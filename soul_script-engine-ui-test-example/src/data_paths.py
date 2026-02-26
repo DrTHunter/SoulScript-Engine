@@ -30,7 +30,7 @@ data/
 import os
 
 # Root data directory — relative to project root
-_PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
+_PROJECT_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
 DATA_ROOT = os.path.join(_PROJECT_ROOT, "data")
 
 

@@ -1,0 +1,20 @@
+{
+  "model_name": "all-mpnet-base-v2",
+  "index_type": "flatip",
+  "embedding_dim": 768,
+  "created_at": "2026-02-25T15:17:35.139862+00:00",
+  "statistics": {
+    "total_vectors": 33,
+    "active_memories": 33,
+    "deleted_memories": 0,
+    "embedding_model": "all-mpnet-base-v2",
+    "embedding_dim": 768,
+    "index_type": "flatip",
+    "sources": {
+      "vault": 1,
+      "user_notes": 32
+    },
+    "total_characters": 74569,
+    "avg_chars_per_memory": 2259
+  }
+}
