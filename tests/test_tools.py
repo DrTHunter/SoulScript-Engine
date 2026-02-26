@@ -17,7 +17,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.tools.registry import ToolRegistry
 from src.runtime_policy import RuntimePolicy
-from src.storage.journal_store import JournalStore
 from src.data_paths import task_inbox_path
 
 PASS = 0
@@ -287,30 +286,8 @@ def test_policy():
 
 
 # ─────────────────────────────────────────────
-# 7. Journal Store
+# 7. Journal Store (REMOVED — src.storage.journal_store was deleted)
 # ─────────────────────────────────────────────
-def test_journal_store():
-    print("\n=== Journal Store ===")
-    tmp_dir = tempfile.mkdtemp()
-    path = os.path.join(tmp_dir, "journal.jsonl")
-
-    try:
-        j = JournalStore(path)
-        j.append("user_input", {"content": "hello"})
-        j.append("llm_response", {"content": "hi there"})
-        j.append("error", {"type": "test", "message": "boom"})
-
-        with open(path, "r") as f:
-            lines = [json.loads(l) for l in f if l.strip()]
-
-        check("3 events written", len(lines) == 3)
-        check("event types correct",
-              [l["event"] for l in lines] == ["user_input", "llm_response", "error"])
-        check("has timestamp", "ts" in lines[0] and "iso" in lines[0])
-        check("data preserved", lines[0]["data"]["content"] == "hello")
-
-    finally:
-        shutil.rmtree(tmp_dir, ignore_errors=True)
 
 
 # ─────────────────────────────────────────────
@@ -342,7 +319,6 @@ if __name__ == "__main__":
     test_task_inbox_ack_dry_run()
     test_continuation_update()
     test_policy()
-    test_journal_store()
     test_allowlist()
 
     print(f"\n{'='*40}")

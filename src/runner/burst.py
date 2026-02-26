@@ -23,16 +23,12 @@ import yaml
 from src.llm_client.base import LLMClient
 from src.llm_client.factory import create_client
 from src.memory.faiss_memory import FAISSMemory
-from src.storage.journal_store import JournalStore
-from src.storage.human_journal import append_entry as journal_entry
 from src.policy.boundary import BoundaryLogger
 from src.runner.tick import run_tick
 from src import data_paths
 from src.runner.types import BurstConfig, TickOutcome
 from src.runtime_policy import RuntimePolicy
 from src.tools.runtime_info_tool import RuntimeInfoTool
-from src.storage.tool_request_writer import ToolRequestWriter
-from src.storage.narrative_writer import NarrativeWriter
 from src.observability.metering import Metering, zero_metering
 
 
@@ -59,7 +55,6 @@ def run_burst(
     stimulus: str = "",
     client: Optional[LLMClient] = None,
     vault: Optional[FAISSMemory] = None,
-    journal: Optional[JournalStore] = None,
 ) -> List[TickOutcome]:
     """Execute *burst_ticks* ticks linearly for the given profile.
 
@@ -77,8 +72,6 @@ def run_burst(
         Optional pre-built LLM client (useful for testing with mocks).
     vault:
         Optional pre-built FAISSMemory (useful for testing with temp dirs).
-    journal:
-        Optional pre-built JournalStore.
 
     Returns
     -------
@@ -105,9 +98,6 @@ def run_burst(
                 faiss_dir=data_paths.faiss_dir(),
             )
 
-    if journal is None:
-        journal = JournalStore(data_paths.burst_journal_path(profile_name))
-
     boundary_logger = BoundaryLogger(data_paths.boundary_events_path())
 
     # --- Set runtime_info context for burst mode ---
@@ -120,30 +110,13 @@ def run_burst(
     )
     RuntimeInfoTool.set_context(profile, burst_policy, execution_mode="burst")
 
-    # --- Writers ---
-    tool_request_writer = ToolRequestWriter(data_paths.tool_requests_path())
-    narrative_writer = NarrativeWriter(
-        data_paths.narrative_path(profile_name), profile.get("name", profile_name),
-    )
-
     # --- Log burst start ---
     burst_id = f"burst_{int(time.time())}"
-    journal.append("burst_start", {
-        "burst_id": burst_id,
-        "profile": profile_name,
-        "burst_ticks": burst_ticks,
-        "max_steps_per_tick": max_steps_per_tick,
-        "stimulus": stimulus,
-    })
 
     print(
         f"[burst] Starting | profile={profile_name} ticks={burst_ticks} "
         f"max_steps={max_steps_per_tick}"
     )
-
-    # --- Begin narrative ---
-    iso_start = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    narrative_writer.begin_burst_session(iso_start, stimulus=stimulus)
 
     # --- Tick loop ---
     outcomes: List[TickOutcome] = []
@@ -161,7 +134,6 @@ def run_burst(
                 tick_index=i,
                 stimulus=stimulus,
                 boundary_logger=boundary_logger,
-                tool_request_writer=tool_request_writer,
             )
         except Exception as exc:
             # Catch-all: tick itself should never raise, but be defensive
@@ -177,13 +149,6 @@ def run_burst(
         # Accumulate metering
         if outcome.metering:
             burst_metering = burst_metering + Metering.from_dict(outcome.metering)
-
-        # Journal the tick
-        journal.append("burst_tick", outcome.to_dict())
-
-        # Narrative log
-        tick_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        narrative_writer.add_tick(i, tick_iso, outcome.outcome_summary or "")
 
         # Console feedback
         err_tag = f" ERRORS={len(outcome.errors)}" if outcome.errors else ""
@@ -216,36 +181,6 @@ def run_burst(
     total_inbox = sum(
         sum(1 for t in o.tools_used if t.startswith("creator_inbox"))
         for o in outcomes
-    )
-
-    # End narrative session
-    narrative_writer.end_burst_session(len(outcomes), total_memories)
-
-    journal.append("burst_end", {
-        "burst_id": burst_id,
-        "ticks_completed": len(outcomes),
-        "total_errors": total_errors,
-        "total_memories_written": total_memories,
-        "metering": burst_metering.to_dict(),
-    })
-
-    # Human-readable diary entry
-    details = []
-    if total_memories > 0:
-        details.append(f"{total_memories} memories written")
-    if total_errors > 0:
-        details.append(f"{total_errors} errors")
-    if burst_metering.cost.total_cost > 0:
-        details.append(f"Cost: ${burst_metering.cost.total_cost:.4f} USD")
-    details.append(f"Tokens: {burst_metering.usage.total_tokens}")
-    journal_entry(
-        source="burst",
-        profile=profile_name,
-        summary=(
-            f"Burst of {len(outcomes)} ticks completed.  "
-            f"{total_memories} memories written, {total_errors} errors."
-        ),
-        details=details or None,
     )
 
     cost_str = f"${burst_metering.cost.total_cost:.4f}"

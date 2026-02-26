@@ -254,7 +254,6 @@ def run_tick(
     tick_index: int,
     stimulus: str = "",
     boundary_logger: Optional[BoundaryLogger] = None,
-    tool_request_writer=None,
 ) -> TickOutcome:
     """Execute a single bounded tick.  Never raises — errors are captured."""
 
@@ -377,14 +376,6 @@ def run_tick(
                 outcome.tools_used.append("runtime_info")
                 outcome.tool_actions.append("snapshot")
                 _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": "runtime_info", "result": result})
-                if tool_request_writer:
-                    tool_request_writer.log_request(
-                        agent=config.profile,
-                        tool_name="runtime_info",
-                        description="Read-only runtime state snapshot.",
-                        arguments={},
-                        context=step.step_summary or "",
-                    )
                 messages.append({
                     "role": "user",
                     "content": json.dumps({"tool_result": result}),
@@ -428,14 +419,6 @@ def run_tick(
                     "result": result,
                     "inbox_msg": {"type": tool_args.get("type",""), "subject": tool_args.get("subject",""), "body": tool_args.get("body","")}
                 })
-                if tool_request_writer:
-                    tool_request_writer.log_request(
-                        agent=config.profile,
-                        tool_name=qualified,
-                        description="Agent-to-operator inbox (send messages to Creator).",
-                        arguments=tool_args,
-                        context=step.step_summary or "",
-                    )
                 messages.append({
                     "role": "user",
                     "content": json.dumps({"tool_result": result}),
@@ -476,14 +459,6 @@ def run_tick(
                 outcome.tools_used.append(qualified)
                 outcome.tool_actions.append(action_name)
                 _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": qualified, "result": result})
-                if tool_request_writer:
-                    tool_request_writer.log_request(
-                        agent=config.profile,
-                        tool_name=qualified,
-                        description="Read-only directive search/manifest.",
-                        arguments=tool_args,
-                        context=step.step_summary or "",
-                    )
                 messages.append({
                     "role": "user",
                     "content": json.dumps({"tool_result": result}),
@@ -536,14 +511,6 @@ def run_tick(
                 outcome.tools_used.append(qualified)
                 outcome.tool_actions.append(action_name)
                 _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": qualified, "result": result})
-                if tool_request_writer:
-                    tool_request_writer.log_request(
-                        agent=config.profile,
-                        tool_name=qualified,
-                        description="Task inbox operation (gated burst, 1/tick).",
-                        arguments=tool_args,
-                        context=step.step_summary or "",
-                    )
                 messages.append({
                     "role": "user",
                     "content": json.dumps({"tool_result": result}),
@@ -601,16 +568,6 @@ def run_tick(
             tool_calls_this_tick += 1
             outcome.tools_used.append(qualified)
             outcome.tool_actions.append(action_name)
-
-            # Log tool request
-            if tool_request_writer:
-                tool_request_writer.log_request(
-                    agent=config.profile,
-                    tool_name=qualified,
-                    description="Memory vault operations (recall, search, add, update, delete).",
-                    arguments=tool_args,
-                    context=step.step_summary or "",
-                )
 
             _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": qualified, "result": result})
 

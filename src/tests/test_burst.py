@@ -17,7 +17,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.llm_client.base import LLMClient, LLMResponse
 from src.memory.vault import MemoryVault
-from src.storage.journal_store import JournalStore
 from src.runner.types import BurstConfig, StepAction, StepOutput, TickOutcome, ProposedMemory
 from src.runner.tick import run_tick, _parse_step_output, build_system_prompt
 from src.runner.burst import run_burst
@@ -412,14 +411,12 @@ def test_burst_runs_n_ticks():
     tmpdir = tempfile.mkdtemp()
     try:
         vault = MemoryVault(os.path.join(tmpdir, "vault.jsonl"))
-        journal = JournalStore(os.path.join(tmpdir, "journal.jsonl"))
 
         outcomes = []
         for i in range(config.burst_ticks):
             client = MockClient([_stop(f"Tick {i} done", "auto")])
             outcome = run_tick(profile, client, vault, config, tick_index=i)
             outcomes.append(outcome)
-            journal.append("burst_tick", outcome.to_dict())
 
         check("ran exactly 5 ticks", len(outcomes) == 5)
         check("tick indices correct",
@@ -482,47 +479,6 @@ def test_tick_tool_call_executes():
         check("tool_used is memory.recall", outcome.tool_used == "memory.recall")
         check("no errors", len(outcome.errors) == 0, f"errors: {outcome.errors}")
         check("steps_taken == 2", outcome.steps_taken == 2)
-    finally:
-        shutil.rmtree(tmpdir)
-
-
-def test_journal_line_format():
-    """Verify journal JSONL line structure for a burst tick."""
-    print("\n=== Journal: Line Format ===")
-
-    tmpdir = tempfile.mkdtemp()
-    try:
-        journal = JournalStore(os.path.join(tmpdir, "journal.jsonl"))
-
-        outcome = TickOutcome(
-            tick_index=7,
-            steps_taken=2,
-            tool_used="memory.search",
-            tool_action="search",
-            errors=[],
-            stop_reason="completed",
-            outcome_summary="Searched memories and stopped.",
-            memories_proposed=1,
-            memories_written=1,
-        )
-        journal.append("burst_tick", outcome.to_dict())
-
-        # Read it back
-        with open(os.path.join(tmpdir, "journal.jsonl"), "r") as f:
-            line = json.loads(f.readline())
-
-        check("has ts", "ts" in line)
-        check("has iso", "iso" in line)
-        check("event == burst_tick", line["event"] == "burst_tick")
-
-        data = line["data"]
-        check("tick_index == 7", data["tick_index"] == 7)
-        check("steps_taken == 2", data["steps_taken"] == 2)
-        check("tool_used", data["tool_used"] == "memory.search")
-        check("stop_reason", data["stop_reason"] == "completed")
-        check("outcome_summary present", "Searched" in data["outcome_summary"])
-        check("memories_proposed == 1", data["memories_proposed"] == 1)
-        check("memories_written == 1", data["memories_written"] == 1)
     finally:
         shutil.rmtree(tmpdir)
 
@@ -600,7 +556,6 @@ if __name__ == "__main__":
     test_burst_runs_n_ticks()
     test_burst_continues_after_exception()
     test_tick_tool_call_executes()
-    test_journal_line_format()
     test_system_prompt_assembly()
     test_proposed_memory_pii_blocked()
 
