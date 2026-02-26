@@ -2,7 +2,7 @@
 
 Maintains an in-memory registry of which directives were actually injected
 into the prompt pipeline for this session.  Exposes read-only accessors
-consumed by RuntimeInfoTool.
+for governance tracking.
 
 Thread-safe for single-process use.  Stateless across sessions — each
 session starts empty and populates on load.

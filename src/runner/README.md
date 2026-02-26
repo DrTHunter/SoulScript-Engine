@@ -45,17 +45,15 @@ Immutable configuration for a burst execution:
 | `max_steps_per_tick` | 3 | Max LLM calls per tick |
 | `max_tool_calls_per_tick` | 2 | Max tool calls allowed per tick |
 | `stimulus` | `""` | Injected into first user message |
-| `allowed_tools` | 16 actions | Frozen tuple of `tool.action` strings |
+| `allowed_tools` | 12 actions | Frozen tuple of `tool.action` strings |
 
-### Allowed Tool Actions (16)
+### Allowed Tool Actions (12)
 
 ```
 memory.recall, memory.search, memory.add, memory.bulk_add,
 memory.update, memory.delete, memory.bulk_delete,
-creator_inbox.send,
 directives.search, directives.list, directives.get,
-directives.manifest, directives.changes,
-task_inbox.add, task_inbox.next, task_inbox.ack
+directives.manifest, directives.changes
 ```
 
 ## Structured Output

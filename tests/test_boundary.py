@@ -278,7 +278,7 @@ def test_registry_multiple_denials():
         )
 
         reg.dispatch("memory", {"action": "add"})
-        reg.dispatch("task_inbox", {"action": "next"})
+        reg.dispatch("directives", {"action": "list"})
         reg.dispatch("web.search", {"query": "news"})
 
         events = logger.read_all()
@@ -286,7 +286,7 @@ def test_registry_multiple_denials():
 
         tools = [e.requested_capability for e in events]
         check("all tools captured",
-              tools == ["memory", "task_inbox", "web.search"],
+              tools == ["memory", "directives", "web.search"],
               f"got: {tools}")
     finally:
         shutil.rmtree(tmpdir)

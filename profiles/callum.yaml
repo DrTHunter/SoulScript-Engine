@@ -11,8 +11,6 @@ allowed_tools:
 - directives
 - echo
 - memory
-- task_inbox
-- creator_inbox
 policy:
   max_iterations: 25
   stasis_mode: false

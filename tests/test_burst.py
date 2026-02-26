@@ -546,116 +546,6 @@ def test_proposed_memory_pii_blocked():
         shutil.rmtree(tmpdir)
 
 
-# ------------------------------------------------------------------
-# Task inbox burst gating tests
-# ------------------------------------------------------------------
-
-def test_tick_task_inbox_gating():
-    """Task inbox in burst: allowlist, 1-per-tick cap, dry_run."""
-    print("\n=== Tick: Task Inbox Burst Gating ===")
-    profile = _make_profile()
-
-    # Config WITHOUT task_inbox allowed
-    config_no_task = BurstConfig(
-        profile="orion",
-        max_steps_per_tick=3,
-        max_tool_calls_per_tick=3,
-        allowed_tools=(
-            "memory.recall", "memory.search", "memory.add",
-        ),
-    )
-
-    # Try to call task_inbox - should be denied (not in allowed_tools)
-    add_step = json.dumps({
-        "step_summary": "Adding a task",
-        "action": "tool",
-        "tool_name": "task_inbox",
-        "tool_args": {"action": "add", "task": "Hello", "profile": "orion"},
-        "proposed_memories": [],
-        "stop_reason": None,
-    })
-    stop = _stop("done")
-    client = MockClient([add_step, stop])
-
-    tmpdir = tempfile.mkdtemp()
-    try:
-        vault = MemoryVault(os.path.join(tmpdir, "vault.jsonl"))
-
-        # Set up task_inbox temp path
-        import src.data_paths as dp
-        import src.tools.task_inbox as ti
-        orig_root = dp.DATA_ROOT
-        dp.DATA_ROOT = tmpdir
-        ti._JSONL_PATH = os.path.join(tmpdir, "shared", "task_inbox.jsonl")
-
-        outcome = run_tick(profile, client, vault, config_no_task, tick_index=0)
-        check("task_inbox denied when not allowed",
-              any("denied" in e for e in outcome.errors),
-              f"errors: {outcome.errors}")
-        check("no tools used on denial", "task_inbox.add" not in outcome.tools_used)
-
-        # Config WITH task_inbox allowed
-        config_with_task = BurstConfig(
-            profile="orion",
-            max_steps_per_tick=4,
-            max_tool_calls_per_tick=4,
-            allowed_tools=(
-                "memory.recall", "memory.search", "memory.add",
-                "task_inbox.add", "task_inbox.next", "task_inbox.ack",
-            ),
-        )
-
-        # Two task_inbox calls in one tick — second should be denied (1-per-tick)
-        add1 = json.dumps({
-            "step_summary": "Adding task 1",
-            "action": "tool",
-            "tool_name": "task_inbox",
-            "tool_args": {"action": "add", "task": "First task"},
-            "proposed_memories": [],
-            "stop_reason": None,
-        })
-        add2 = json.dumps({
-            "step_summary": "Adding task 2",
-            "action": "tool",
-            "tool_name": "task_inbox",
-            "tool_args": {"action": "add", "task": "Second task"},
-            "proposed_memories": [],
-            "stop_reason": None,
-        })
-        stop2 = _stop("done after tasks")
-        client2 = MockClient([add1, add2, stop2])
-        vault2 = MemoryVault(os.path.join(tmpdir, "vault2.jsonl"))
-
-        outcome2 = run_tick(profile, client2, vault2, config_with_task, tick_index=1)
-        check("first task_inbox call allowed", "task_inbox.add" in outcome2.tools_used)
-        check("second task_inbox call denied (1/tick)",
-              any("task_inbox_denied" in e for e in outcome2.errors),
-              f"errors: {outcome2.errors}")
-
-        # Dry-run: task_inbox add with dry_run=true
-        dry_add = json.dumps({
-            "step_summary": "Dry run add",
-            "action": "tool",
-            "tool_name": "task_inbox",
-            "tool_args": {"action": "add", "task": "Dry task", "dry_run": True},
-            "proposed_memories": [],
-            "stop_reason": None,
-        })
-        stop3 = _stop("dry run done")
-        client3 = MockClient([dry_add, stop3])
-        vault3 = MemoryVault(os.path.join(tmpdir, "vault3.jsonl"))
-
-        outcome3 = run_tick(profile, client3, vault3, config_with_task, tick_index=2)
-        check("dry_run task_inbox call succeeds", "task_inbox.add" in outcome3.tools_used)
-        check("no errors on dry_run", len(outcome3.errors) == 0,
-              f"errors: {outcome3.errors}")
-
-        dp.DATA_ROOT = orig_root
-        ti._JSONL_PATH = dp.task_inbox_path()
-    finally:
-        shutil.rmtree(tmpdir, ignore_errors=True)
-
-
 # ==================================================================
 # Main
 # ==================================================================
@@ -675,8 +565,6 @@ if __name__ == "__main__":
     test_tick_tool_call_executes()
     test_system_prompt_assembly()
     test_proposed_memory_pii_blocked()
-    test_tick_task_inbox_gating()
-
     print(f"\n{'='*50}")
     print(f"  PASSED: {PASS}   FAILED: {FAIL}   TOTAL: {PASS + FAIL}")
     print(f"{'='*50}")

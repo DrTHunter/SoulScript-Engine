@@ -23,8 +23,8 @@ Every tool/action has a baseline risk level when denied:
 
 | Risk | Examples |
 |------|----------|
-| `low` | `echo`, `memory.recall`, `memory.search`, `directives.search`, `directives.list`, `directives.get`, `task_inbox.ack` |
-| `med` | `memory.add`, `memory.update`, `memory.delete`, `task_inbox.add`, `task_inbox.next`, `creator_inbox.send`, `continuation_update` |
+| `low` | `echo`, `memory.recall`, `memory.search`, `directives.search`, `directives.list`, `directives.get` |
+| `med` | `memory.add`, `memory.update`, `memory.delete`, `continuation_update` |
 | `high` | `web.search`, `web.scrape`, `email.send` — external I/O and system access |
 
 Unknown tools default to `med`.

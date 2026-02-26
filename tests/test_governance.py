@@ -531,50 +531,6 @@ def test_validate_manifest_enum_constants():
 
 
 # ==================================================================
-# RuntimeInfoTool active_directives integration test
-# ==================================================================
-
-def test_runtime_info_active_directives():
-    print("\n=== RuntimeInfoTool: active_directives in snapshot ===")
-    from src.tools.runtime_info_tool import RuntimeInfoTool
-    from src.runtime_policy import RuntimePolicy
-
-    RuntimeInfoTool.reset()  # also resets ActiveDirectives
-
-    profile = {
-        "name": "test-agent",
-        "provider": "openai",
-        "model": "gpt-5",
-        "base_url": "https://api.openai.com/v1",
-        "temperature": 0.7,
-        "allowed_tools": [],
-        "memory": {},
-        "directives": {},
-        "window_size": 50,
-    }
-    policy = RuntimePolicy(max_iterations=10)
-    RuntimeInfoTool.set_context(profile, policy)
-
-    # Snapshot should have active_directives with count=0
-    result = json.loads(RuntimeInfoTool.execute({}))
-    check("active_directives in snapshot", "active_directives" in result)
-    check("count=0 when empty", result["active_directives"]["count"] == 0)
-    check("active_directives in REQUIRED_FIELDS", "active_directives" in RuntimeInfoTool.REQUIRED_FIELDS)
-
-    # Record some directives, then check again
-    ActiveDirectives.record("Test Dir", "Body", "shared")
-    result2 = json.loads(RuntimeInfoTool.execute({}))
-    check("count=1 after record", result2["active_directives"]["count"] == 1)
-    check("diff shows change", result2["diff_count"] > 0)
-
-    # Find the active_directives diff entry
-    ad_diffs = [d for d in result2["diff"] if d["field"] == "active_directives"]
-    check("active_directives in diff", len(ad_diffs) == 1)
-
-    RuntimeInfoTool.reset()
-
-
-# ==================================================================
 # Integration: injector populates ActiveDirectives
 # ==================================================================
 
@@ -646,7 +602,6 @@ if __name__ == "__main__":
     test_validate_manifest_enum_constants()
 
     # Integration tests
-    test_runtime_info_active_directives()
     test_injector_populates_active_directives()
 
     print("\n" + "=" * 60)

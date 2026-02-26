@@ -47,13 +47,8 @@ _RISK_MAP: Dict[str, str] = {
     "memory.delete":       "med",
     "memory.bulk_add":     "med",
     "memory.bulk_delete":  "med",
-    "task_inbox":          "med",
-    "task_inbox.add":      "med",
-    "task_inbox.next":     "med",
-    "task_inbox.ack":      "low",
     "directives.manifest": "low",
     "directives.changes":  "low",
-    "creator_inbox.send":    "med",
     "continuation_update": "med",
     # High risk: external I/O, system access (base names for fallback)
     "web":                 "high",

@@ -47,14 +47,9 @@ These tools are pure Python and need no Docker container or external service:
 | Tool | Description |
 |------|-------------|
 | `echo` | Simple echo for testing |
-| `task_inbox` | Read/write shared task inbox |
 | `continuation_update` | Post continuation updates |
 | `memory` | Read/write agent memory vault |
 | `directives` | Manage runtime directives |
-| `runtime_info` | Query runtime state and config |
-| `creator_inbox` | Send messages to Creator (operator) |
-| `email` | Send email via SMTP (built-in, no relay needed) |
-| `web_search` | Web search + scrape (requires SearXNG) |
 
 ---
 
@@ -64,8 +59,6 @@ These tools are pure Python and need no Docker container or external service:
 agent-runtime/
 ├── src/tools/           # Tool logic (Python classes, dispatch)
 │   ├── registry.py      # Master catalogue & allowlist enforcement
-│   ├── web_search.py    # Connects to SearXNG (port 3000)
-│   ├── email_tool.py    # Sends via SMTP directly
 │   └── ...              # Other built-in tools
 │
 ├── tools/               # ← YOU ARE HERE — external service files

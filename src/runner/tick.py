@@ -20,10 +20,7 @@ from src.memory.injector import build_memory_block
 from src.memory.faiss_memory import FAISSMemory
 from src.storage.note_collector import collect_notes
 from src.tools.memory_tool import MemoryTool
-from src.tools.runtime_info_tool import RuntimeInfoTool
-from src.tools.creator_inbox import CreatorInboxTool
 from src.tools.directives_tool import DirectivesTool
-from src.tools.task_inbox import TaskInboxTool
 from src.directives.store import DirectiveStore
 from src.directives.injector import build_directives_block
 from src.governance.active_directives import ActiveDirectives
@@ -78,17 +75,10 @@ the object).  The schema is:
     Supply tool_name="memory" and tool_args={{"action": "<action>", ...}}.
     For bulk_add, supply tool_args={{"action": "bulk_add", "memories": [{{"text": "...", "scope": "...", "category": "..."}}, ...]}}.
     For bulk_delete, supply tool_args={{"action": "bulk_delete", "memory_ids": ["id1", "id2", ...]}}.
-  - **creator_inbox** (action: send). Send a direct message to the operator.
-    Supply tool_name="creator_inbox" and tool_args={{"action": "send", "type": "...", "subject": "...", "body": "...", ...}}.
   - **directives** (actions: search, list, get, manifest, changes). Read-only access to user-authored directives.
     Supply tool_name="directives" and tool_args={{"action": "<action>", ...}}.
     Use manifest to see all directive IDs, versions, hashes, and status.
     Use changes to see what's been added/removed/modified since last manifest generation.
-  - **runtime_info** (no action needed). On-demand snapshot of your identity, model, policy,
-    allowed tools, and burst config. Returns a diff of what changed since your last check.
-  - **task_inbox** (actions: add, next, ack). Cross-agent task queue.
-    Supply tool_name="task_inbox" and tool_args={{"action": "<action>", ...}}.
-    Set dry_run=true to preview without side effects. Limited to 1 call per tick.
 - ``action = "stop"``:  you have finished or have nothing useful left to do.
 - You may accumulate ``proposed_memories`` across steps; they will be
   persisted at the end of the tick.
@@ -260,27 +250,11 @@ def run_tick(
     ActiveDirectives.reset()
     outcome = TickOutcome(tick_index=tick_index)
     tool_calls_this_tick = 0
-    task_inbox_calls_this_tick = 0  # separate 1-per-tick cap for task_inbox
     all_proposed: List[ProposedMemory] = []
     _blog = boundary_logger or BoundaryLogger()
     tick_metering = zero_metering()
     provider = profile.get("provider", "")
     last_step_summary: Optional[str] = None
-
-    # Refresh RuntimeInfoTool with live burst context so on-demand
-    # snapshots reflect current tick state (not just boot values)
-    RuntimeInfoTool.set_context(
-        profile=profile,
-        policy=RuntimeInfoTool._policy,
-        execution_mode="burst",
-        burst_config={
-            "tick_index": tick_index,
-            "burst_ticks": config.burst_ticks,
-            "max_steps_per_tick": config.max_steps_per_tick,
-            "max_tool_calls_per_tick": config.max_tool_calls_per_tick,
-            "allowed_tools": list(config.allowed_tools),
-        },
-    )
 
     # Build system prompt once per tick
     system_prompt = build_system_prompt(profile, vault, config, tick_index, stimulus)
@@ -365,66 +339,6 @@ def run_tick(
             # Validate tool is allowed
             tool_name = step.tool_name or ""
 
-            # Special-case: runtime_info (read-only, no action)
-            if tool_name == "runtime_info":
-                try:
-                    result = RuntimeInfoTool.execute({})
-                except Exception as exc:
-                    result = json.dumps({"status": "error", "message": str(exc)})
-                    outcome.errors.append(f"step_{step_idx}_tool_exec_error: {exc}")
-                tool_calls_this_tick += 1
-                outcome.tools_used.append("runtime_info")
-                outcome.tool_actions.append("snapshot")
-                _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": "runtime_info", "result": result})
-                messages.append({
-                    "role": "user",
-                    "content": json.dumps({"tool_result": result}),
-                })
-                continue
-
-            # Special-case: creator_inbox (agent-to-operator messages)
-            if tool_name == "creator_inbox":
-                tool_args = step.tool_args or {}
-                action_name = tool_args.get("action", "")
-                qualified = f"creator_inbox.{action_name}"
-                if qualified not in config.allowed_tools:
-                    denial_json, event = build_denial(
-                        tool_name=qualified,
-                        profile=config.profile,
-                        reason=f"Action '{qualified}' is not in the allowed set for this burst.",
-                        tick_index=tick_index,
-                        tool_args=tool_args,
-                    )
-                    _blog.append(event)
-                    outcome.errors.append(
-                        f"step_{step_idx}_tool_denied: '{qualified}' not in allowed_tools"
-                    )
-                    messages.append({
-                        "role": "user",
-                        "content": denial_json,
-                    })
-                    continue
-                # Inject sender identity
-                tool_args["_from"] = config.profile
-                try:
-                    result = CreatorInboxTool.execute(tool_args)
-                except Exception as exc:
-                    result = json.dumps({"status": "error", "message": str(exc)})
-                    outcome.errors.append(f"step_{step_idx}_tool_exec_error: {exc}")
-                tool_calls_this_tick += 1
-                outcome.tools_used.append(qualified)
-                outcome.tool_actions.append(action_name)
-                _emit_event("tool-result", {
-                    "tick": tick_index, "step": step_idx, "tool": qualified,
-                    "result": result,
-                    "inbox_msg": {"type": tool_args.get("type",""), "subject": tool_args.get("subject",""), "body": tool_args.get("body","")}
-                })
-                messages.append({
-                    "role": "user",
-                    "content": json.dumps({"tool_result": result}),
-                })
-                continue
-
             # Special-case: directives (read-only)
             if tool_name == "directives":
                 tool_args = step.tool_args or {}
@@ -456,58 +370,6 @@ def run_tick(
                     result = json.dumps({"status": "error", "message": str(exc)})
                     outcome.errors.append(f"step_{step_idx}_tool_exec_error: {exc}")
                 tool_calls_this_tick += 1
-                outcome.tools_used.append(qualified)
-                outcome.tool_actions.append(action_name)
-                _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": qualified, "result": result})
-                messages.append({
-                    "role": "user",
-                    "content": json.dumps({"tool_result": result}),
-                })
-                continue
-
-            # Special-case: task_inbox (gated, 1-call-per-tick, structured logs)
-            if tool_name == "task_inbox":
-                tool_args = step.tool_args or {}
-                action_name = tool_args.get("action", "")
-                qualified = f"task_inbox.{action_name}"
-                if qualified not in config.allowed_tools:
-                    denial_json, event = build_denial(
-                        tool_name=qualified,
-                        profile=config.profile,
-                        reason=f"Action '{qualified}' is not in the allowed set for this burst.",
-                        tick_index=tick_index,
-                        tool_args=tool_args,
-                    )
-                    _blog.append(event)
-                    outcome.errors.append(
-                        f"step_{step_idx}_tool_denied: '{qualified}' not in allowed_tools"
-                    )
-                    messages.append({
-                        "role": "user",
-                        "content": denial_json,
-                    })
-                    continue
-                # Enforce 1 task_inbox call per tick
-                if task_inbox_calls_this_tick >= 1:
-                    outcome.errors.append(
-                        f"step_{step_idx}_task_inbox_denied: only 1 task_inbox call "
-                        f"per tick (already used)"
-                    )
-                    messages.append({
-                        "role": "user",
-                        "content": json.dumps({
-                            "tool_error": "task_inbox denied — limit is 1 call per tick. "
-                                          "Choose 'think' or 'stop'."
-                        }),
-                    })
-                    continue
-                try:
-                    result = TaskInboxTool.execute(tool_args)
-                except Exception as exc:
-                    result = json.dumps({"status": "error", "message": str(exc)})
-                    outcome.errors.append(f"step_{step_idx}_tool_exec_error: {exc}")
-                tool_calls_this_tick += 1
-                task_inbox_calls_this_tick += 1
                 outcome.tools_used.append(qualified)
                 outcome.tool_actions.append(action_name)
                 _emit_event("tool-result", {"tick": tick_index, "step": step_idx, "tool": qualified, "result": result})

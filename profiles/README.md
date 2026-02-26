@@ -23,11 +23,9 @@ window_size: 50                # Max non-system messages kept in state
 
 allowed_tools:                 # Tools this agent can call
   - echo
-  - task_inbox
   - continuation_update
   - memory
   - directives
-  - creator_inbox
 
 policy:                        # Runtime safety limits
   max_iterations: 25           # Max LLM calls per user turn

@@ -28,7 +28,6 @@ from src.runner.tick import run_tick
 from src import data_paths
 from src.runner.types import BurstConfig, TickOutcome
 from src.runtime_policy import RuntimePolicy
-from src.tools.runtime_info_tool import RuntimeInfoTool
 from src.observability.metering import Metering, zero_metering
 
 
@@ -100,16 +99,6 @@ def run_burst(
 
     boundary_logger = BoundaryLogger(data_paths.boundary_events_path())
 
-    # --- Set runtime_info context for burst mode ---
-    policy_cfg = profile.get("policy", {})
-    burst_policy = RuntimePolicy(
-        max_iterations=policy_cfg.get("max_iterations", 25),
-        max_wall_time_seconds=policy_cfg.get("max_wall_time_seconds"),
-        stasis_mode=policy_cfg.get("stasis_mode", False),
-        tool_failure_mode=policy_cfg.get("tool_failure_mode", "continue"),
-    )
-    RuntimeInfoTool.set_context(profile, burst_policy, execution_mode="burst")
-
     # --- Log burst start ---
     burst_id = f"burst_{int(time.time())}"
 
@@ -152,7 +141,6 @@ def run_burst(
 
         # Console feedback
         err_tag = f" ERRORS={len(outcome.errors)}" if outcome.errors else ""
-        inbox_tag = " inbox=sent" if any(t.startswith("creator_inbox") for t in outcome.tools_used) else ""
         tools_str = ",".join(outcome.tools_used) if outcome.tools_used else "none"
         cost_tag = ""
         if outcome.metering:
@@ -178,16 +166,12 @@ def run_burst(
     # --- Log burst end ---
     total_errors = sum(len(o.errors) for o in outcomes)
     total_memories = sum(o.memories_written for o in outcomes)
-    total_inbox = sum(
-        sum(1 for t in o.tools_used if t.startswith("creator_inbox"))
-        for o in outcomes
-    )
 
     cost_str = f"${burst_metering.cost.total_cost:.4f}"
     est_tag = " (estimated)" if burst_metering.usage.is_estimated else ""
     print(
         f"[burst] Done | ticks={len(outcomes)} errors={total_errors} "
-        f"memories_written={total_memories} inbox_sent={total_inbox} "
+        f"memories_written={total_memories} "
         f"tokens={burst_metering.usage.total_tokens} cost={cost_str}{est_tag}"
     )
 

@@ -29,15 +29,11 @@ class BurstConfig:
         "memory.update",
         "memory.delete",
         "memory.bulk_delete",
-        "creator_inbox.send",
         "directives.search",
         "directives.list",
         "directives.get",
         "directives.manifest",
         "directives.changes",
-        "task_inbox.add",
-        "task_inbox.next",
-        "task_inbox.ack",
     )
     stimulus: str = ""                         # injected into first user msg
 

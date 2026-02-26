@@ -25,8 +25,6 @@ data/
   memory/                     # Memory Vault (shared across agents)
     vault.jsonl
   shared/                     # Cross-agent / system-level data
-    task_inbox.jsonl
-    creator_inbox.jsonl
     boundary_events.jsonl
     change_log.jsonl
 """
@@ -110,18 +108,6 @@ def vault_path() -> str:
     """``data/memory/vault.jsonl``"""
     memory_dir()  # ensure exists
     return os.path.join(DATA_ROOT, "memory", "vault.jsonl")
-
-
-def task_inbox_path() -> str:
-    """``data/shared/task_inbox.jsonl``"""
-    shared_dir()  # ensure exists
-    return os.path.join(DATA_ROOT, "shared", "task_inbox.jsonl")
-
-
-def creator_inbox_path() -> str:
-    """``data/shared/creator_inbox.jsonl`` — agent-to-operator inbox."""
-    shared_dir()  # ensure exists
-    return os.path.join(DATA_ROOT, "shared", "creator_inbox.jsonl")
 
 
 def boundary_events_path() -> str:

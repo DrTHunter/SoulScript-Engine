@@ -18,7 +18,6 @@ Session-scoped in-memory registry of which directives were actually loaded into 
   - `reset()` — clear all entries (session start / tests)
 
 Populated automatically by `src/directives/injector.py` when directives are loaded.
-Exposed in `RuntimeInfoTool` snapshots under the `active_directives` key.
 
 ### `change_log.py`
 
@@ -50,8 +49,6 @@ ActiveDirectives.reset()
 directives/injector.py → build_directives_block()
     ↓
 ActiveDirectives.record_sections()  (auto-populates)
-    ↓
-RuntimeInfoTool.execute()  →  includes active_directives summary
     ↓
 ChangeLog.append()  (optional — for governance-critical changes)
 ```

@@ -15,23 +15,17 @@ Boundary handling:
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from src.tools.echo import EchoTool
-from src.tools.task_inbox import TaskInboxTool
 from src.tools.continuation_update import ContinuationUpdateTool
 from src.tools.memory_tool import MemoryTool
 from src.tools.directives_tool import DirectivesTool
-from src.tools.runtime_info_tool import RuntimeInfoTool
-from src.tools.creator_inbox import CreatorInboxTool
 from src.policy.boundary import BoundaryLogger, BoundaryEvent, build_denial
 
 # Master catalogue — every tool the runtime knows about.
 _ALL_TOOLS: Dict[str, Any] = {
     "echo": EchoTool(),
-    "task_inbox": TaskInboxTool(),
     "continuation_update": ContinuationUpdateTool(),
     "memory": MemoryTool(),
     "directives": DirectivesTool(),
-    "runtime_info": RuntimeInfoTool(),
-    "creator_inbox": CreatorInboxTool(),
 }
 
 

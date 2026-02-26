@@ -3,8 +3,6 @@ allowed_tools:
 - directives
 - echo
 - memory
-- task_inbox
-- creator_inbox
 base_url: https://api.openai.com/v1
 description: ''
 directives:
