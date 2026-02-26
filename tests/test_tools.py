@@ -1,4 +1,4 @@
-"""Offline tests for all tools, router, policy, and storage.
+"""Offline tests for tools and runtime policy.
 
 Run from project root:
     python -m tests.test_tools
@@ -15,7 +15,8 @@ import shutil
 # ── ensure project root is on path ──
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.tools.registry import ToolRegistry
+from src.tools.echo import EchoTool
+from src.tools.continuation_update import ContinuationUpdateTool
 from src.runtime_policy import RuntimePolicy
 
 PASS = 0
@@ -32,38 +33,22 @@ def check(label, condition, detail=""):
         print(f"  [FAIL] {label}  {detail}")
 
 
-def _dispatch(reg, name, arguments):
-    """Helper: call dispatch and return only the result string."""
-    result, _event = reg.dispatch(name, arguments)
-    return result
-
-
 # ─────────────────────────────────────────────
 # 1. Echo tool
 # ─────────────────────────────────────────────
 def test_echo():
     print("\n=== Echo Tool ===")
-    reg = ToolRegistry(["echo"])
+    tool = EchoTool()
 
-    defs = reg.get_definitions()
-    check("echo definition exists", len(defs) == 1 and defs[0]["name"] == "echo")
+    defn = tool.definition()
+    check("echo definition exists", defn["name"] == "echo")
 
-    result = _dispatch(reg, "echo", {"message": "hello world"})
+    result = tool.execute({"message": "hello world"})
     check("echo returns message", result == "hello world", f"got: {result!r}")
-
-    # Disallowed tool now returns denial payload instead of raising
-    result, event = reg.dispatch("memory", {"action": "recall"})
-    denial = json.loads(result)
-    check("echo-only blocks memory",
-          denial.get("error") == "TOOL_NOT_ALLOWED" and denial.get("tool") == "memory",
-          f"got: {result!r}")
-
-
-# (Task inbox tests removed — src.tools.task_inbox was deleted)
 
 
 # ─────────────────────────────────────────────
-# 3. Continuation Update tool
+# 2. Continuation Update tool
 # ─────────────────────────────────────────────
 def test_continuation_update():
     print("\n=== Continuation Update Tool ===")
@@ -72,30 +57,30 @@ def test_continuation_update():
     tmp_dir = tempfile.mkdtemp()
     dp.DATA_ROOT = tmp_dir
 
-    reg = ToolRegistry(["continuation_update"])
+    tool = ContinuationUpdateTool()
 
     try:
         # Append mode
-        r1 = _dispatch(reg, "continuation_update", {
+        r1 = tool.execute({
             "profile": "orion", "mode": "append", "content": "Started task A."
         })
         check("append succeeds", "Appended" in r1, r1)
 
         # Append again
-        r2 = _dispatch(reg, "continuation_update", {
+        r2 = tool.execute({
             "profile": "orion", "mode": "append", "content": "Finished task A."
         })
         check("second append succeeds", "Appended" in r2, r2)
 
         # Replace section (new)
-        r3 = _dispatch(reg, "continuation_update", {
+        r3 = tool.execute({
             "profile": "orion", "mode": "replace_section",
             "section": "Status", "content": "In progress."
         })
         check("replace_section adds new", "Added" in r3, r3)
 
         # Replace section (update)
-        r4 = _dispatch(reg, "continuation_update", {
+        r4 = tool.execute({
             "profile": "orion", "mode": "replace_section",
             "section": "Status", "content": "Complete."
         })
@@ -112,20 +97,20 @@ def test_continuation_update():
               f"found {content.count('## Status')} occurrences")
 
         # Different profile -> separate file
-        r5 = _dispatch(reg, "continuation_update", {
+        r5 = tool.execute({
             "profile": "elysia", "mode": "append", "content": "Hello from elysia."
         })
         elysia_path = os.path.join(tmp_dir, "elysia", "continuation.md")
         check("elysia file created", os.path.exists(elysia_path))
 
         # Path traversal blocked
-        r6 = _dispatch(reg, "continuation_update", {
+        r6 = tool.execute({
             "profile": "../escape", "mode": "append", "content": "bad"
         })
         check("path traversal blocked", "Error" in r6, r6)
 
         # Missing content
-        r7 = _dispatch(reg, "continuation_update", {
+        r7 = tool.execute({
             "profile": "orion", "mode": "append", "content": "  "
         })
         check("empty content blocked", "Error" in r7, r7)
@@ -136,12 +121,7 @@ def test_continuation_update():
 
 
 # ─────────────────────────────────────────────
-# 4. Router (REMOVED — src.router was deleted)
-# ─────────────────────────────────────────────
-
-
-# ─────────────────────────────────────────────
-# 5. Runtime Policy
+# 3. Runtime Policy
 # ─────────────────────────────────────────────
 def test_policy():
     print("\n=== Runtime Policy ===")
@@ -163,43 +143,12 @@ def test_policy():
 
 
 # ─────────────────────────────────────────────
-# 6. State Store (REMOVED — src.storage.state_store was deleted)
-# ─────────────────────────────────────────────
-
-
-# ─────────────────────────────────────────────
-# 7. Journal Store (REMOVED — src.storage.journal_store was deleted)
-# ─────────────────────────────────────────────
-
-
-# ─────────────────────────────────────────────
-# 8. Registry allowlist enforcement
-# ─────────────────────────────────────────────
-def test_allowlist():
-    print("\n=== Allowlist Enforcement ===")
-    full = ToolRegistry(["echo", "continuation_update", "memory"])
-    check("full registry: 3 defs", len(full.get_definitions()) == 3)
-
-    partial = ToolRegistry(["echo"])
-    check("partial registry: 1 def", len(partial.get_definitions()) == 1)
-
-    empty = ToolRegistry([])
-    check("empty registry: 0 defs", len(empty.get_definitions()) == 0)
-
-    result, event = empty.dispatch("echo", {"message": "test"})
-    denial = json.loads(result)
-    check("empty blocks echo",
-          denial.get("error") == "TOOL_NOT_ALLOWED" and event is not None)
-
-
-# ─────────────────────────────────────────────
 # Run all
 # ─────────────────────────────────────────────
 if __name__ == "__main__":
     test_echo()
     test_continuation_update()
     test_policy()
-    test_allowlist()
 
     print(f"\n{'='*40}")
     print(f"Results: {PASS} passed, {FAIL} failed")

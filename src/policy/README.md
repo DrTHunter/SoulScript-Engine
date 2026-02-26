@@ -40,10 +40,8 @@ Unknown tools default to `med`.
 
 ## Consumers
 
-- **`ToolRegistry.dispatch()`** — interactive loop, denies unknown/disallowed tools
-
 `build_denial()` creates the payload and `BoundaryLogger.append()` persists the event.
 
 ## Tests
 
-See `tests/test_boundary.py` — 61 checks covering denial payloads, risk classification, BoundaryLogger, and registry integration.
+See `tests/test_boundary.py` — checks covering denial payloads, risk classification, and BoundaryLogger.

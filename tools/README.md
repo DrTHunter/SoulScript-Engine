@@ -57,9 +57,8 @@ These tools are pure Python and need no Docker container or external service:
 
 ```
 agent-runtime/
-├── src/tools/           # Tool logic (Python classes, dispatch)
-│   ├── registry.py      # Master catalogue & allowlist enforcement
-│   └── ...              # Other built-in tools
+├── src/tools/           # Tool logic (Python classes)
+│   └── ...              # Built-in tools
 │
 ├── tools/               # ← YOU ARE HERE — external service files
 │   ├── searxng/         # Docker: SearXNG search engine

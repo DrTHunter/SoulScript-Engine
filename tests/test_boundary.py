@@ -21,7 +21,6 @@ from src.policy.boundary import (
     build_denial,
     classify_risk,
 )
-from src.tools.registry import ToolRegistry
 
 PASS = 0
 FAIL = 0
@@ -171,127 +170,6 @@ def test_logger_empty_file():
         shutil.rmtree(tmpdir)
 
 
-# ==================================================================
-# 4. ToolRegistry integration
-# ==================================================================
-
-def test_registry_disallowed_tool():
-    """Requesting a known but disallowed tool returns denial payload."""
-    print("\n=== Registry: Disallowed Tool ===")
-
-    tmpdir = tempfile.mkdtemp()
-    try:
-        logger = BoundaryLogger(os.path.join(tmpdir, "boundary.jsonl"))
-        reg = ToolRegistry(
-            allowed=["echo"],
-            profile="orion",
-            boundary_logger=logger,
-        )
-
-        result, event = reg.dispatch("memory", {"action": "recall"})
-
-        # Result is a valid JSON denial
-        payload = json.loads(result)
-        check("denial error field", payload["error"] == "TOOL_NOT_ALLOWED")
-        check("denial tool field", payload["tool"] == "memory")
-        check("denial how_to_enable", "allowed_tools" in payload["how_to_enable"])
-
-        # Event returned
-        check("event returned", event is not None)
-        check("event type", event.type == "boundary_request")
-        check("event profile orion", event.profile == "orion")
-        check("event reason mentions allowlist", "allowlist" in event.reason)
-
-        # Event was logged
-        events = logger.read_all()
-        check("1 event logged", len(events) == 1)
-    finally:
-        shutil.rmtree(tmpdir)
-
-
-def test_registry_unknown_tool():
-    """Requesting a completely unknown tool returns denial with name preserved."""
-    print("\n=== Registry: Unknown Tool ===")
-
-    tmpdir = tempfile.mkdtemp()
-    try:
-        logger = BoundaryLogger(os.path.join(tmpdir, "boundary.jsonl"))
-        reg = ToolRegistry(
-            allowed=["echo", "memory"],
-            profile="elysia",
-            boundary_logger=logger,
-        )
-
-        result, event = reg.dispatch("web.search", {"query": "test"})
-
-        payload = json.loads(result)
-        check("denial error field", payload["error"] == "TOOL_NOT_ALLOWED")
-        check("denial preserves tool name", payload["tool"] == "web.search")
-
-        check("event returned", event is not None)
-        check("event reason mentions not registered", "not registered" in event.reason)
-        check("event risk_level high (web)", event.risk_level == "high")
-        check("event tool_args preserved", event.tool_args == {"query": "test"})
-
-        events = logger.read_all()
-        check("1 event logged", len(events) == 1)
-    finally:
-        shutil.rmtree(tmpdir)
-
-
-def test_registry_allowed_tool_no_event():
-    """Allowed tools execute normally and return no boundary event."""
-    print("\n=== Registry: Allowed Tool (no event) ===")
-
-    tmpdir = tempfile.mkdtemp()
-    try:
-        logger = BoundaryLogger(os.path.join(tmpdir, "boundary.jsonl"))
-        reg = ToolRegistry(
-            allowed=["echo"],
-            profile="orion",
-            boundary_logger=logger,
-        )
-
-        result, event = reg.dispatch("echo", {"message": "hello"})
-
-        check("result is hello", result == "hello")
-        check("no boundary event", event is None)
-
-        # No events logged
-        events = logger.read_all()
-        check("0 events logged", len(events) == 0)
-    finally:
-        shutil.rmtree(tmpdir)
-
-
-def test_registry_multiple_denials():
-    """Multiple denials accumulate in the log."""
-    print("\n=== Registry: Multiple Denials ===")
-
-    tmpdir = tempfile.mkdtemp()
-    try:
-        logger = BoundaryLogger(os.path.join(tmpdir, "boundary.jsonl"))
-        reg = ToolRegistry(
-            allowed=["echo"],
-            profile="orion",
-            boundary_logger=logger,
-        )
-
-        reg.dispatch("memory", {"action": "add"})
-        reg.dispatch("directives", {"action": "list"})
-        reg.dispatch("web.search", {"query": "news"})
-
-        events = logger.read_all()
-        check("3 events logged", len(events) == 3)
-
-        tools = [e.requested_capability for e in events]
-        check("all tools captured",
-              tools == ["memory", "directives", "web.search"],
-              f"got: {tools}")
-    finally:
-        shutil.rmtree(tmpdir)
-
-
 def test_boundary_event_to_dict():
     """BoundaryEvent serialises all required fields."""
     print("\n=== BoundaryEvent.to_dict ===")
@@ -331,10 +209,6 @@ if __name__ == "__main__":
     test_build_denial_default_reason()
     test_boundary_logger()
     test_logger_empty_file()
-    test_registry_disallowed_tool()
-    test_registry_unknown_tool()
-    test_registry_allowed_tool_no_event()
-    test_registry_multiple_denials()
     test_boundary_event_to_dict()
 
     print(f"\n{'='*50}")

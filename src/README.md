@@ -16,7 +16,7 @@ Core source code for the agent runtime. Contains all Python modules organized in
 | Directory | Purpose |
 |-----------|---------|
 | `llm_client/` | LLM provider abstraction layer (OpenAI, Ollama, Anthropic) with a common `LLMClient` interface |
-| `tools/` | Tool implementations, JSON Schema definitions, and registry with allowlist enforcement |
+| `tools/` | Tool implementations and JSON Schema definitions |
 | `memory/` | Memory Vault — durable, scoped, append-only memory with PII guard and duplicate detection |
 | `directives/` | Directive parser, store, injector, and manifest system for user-authored directives |
 | `storage/` | State store (rolling-window), journal store (append-only JSONL), narrative writer, human diary |
@@ -38,7 +38,7 @@ Build system prompt:
   4. User notes (notes/<profile>.md)
     ↓
 Conversation loop:
-  User input → LLM → tool calls → dispatch (tools/registry.py) → repeat
+  User input → LLM → tool calls → dispatch → repeat
     ↓
 Metering (observability/metering.py) → cost tracking
 Boundary checks (policy/boundary.py) → denial payloads
