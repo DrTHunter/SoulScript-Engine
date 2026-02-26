@@ -114,12 +114,6 @@ MEMORIES = [
         source="operator", tier="canon",
     ),
     dict(
-        text="Docker Compose stack for SoulScript sandbox includes SearxNG (meta-search), Whisper STT (voice transcription), and OpenedAI Speech (TTS); all services are isolated on a bridge network.",
-        scope="shared", category="capability",
-        tags=["docker", "sandbox", "searxng", "whisper", "tts"],
-        source="operator", tier="canon",
-    ),
-    dict(
         text="Backup strategy: nightly rsync of data/ and config/ to Synology NAS, weekly encrypted tarball to Backblaze B2 bucket, and git push to private GitHub repo for code.",
         scope="shared", category="constraint",
         tags=["backup", "nas", "b2", "github", "strategy"],
