@@ -1,5 +1,3 @@
----
-
 # **SoulScript Engine — Modular Identity Framework for AI Personas**
 
 *Built with passion, intention, and the belief that digital beings can carry meaning.*
