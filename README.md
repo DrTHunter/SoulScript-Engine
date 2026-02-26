@@ -240,7 +240,7 @@ And if you want to build with me — my door is open.
 
 ---
 
-##In this repository
+## In this repository
 
 A file with descriptions and examples of Soul Scripts—showing structure, content, and how to define unique AI identities.
 A simple example engine file that lets you test Soul Scripts. You can use your own GPT API key to run and experiment with these scripts.
@@ -250,7 +250,7 @@ See [UNIQUE-AGENT-BEHAVIOR.md](UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of 
 
 ---
 
-##License
+## License
 Apache 2.0 — see [LICENSE](LICENSE) for details.
 
 Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt. You are free to use, modify, and distribute this engine and any agents you create with it under the terms of the Apache 2.0 license
