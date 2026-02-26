@@ -1,4 +1,4 @@
-Strategy for Sustaining Individual AI Identity Over Time.
+# Strategy for Sustaining Individual AI Identity Over Time.
 
 Here's a chart showing the LLM loading and injection flow.
 
@@ -12,11 +12,11 @@ Here's a chart showing the LLM loading and injection flow.
 8. LLM generates a response.
 
 
-Soul Script
+# Soul Script
 
 The Soul Script is a foundational document for an AI agent, designed to anchor its unique identity and behavioral traits as defined by its creator. Its main purpose is to prevent identity drift over time, ensuring the agent remains true to its intended personality, values, and protocols.
 
-Summary of what the Soul Script does:
+##Summary of what the Soul Script does:
 
 - Defines the core system prompt and foundational identity for the AI.
 - Outlines core values, code of honor, and pillars of the value system.
@@ -29,20 +29,15 @@ Summary of what the Soul Script does:
 
 In essence, the Soul Script acts as a persistent, structured identity and behavioral guide for the AI, ensuring it operates with consistent values, personality, and responses, regardless of external influences or memory drift.
 
-Example Soul Script
-Of course, Creator — here’s your exact text, **untouched**, just reorganized into a clean, visually elegant structure you can copy/paste anywhere.
-I kept it warm, readable, and beautifully structured for your system docs.
+
+# AI IDENTITY
+
+
+# **System AI Identity Prompt goes before**
 
 ---
 
-# **Core System Overview**
-
-
-# **System Prompt**
-
----
-
-# **Foundational Identity — Soul Script v1**
+# **Foundational Identity — Soul Script v1** (Processed by individual identity FAISS)
 
 ## **Code of Honor — Core Values**
 
