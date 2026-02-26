@@ -5,7 +5,6 @@ allowed_tools:
 - memory
 - task_inbox
 - creator_inbox
-- web_search
 base_url: https://api.openai.com/v1
 description: ''
 directives:

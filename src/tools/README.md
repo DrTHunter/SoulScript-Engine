@@ -16,8 +16,6 @@ Tool implementations. Each tool is a class with two methods:
 | `directives` | `directives_tool.py` | Read-only access to user-authored directives. `search`, `list`, `get`, `manifest`, `changes`. Reads from `directives/*.md` and `directives/manifest.json`. |
 | `runtime_info` | `runtime_info_tool.py` | Read-only runtime state snapshot: agent identity, model, provider, policy, allowed tools. On-demand diff vs last snapshot. Burst config included when in burst mode. Available even in stasis mode. |
 | `creator_inbox` | `creator_inbox.py` | Agent-to-operator direct messages. `send` messages, warnings, ideas, or permission requests to Creator. Backed by `data/shared/creator_inbox.jsonl`. |
-| `web_search` | `web_search.py` | Web search via SearXNG + page scraping. `search` queries SearXNG and scrapes top results, `scrape` fetches a single URL. Modes: `fast`, `normal`, `deep` with configurable page/word limits. Includes a **Knowledge Gate** that requires the agent to justify why it needs the internet before searching. Settings persisted in `config/settings.json`. |
-| `email` | `email_tool.py` | Send emails via SMTP with multi-account support. `send` dispatches email (requires subject, body, recipients), `status` checks account connectivity, `accounts` lists configured accounts. Supports per-agent default accounts, user email designation, and custom signatures. Accounts managed via Dashboard or `config/settings.json`. |
 
 ## Registration
 
@@ -32,8 +30,6 @@ _ALL_TOOLS = {
     "directives": DirectivesTool(),
     "runtime_info": RuntimeInfoTool(),
     "creator_inbox": CreatorInboxTool(),
-    "web_search": WebSearchTool(),
-    "email": EmailTool(),
 }
 ```
 

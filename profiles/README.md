@@ -28,8 +28,6 @@ allowed_tools:                 # Tools this agent can call
   - memory
   - directives
   - creator_inbox
-  - web_search
-  - email
 
 policy:                        # Runtime safety limits
   max_iterations: 25           # Max LLM calls per user turn

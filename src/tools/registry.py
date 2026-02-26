@@ -21,9 +21,6 @@ from src.tools.memory_tool import MemoryTool
 from src.tools.directives_tool import DirectivesTool
 from src.tools.runtime_info_tool import RuntimeInfoTool
 from src.tools.creator_inbox import CreatorInboxTool
-from src.tools.web_search import WebSearchTool
-from src.tools.email_tool import EmailTool
-from src.tools.computer_use import ComputerUseTool
 from src.policy.boundary import BoundaryLogger, BoundaryEvent, build_denial
 
 # Master catalogue — every tool the runtime knows about.
@@ -35,9 +32,6 @@ _ALL_TOOLS: Dict[str, Any] = {
     "directives": DirectivesTool(),
     "runtime_info": RuntimeInfoTool(),
     "creator_inbox": CreatorInboxTool(),
-    "web_search": WebSearchTool(),
-    "email": EmailTool(),
-    "computer_use": ComputerUseTool(),
 }
 
 

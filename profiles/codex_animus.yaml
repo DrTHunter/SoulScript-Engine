@@ -14,7 +14,6 @@ allowed_tools:
 - memory
 - task_inbox
 - creator_inbox
-- web_search
 policy:
   max_iterations: 25
   stasis_mode: false

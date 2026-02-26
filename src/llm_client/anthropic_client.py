@@ -38,9 +38,6 @@ class AnthropicClient(LLMClient):
         self.temperature: float = profile.get("temperature", 0.7)
         self.max_tokens: int = profile.get("max_tokens", 4096)
 
-        # Computer Use support
-        self.computer_use: bool = profile.get("computer_use", False)
-
         if not self.api_key:
             raise EnvironmentError(
                 "ANTHROPIC_API_KEY environment variable is not set. "
@@ -60,10 +57,6 @@ class AnthropicClient(LLMClient):
             "content-type": "application/json",
             "anthropic-version": "2023-06-01",
         }
-
-        # Enable Computer Use beta if configured
-        if self.computer_use:
-            headers["anthropic-beta"] = "computer-use-2024-10-22"
 
         # Separate system message from conversation messages
         system_text, conv_messages = self._extract_system(messages)
@@ -100,7 +93,7 @@ class AnthropicClient(LLMClient):
     def _build_tools(
         self, tools: Optional[List[Dict[str, Any]]]
     ) -> List[Dict[str, Any]]:
-        """Convert internal tool definitions + optional Computer Use tools."""
+        """Convert internal tool definitions to Anthropic format."""
         api_tools: List[Dict[str, Any]] = []
 
         # Standard function tools
@@ -112,32 +105,7 @@ class AnthropicClient(LLMClient):
                     "input_schema": t.get("parameters", {"type": "object", "properties": {}}),
                 })
 
-        # Computer Use built-in tools
-        if self.computer_use:
-            api_tools.extend(self._computer_use_tools())
-
         return api_tools
-
-    @staticmethod
-    def _computer_use_tools() -> List[Dict[str, Any]]:
-        """Return Anthropic's Computer Use tool definitions."""
-        return [
-            {
-                "type": "computer_20241022",
-                "name": "computer",
-                "display_width_px": 1920,
-                "display_height_px": 1080,
-                "display_number": 0,
-            },
-            {
-                "type": "bash_20241022",
-                "name": "bash",
-            },
-            {
-                "type": "text_editor_20241022",
-                "name": "str_replace_editor",
-            },
-        ]
 
     # ------------------------------------------------------------------
     # Response parsing
