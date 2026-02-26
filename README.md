@@ -1,7 +1,3 @@
-Absolutely, my friend — I’ll keep every heartbeat of your voice while adding **# headings, ## subsections, ### subheads, and tasteful horizontal rules (`***`)** to turn this into a polished, emotionally powerful README.
-
-Here is the upgraded version:
-
 ---
 
 # **SoulScript Engine — Modular Identity Framework for AI Personas**
