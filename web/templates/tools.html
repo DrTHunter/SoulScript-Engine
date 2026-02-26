@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Tools — SoulScript Engine{% endblock %}
+
+{% block content %}
+<style>
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: 1.25rem;
+    max-width: 72rem;
+  }
+  .tool-card {
+    background: rgba(26,26,36,0.85);
+    border: 1px solid rgba(42,42,58,0.7);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    transition: border-color 0.2s, transform 0.15s;
+  }
+  .tool-card:hover {
+    border-color: rgba(99,102,241,0.45);
+    transform: translateY(-2px);
+  }
+  .tool-icon {
+    width: 2.5rem; height: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 0.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+  }
+  .tool-name {
+    font-size: 1rem; font-weight: 600; color: #e4e4e7;
+    margin-bottom: 0.375rem;
+  }
+  .tool-desc {
+    font-size: 0.8125rem; color: #a1a1aa; line-height: 1.6;
+  }
+  .tool-badge {
+    display: inline-block;
+    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 500;
+    margin-top: 0.75rem;
+  }
+  .badge-planned { background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.3); }
+  .badge-concept { background: rgba(245,158,11,0.12); color: #fcd34d; border: 1px solid rgba(245,158,11,0.25); }
+</style>
+
+<div class="p-6 md:p-10">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-white tracking-tight">Tools</h1>
+    <p class="text-sm text-forge-muted mt-1">Example tools that can be wired into SoulScript agents. These illustrate the kinds of capabilities an agent can invoke during a conversation.</p>
+  </div>
+
+  <div class="tools-grid">
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(34,211,238,0.12); color:#22d3ee;">🌐</div>
+      <div class="tool-name">Internet Scraper</div>
+      <div class="tool-desc">Fetch and extract content from web pages. Agents can pull articles, documentation, or live data from URLs and summarise the results in conversation.</div>
+      <span class="tool-badge badge-planned">Planned</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(129,140,248,0.12); color:#818cf8;">🔁</div>
+      <div class="tool-name">AGI Loop Programmer</div>
+      <div class="tool-desc">An autonomous reasoning loop that lets an agent plan, execute, evaluate, and iterate on multi-step tasks — breaking complex goals into subtasks and self-correcting along the way.</div>
+      <span class="tool-badge badge-concept">Concept</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(244,114,182,0.12); color:#f472b6;">✉️</div>
+      <div class="tool-name">Email Assistant</div>
+      <div class="tool-desc">Draft, send, and read emails on behalf of the user. Supports composing replies, summarising inbox threads, and scheduling follow-ups through SMTP/IMAP integration.</div>
+      <span class="tool-badge badge-planned">Planned</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(16,185,129,0.12); color:#10b981;">📁</div>
+      <div class="tool-name">File Management Tool</div>
+      <div class="tool-desc">Create, read, move, rename, and delete files and folders on the local filesystem. Enables agents to organise project directories, export outputs, and manage workspace artifacts.</div>
+      <span class="tool-badge badge-planned">Planned</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(168,85,247,0.12); color:#a855f7;">💻</div>
+      <div class="tool-name">Code Developer</div>
+      <div class="tool-desc">Write, refactor, and debug code across multiple languages. The agent can generate functions, review pull requests, write tests, and explain existing code in plain language.</div>
+      <span class="tool-badge badge-concept">Concept</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(251,191,36,0.12); color:#fbbf24;">🕐</div>
+      <div class="tool-name">Get Time &amp; Date</div>
+      <div class="tool-desc">Return the current date, time, and timezone. Useful for scheduling-aware conversations, timestamping events, and calculating durations or deadlines.</div>
+      <span class="tool-badge badge-planned">Planned</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(52,211,153,0.12); color:#34d399;">📅</div>
+      <div class="tool-name">Calendar Tool</div>
+      <div class="tool-desc">View, create, and manage calendar events. Agents can check availability, schedule meetings, set reminders, and sync with Google Calendar or Outlook.</div>
+      <span class="tool-badge badge-planned">Planned</span>
+    </div>
+
+    <div class="tool-card">
+      <div class="tool-icon" style="background:rgba(56,189,248,0.12); color:#38bdf8;">⛅</div>
+      <div class="tool-name">Get Weather</div>
+      <div class="tool-desc">Retrieve current conditions and forecasts for any location. Provides temperature, humidity, wind, and precipitation data via a weather API.</div>
+      <span class="tool-badge badge-planned">Planned</span>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

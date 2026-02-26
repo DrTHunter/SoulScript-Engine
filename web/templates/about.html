@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}About — SoulScript Engine{% endblock %}
+
+{% block content %}
+<style>
+  .about-card {
+    background: rgba(26,26,36,0.85);
+    border: 1px solid rgba(42,42,58,0.7);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    max-width: 56rem;
+    margin: 0 auto;
+  }
+  .about-textarea {
+    width: 100%;
+    min-height: 20rem;
+    padding: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: rgba(15,15,20,0.8);
+    border: 1px solid rgba(63,63,70,0.5);
+    border-radius: 0.5rem;
+    color: #d4d4d8;
+    resize: vertical;
+    transition: border-color 0.15s;
+  }
+  .about-textarea:focus {
+    outline: none;
+    border-color: rgba(99,102,241,0.6);
+    box-shadow: 0 0 0 2px rgba(99,102,241,0.15);
+  }
+  .save-btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    border: none;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+  .save-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; padding: 0.75rem 1.25rem;
+    background: rgba(16,185,129,0.9); color: #fff; border-radius: 0.5rem;
+    font-size: 0.8125rem; z-index: 999; animation: fadeInOut 3s ease-in-out forwards;
+  }
+  .toast.error { background: rgba(239,68,68,0.9); }
+  @keyframes fadeInOut { 0%{opacity:0;transform:translateY(10px)} 10%{opacity:1;transform:translateY(0)} 85%{opacity:1} 100%{opacity:0} }
+  .char-count { font-size: 0.75rem; color: #71717a; }
+</style>
+
+<div class="p-6 md:p-10">
+  <div class="about-card">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">About</h1>
+        <p class="text-sm text-forge-muted mt-1">Describe this system, your agents, or anything you want to remember.</p>
+      </div>
+    </div>
+
+    <textarea id="about-text" class="about-textarea" placeholder="Write about this SoulScript Engine instance — the agents you've configured, what they're for, architecture notes, or anything else…">{{ about_text }}</textarea>
+
+    <div class="flex items-center justify-between mt-4">
+      <span class="char-count" id="char-count"></span>
+      <div class="flex items-center gap-3">
+        <span id="save-status" class="text-xs text-forge-muted"></span>
+        <button class="save-btn" id="save-btn" onclick="saveAbout()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const textarea = document.getElementById('about-text');
+  const charCount = document.getElementById('char-count');
+  const saveBtn = document.getElementById('save-btn');
+  const saveStatus = document.getElementById('save-status');
+  let saved = true;
+
+  function updateCount() {
+    charCount.textContent = textarea.value.length.toLocaleString() + ' characters';
+  }
+  textarea.addEventListener('input', () => { saved = false; updateCount(); });
+  updateCount();
+
+  async function saveAbout() {
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+    try {
+      const res = await fetch('/api/about', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: textarea.value }),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      saved = true;
+      showToast('Saved');
+    } catch (e) {
+      showToast(e.message, true);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  }
+
+  // Ctrl+S shortcut
+  textarea.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      saveAbout();
+    }
+  });
+
+  function showToast(msg, isError) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (isError ? ' error' : '');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+  }
+</script>
+{% endblock %}

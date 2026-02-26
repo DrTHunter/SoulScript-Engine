@@ -485,6 +485,39 @@ async def page_settings(request: Request, tab: str = "connections"):
     })
 
 
+# ── Tools showcase page ──────────────────────────────────────────
+@app.get("/tools", response_class=HTMLResponse)
+async def page_tools(request: Request):
+    return templates.TemplateResponse("tools.html", {
+        "request": request, "page": "tools",
+    })
+
+
+# ── About page ───────────────────────────────────────────────────
+ABOUT_FILE = _CONFIG_DIR / "about.json"
+
+def _load_about() -> dict:
+    return _read_json(ABOUT_FILE, {"text": ""})
+
+def _save_about(data: dict):
+    _write_json(ABOUT_FILE, data)
+
+@app.get("/about", response_class=HTMLResponse)
+async def page_about(request: Request):
+    about = _load_about()
+    return templates.TemplateResponse("about.html", {
+        "request": request, "page": "about", "about_text": about.get("text", ""),
+    })
+
+class AboutUpdate(BaseModel):
+    text: str
+
+@app.post("/api/about")
+async def api_about_save(body: AboutUpdate):
+    _save_about({"text": body.text})
+    return JSONResponse({"ok": True})
+
+
 # ═══════════════════════════════════════════════════════════════════
 #  CHAT API
 # ═══════════════════════════════════════════════════════════════════

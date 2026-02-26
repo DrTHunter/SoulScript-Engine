@@ -6,10 +6,10 @@ Parses, scores, and retrieves sections from user-authored directive markdown fil
 
 | File | Purpose |
 |------|---------|
-| `parser.py` | `DirectiveSection` dataclass + `parse_directive_file()` -- splits markdown on `## Headings` |
-| `store.py` | `DirectiveStore` -- loads sections, scores relevance, provides search/list/get |
-| `injector.py` | `build_directives_block()` -- formats relevant sections for system prompt injection |
-| `manifest.py` | `generate_manifest()` / `save_manifest()` / `load_manifest()` / `validate_manifest()` / `diff_manifest()` / `audit_changes()` -- builds, persists, validates, and diffs `directives/manifest.json` |
+| `parser.py` | `DirectiveSection` dataclass + `parse_directive_file()` — splits markdown on `## Headings` |
+| `store.py` | `DirectiveStore` — loads sections, scores relevance, provides search/list/get |
+| `injector.py` | `build_directives_block()` — formats relevant sections for system prompt injection |
+| `manifest.py` | `generate_manifest()` / `save_manifest()` / `load_manifest()` / `validate_manifest()` / `diff_manifest()` / `audit_changes()` — builds, persists, validates, and diffs `directives/manifest.json` |
 
 ## How It Works
 
@@ -35,7 +35,7 @@ score = token_overlap_ratio + substring_bonus(0.3) + SequenceMatcher_ratio * 0.4
 ```yaml
 directives:
   enabled: true
-  scopes: [shared, orion]
+  scopes: [shared, codex_animus]
   max_sections: 5
 ```
 
@@ -77,7 +77,7 @@ Agents can call `directives.changes` to see the audit deltas at any time.
 
 - All required top-level keys present (`manifest_version`, `generated_utc`, `hash_algo`, `root_paths`, `default_retrieval_mode`, `directives`)
 - All 12 required per-entry keys present
-- Enum values in range (`scope`: shared/orion/elysia, `status`: active/deprecated/experimental, `risk`: low/medium/high)
+- Enum values in range (`status`: active/deprecated/experimental, `risk`: low/medium/high)
 - No duplicate directive IDs
 - Source files exist on disk
 - SHA-256 hash matches live content (detects drift)
@@ -87,7 +87,8 @@ Returns `{"valid": bool, "errors": [str]}`.
 ## Directive Files
 
 Located in `directives/` at the project root:
-- `shared.md` -- both agents
-- `orion.md` -- Orion only
-- `elysia.md` -- Elysia only
-- `manifest.json` -- auto-generated index (see above)
+- `shared.md` — all agents
+- `astraea.md` — Astraea only
+- `callum.md` — Callum only
+- `codex_animus.md` — Codex Animus only
+- `manifest.json` — auto-generated index (see above)

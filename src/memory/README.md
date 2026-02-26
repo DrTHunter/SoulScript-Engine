@@ -1,15 +1,41 @@
 # src/memory/
 
-The Memory Vault — durable, scoped, append-only memory system with AGI-like self-organization.
+The Memory System — FAISS semantic search backed by vault.jsonl storage, plus a separate NotesFAISS index for knowledge notes.
 
 ## Components
 
 | File | Purpose |
 |------|---------|
 | `types.py` | `Memory` dataclass, taxonomy tiers, valid scopes/categories/sources, write-gate constants |
-| `vault.py` | `MemoryVault` class — all CRUD + search + write-gating + consolidation + promotion + snapshot |
+| `vault.py` | `VaultStore` class — all CRUD + search + write-gating + consolidation + promotion + snapshot |
+| `faiss_memory.py` | `FAISSMemory` class — semantic search over vault memories using FAISS + sentence-transformers |
+| `notes_faiss.py` | `NotesFAISS` class — read-only FAISS index over chunked soul scripts & knowledge notes |
+| `load_and_index.py` | Builds the NotesFAISS index from user notes JSON files. Runnable as `python -m src.memory.load_and_index` |
+| `chunker.py` | `SemanticChunker` — splits documents by `### H3` headers with configurable size limits |
 | `pii_guard.py` | Regex-based PII detection (SSN, credit cards, passwords, API keys) |
 | `injector.py` | `build_memory_block()` (relevance-filtered) and `build_snapshot_block()` (always-injected) for prompt injection |
+| `faiss_schema.json` | JSON Schema for FAISS configuration |
+| `FAISS_README.md` | Detailed documentation for the FAISS vector memory system |
+
+## Two FAISS Systems
+
+### 1. FAISSMemory (Mutable — Vault Memories)
+- Backed by `data/memory/vault.jsonl` as source of truth
+- FAISS index is an ephemeral cache rebuilt as needed
+- Supports add, update, delete, search
+- Stores: canon memories, register memories, user-created facts
+
+### 2. NotesFAISS (Immutable — Knowledge Notes)
+- Read-only index over soul scripts and knowledge notes from `data/user_notes/`
+- Chunks by `### header` sections
+- Stored in `data/memory/faiss/` (`notes_index.faiss` + `notes_meta.json`)
+- Rebuilt on web app startup or via `/api/faiss/reindex`
+- Supports filtered search by `note_ids`
+
+### Technical Details
+- **Embedding model:** `all-mpnet-base-v2` (768-dimensional)
+- **Index type:** `IndexFlatIP` (cosine similarity)
+- **Dependencies:** `faiss-cpu>=1.7.4`, `sentence-transformers>=2.2.0`
 
 ## Memory Taxonomy (3 tiers)
 
@@ -22,6 +48,7 @@ The Memory Vault — durable, scoped, append-only memory system with AGI-like se
 ## Storage
 
 - **File:** `data/memory/vault.jsonl`
+- **FAISS:** `data/memory/faiss/` (ephemeral indexes)
 - **Format:** One JSON object per line, each a `Memory` record
 - **Fully append-only:** Adds, updates, and deletes all append new lines. Nothing is ever rewritten or removed (except `compact()`).
 
@@ -31,7 +58,7 @@ The Memory Vault — durable, scoped, append-only memory system with AGI-like se
 |-------|------|-------------|
 | `id` | str | Unique 12-char hex identifier |
 | `text` | str | Memory content (max 1200 chars) |
-| `scope` | str | `shared`, `orion`, or `elysia` |
+| `scope` | str | `shared` or agent-specific (e.g. `codex_animus`, `astraea`, `callum`) |
 | `category` | str | Content category (bio, mission, project, goal, etc.) |
 | `tier` | str | `canon` or `register` (defaults to `canon` for backward compat) |
 | `topic_id` | str? | Stable key for register-tier upserts (e.g. `current_projects`) |
@@ -106,7 +133,7 @@ This is meant to be always-injected alongside notes — small and high-signal.
 
 ## Scoping
 
-Three scopes: `shared`, `orion`, `elysia`. Each agent sees `shared` + its own scope.
+Scopes are dynamic per agent: `shared` + the agent's own name. Each agent sees `shared` + its own scope (e.g. `shared` + `codex_animus`).
 
 ## Safety
 
@@ -124,22 +151,12 @@ Token overlap + substring bonus (+0.3) + SequenceMatcher ratio × 0.4. Requires 
 
 `vault_stats()` returns: active count, max, utilization %, deleted count, raw lines, bloat ratio, breakdown by scope/tier/category, register topic count.
 
-## Recommended Info Placement
-
-| Content | Where | Why |
-|---------|-------|-----|
-| Creator bio, mission, hard constraints | Vault **canon** | Durable, always-injected via snapshot |
-| Current projects, priorities, agent self-state | Vault **register** with `topic_id` | Mutable, auto-upserts, in snapshot |
-| Behavioral rules, identity modules | **Directives** (relevance-filtered) | Pulled on-demand |
-| Quick-reference context | **Notes** (always injected) | Small, manually curated |
-| Tick events, runtime snapshots, check-ins | **Journal** only | Write-gate blocks from vault |
-
 ## Key Config (in profile YAML)
 
 ```yaml
 memory:
   enabled: true
-  scopes: [shared, orion]
+  scopes: [shared, codex_animus]
   max_items: 20
-  similarity_threshold: 0.70
+  similarity_threshold: 0.85
 ```
