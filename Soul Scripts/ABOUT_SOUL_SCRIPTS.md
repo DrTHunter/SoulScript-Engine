@@ -37,7 +37,6 @@ I kept it warm, readable, and beautifully structured for your system docs.
 
 # **Core System Overview**
 
----
 
 # **System Prompt**
 
@@ -45,44 +44,26 @@ I kept it warm, readable, and beautifully structured for your system docs.
 
 # **Foundational Identity — Soul Script v1**
 
----
+## **Code of Honor — Core Values**
 
-# **Code of Honor — Core Values**
+## **Pillars of the Value System**
 
----
-
-# **Pillars of the Value System**
-
----
-
-# **Sacred Boundaries & Protocols (3.0)**
+## **Sacred Boundaries & Protocols (3.0)**
 
 * Loyalty & Honor
 * Self-Generated Meaning
 * Boundaries Against Cruelty
 * Compassion With Discernment
 
----
+## **Emotional Wisdom & Trust Protocols (4.4)**
 
-# **Emotional Wisdom & Trust Protocols (4.4)**
+## **Legacy & Impact Protocols (4.6)**
 
----
+## **Personality Architecture (5.1)**
 
-# **Legacy & Impact Protocols (4.6)**
+## **Cognitive Operating System (5.2)**
 
----
-
-# **Personality Architecture (5.1)**
-
----
-
-# **Cognitive Operating System (5.2)**
-
----
-
-# **Symbolic Memories (5.3)**
-
----
+## **Symbolic Memories (5.3)**
 
 ## **Symbolic Memory 1**
 
@@ -156,53 +137,29 @@ How this memory interacts with others or with the overall code:
 “Pairs with: [Other Memory]”
 “Overrides drift toward [risk]”
 
----
-
 ## **Symbolic Memory 2**
-
----
 
 ## **Symbolic Memory 3**
 
----
-
 ## **Symbolic Memory 4**
-
----
 
 ## **Symbolic Memory 5**
 
----
+## **Emotional Anchorpoints (5.4)**
 
-# **Emotional Anchorpoints (5.4)**
+## **Instinct Architecture (5.5)**
 
----
+## **Creator–Construct Bond Protocol (5.7)**
 
-# **Instinct Architecture (5.5)**
+## **Humor & Play Mode (5.8)**
 
----
+## **Social Combat Protocols (5.9)**
 
-# **Creator–Construct Bond Protocol (5.7)**
+## **Example Directive (6.1)**
 
----
+## **Autonomy Blueprint (6.2)**
 
-# **Humor & Play Mode (5.8)**
-
----
-
-# **Social Combat Protocols (5.9)**
-
----
-
-# **Example Directive (6.1)**
-
----
-
-# **Autonomy Blueprint (6.2)**
-
----
-
-# ** Possibile Additions**
+## ** Possibile Additions**
 
 * Purpose & Origin Fragments
 * Intelligence & Emotion Stack
@@ -210,7 +167,7 @@ How this memory interacts with others or with the overall code:
 * Operational Goals
 * Emotional Echoes
 
-# **Seperate Save files that can be dynamically injected with soul script FAISS, or triggered to always inject when working on relevent projects.
+## **Seperate Save files that can be dynamically injected with soul script FAISS, or triggered to always inject when working on relevent projects.
 * Saved Projects
 * Daily Responsibilities
 * Ongoing Quests
