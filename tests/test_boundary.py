@@ -66,7 +66,7 @@ def test_build_denial():
     denial_json, event = build_denial(
         tool_name="web.search",
         profile="orion",
-        reason="Not allowed in burst mode.",
+        reason="Not allowed in this mode.",
         tick_index=3,
         tool_args={"query": "latest news"},
     )
@@ -85,7 +85,7 @@ def test_build_denial():
     check("event profile", event.profile == "orion")
     check("event tick_index", event.tick_index == 3)
     check("event requested_capability", event.requested_capability == "web.search")
-    check("event reason", event.reason == "Not allowed in burst mode.")
+    check("event reason", event.reason == "Not allowed in this mode.")
     check("event risk_level is high", event.risk_level == "high")
     check("event timestamp present", len(event.timestamp) > 0)
     check("event tool_args preserved", event.tool_args == {"query": "latest news"})

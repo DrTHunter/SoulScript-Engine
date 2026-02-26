@@ -50,7 +50,7 @@ MEMORIES = [
 
     # â”€â”€ Project State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     dict(
-        text="SoulScript Engine is currently in pre-alpha; core subsystems include burst runner, FAISS memory vault, directive injector, governance layer, routing, and a Flask-based web dashboard on port 8585.",
+        text="SoulScript Engine is currently in pre-alpha; core subsystems include FAISS memory vault, directive injector, governance layer, routing, and a FastAPI web dashboard on port 8585.",
         scope="shared", category="project",
         tags=["soulscript", "status", "pre_alpha", "architecture"],
         source="operator", tier="register", topic_id="project_status",
@@ -62,7 +62,7 @@ MEMORIES = [
         source="operator", tier="register", topic_id="git_branches",
     ),
     dict(
-        text="Known open issues: port 8585 occasionally held by zombie uvicorn processes after crash; FAISS index rebuild is slow on >10k vectors; burst runner lacks graceful shutdown on SIGINT.",
+        text="Known open issues: port 8585 occasionally held by zombie uvicorn processes after crash; FAISS index rebuild is slow on >10k vectors.",
         scope="shared", category="project",
         tags=["soulscript", "bugs", "known_issues", "uvicorn"],
         source="operator", tier="register", topic_id="known_issues",

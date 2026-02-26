@@ -51,4 +51,3 @@ Prefer concise responses.
 
 - Markdown injection: `src/loop.py` (lines 125-145)
 - JSON notes loader: `src/storage/user_notes_loader.py`
-- Burst mode injection: `src/runner/tick.py` (_load_notes function)

@@ -146,7 +146,6 @@ SoulScript-Engine/
 │   ├── memory/           # Memory Vault — append-only JSONL + FAISS vector search
 │   ├── directives/       # Dynamic directive injection system
 │   ├── governance/       # Boundary enforcement and safety rails
-│   ├── runner/           # Burst runner (tool-loop execution engine)
 │   ├── tools/            # Built-in tool definitions
 │   ├── routing/          # Agent routing logic
 │   ├── storage/          # State + journal persistence

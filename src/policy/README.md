@@ -41,9 +41,8 @@ Unknown tools default to `med`.
 ## Consumers
 
 - **`ToolRegistry.dispatch()`** — interactive loop, denies unknown/disallowed tools
-- **`run_tick()`** — burst runner, denies tools not in `BurstConfig.allowed_tools`
 
-Both call `build_denial()` for the payload and `BoundaryLogger.append()` to persist the event.
+`build_denial()` creates the payload and `BoundaryLogger.append()` persists the event.
 
 ## Tests
 

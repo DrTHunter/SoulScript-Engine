@@ -8,8 +8,8 @@ REGISTER – mutable state registers: one record per *topic_id*, updated in
            place (append-only version bump).  Current projects, active
            priorities, evolving preferences, agent self-state.
 LOG     – ephemeral events: tick markers, runtime snapshots, check-ins,
-          one-off observations.  These belong in the burst journal, NOT
-          the vault.  The write-gate rejects LOG-tier writes.
+          one-off observations.  These do NOT belong in the vault.
+          The write-gate rejects LOG-tier writes.
 
 The ``tier`` field is stored on every Memory record.  Old records
 missing the field default to ``"canon"`` for backward compat.
@@ -51,7 +51,7 @@ VALID_SOURCES = frozenset({"chat", "manual", "tool", "operator", "promotion"})
 # Used by the write-gate to auto-reject LOG-tier noise.
 JOURNAL_ONLY_SIGNALS = frozenset({
     "tick marker", "runtime snapshot", "check-in", "heartbeat",
-    "burst tick", "no changes", "nothing to report",
+    "no changes", "nothing to report",
     "status unchanged", "routine scan", "ephemeral",
 })
 

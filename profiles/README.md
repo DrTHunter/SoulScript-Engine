@@ -95,7 +95,7 @@ budget:
   monthly_hard_cap: 20.00      # Hard stop for monthly spending
   monthly_soft_cap: 16.00      # Warning threshold (tier demotion)
   per_session_cap: 2.00        # Max spend per interactive session
-  per_tick_cap: 0.10           # Max spend per burst tick
+  per_tick_cap: 0.10           # Max spend per tick
 
 # ── Context Management ────────────────────────────────────────────
 context:
@@ -111,7 +111,7 @@ agi_loop:
   interval_hours: 0            # Hours between loops
   interval_minutes: 30         # Minutes between loops
   max_loops: 0                 # 0 = infinite
-  ticks_per_loop: 15           # Burst ticks per loop cycle
+  ticks_per_loop: 15           # Ticks per loop cycle
   max_steps_per_tick: 3        # Max model calls per tick
   stimulus: ""                 # Default stimulus text
   auto_pause_on_budget: true   # Pause when budget is exhausted

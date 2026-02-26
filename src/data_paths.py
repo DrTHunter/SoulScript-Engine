@@ -11,14 +11,12 @@ data/
   orion/                      # Orion-specific runtime data
     state.json
     journal.jsonl
-    burst_journal.jsonl
     summary.md
     continuation.md
     narrative.md
   elysia/                     # Elysia-specific runtime data
     state.json
     journal.jsonl
-    burst_journal.jsonl
     summary.md
     continuation.md
     narrative.md
@@ -78,11 +76,6 @@ def state_path(profile: str) -> str:
 def journal_path(profile: str) -> str:
     """``data/<profile>/journal.jsonl``"""
     return os.path.join(profile_dir(profile), "journal.jsonl")
-
-
-def burst_journal_path(profile: str) -> str:
-    """``data/<profile>/burst_journal.jsonl``"""
-    return os.path.join(profile_dir(profile), "burst_journal.jsonl")
 
 
 def summary_path(profile: str) -> str:

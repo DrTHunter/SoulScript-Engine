@@ -58,7 +58,7 @@ Task-to-tier mapping is overridable in the profile YAML under `routing.task_over
 | Monthly hard cap | $20.00 | Blocks all cloud tier calls |
 | Monthly soft cap | $16.00 (80%) | Demotes from expensive → cheap cloud |
 | Per-session cap | $2.00 | Blocks further calls in current session |
-| Per-tick cap | $0.10 | Blocks individual burst tick calls |
+| Per-tick cap | $0.10 | Blocks individual tick calls |
 
 Month rollover is automatic — spending resets on the first call of each new month.
 

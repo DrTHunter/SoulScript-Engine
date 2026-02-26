@@ -142,15 +142,15 @@ class TickScheduler:
     """Scheduler for indefinite AGI-like autonomous agent loops.
 
     Controls timing, loop counting, pause/resume, and integrates
-    with the burst runner for actual tick execution.
+    with a configurable execution function for actual loop work.
 
     Parameters
     ----------
     config : ScheduleConfig
         Scheduling parameters.
-    run_burst_fn : callable, optional
+    run_fn : callable, optional
         Function to call for each loop cycle. Signature:
-        (profile_name, burst_ticks, max_steps_per_tick, stimulus) -> list[TickOutcome]
+        (profile_name, ticks_per_loop, max_steps_per_tick, stimulus) -> list[outcome]
     budget_tracker : optional BudgetTracker
         For budget-aware auto-pausing.
     state_path : str, optional
@@ -160,12 +160,12 @@ class TickScheduler:
     def __init__(
         self,
         config: ScheduleConfig,
-        run_burst_fn: Optional[Callable] = None,
+        run_fn: Optional[Callable] = None,
         budget_tracker: "Any" = None,
         state_path: str | None = None,
     ):
         self.config = config
-        self._run_burst_fn = run_burst_fn
+        self._run_fn = run_fn
         self.budget_tracker = budget_tracker
         self._state_path = state_path or _agi_state_path()
         self.state = self._load_state()
@@ -398,27 +398,22 @@ class TickScheduler:
         self._save_state()
 
     def _execute_loop(self) -> Dict[str, Any]:
-        """Execute one loop cycle (burst of ticks).
+        """Execute one loop cycle.
 
         Returns a result dict with keys: ticks, errors, cost, summary.
         """
-        if self._run_burst_fn is None:
-            # If no burst function provided, try importing
-            try:
-                from src.runner.burst import run_burst
-                self._run_burst_fn = run_burst
-            except ImportError:
-                return {
-                    "ticks": 0,
-                    "errors": 1,
-                    "cost": 0.0,
-                    "summary": "Failed to import run_burst",
-                }
+        if self._run_fn is None:
+            return {
+                "ticks": 0,
+                "errors": 1,
+                "cost": 0.0,
+                "summary": "No execution function configured",
+            }
 
         try:
-            outcomes = self._run_burst_fn(
+            outcomes = self._run_fn(
                 profile_name=self.config.profile,
-                burst_ticks=self.config.ticks_per_loop,
+                ticks_per_loop=self.config.ticks_per_loop,
                 max_steps_per_tick=self.config.max_steps_per_tick,
                 stimulus=self.config.stimulus,
             )
@@ -435,7 +430,7 @@ class TickScheduler:
 
             # Record cost to budget tracker
             if self.budget_tracker and total_cost > 0:
-                tier_name = "burst_loop"
+                tier_name = "loop_cycle"
                 self.budget_tracker.record_cost(total_cost, tier_name)
 
             summaries = [o.outcome_summary for o in outcomes if o.outcome_summary]
@@ -465,7 +460,7 @@ class TickScheduler:
         cls,
         config_dict: Dict[str, Any],
         budget_tracker: "Any" = None,
-        run_burst_fn: Optional[Callable] = None,
+        run_fn: Optional[Callable] = None,
     ) -> "TickScheduler":
         """Create from a config dict.
 
@@ -485,6 +480,6 @@ class TickScheduler:
         config = ScheduleConfig.from_dict(config_dict)
         return cls(
             config=config,
-            run_burst_fn=run_burst_fn,
+            run_fn=run_fn,
             budget_tracker=budget_tracker,
         )

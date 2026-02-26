@@ -27,7 +27,7 @@ python -m web.app --host 0.0.0.0
 |----------|------|
 | `base.html` | Shared layout (nav, sidebar, footer) |
 | `dashboard.html` | Home — agent overview and quick stats |
-| `chat.html` | Real-time chat with agents (interactive + burst mode) |
+| `chat.html` | Real-time chat with agents |
 | `vault.html` | Memory vault browser with stats, compaction, and management |
 | `inbox.html` | Creator inbox — agent-to-operator messages |
 | `narratives.html` | Narrative log viewer (per-agent) |
@@ -65,7 +65,7 @@ python -m web.app --host 0.0.0.0
 
 ### Chat API
 
-Send messages, run burst sessions, manage chat history with folders and titles.
+Send messages, manage chat history with folders and titles.
 
 ### TTS / STT APIs
 

@@ -389,7 +389,7 @@ class TestTickScheduler(unittest.TestCase):
             tools_used=[],
         )]
 
-        def mock_burst(profile_name, burst_ticks, max_steps_per_tick, stimulus):
+        def mock_run(profile_name, ticks_per_loop, max_steps_per_tick, stimulus):
             return mock_outcomes
 
         config = ScheduleConfig(
@@ -400,7 +400,7 @@ class TestTickScheduler(unittest.TestCase):
         )
         scheduler = TickScheduler(
             config=config,
-            run_burst_fn=mock_burst,
+            run_fn=mock_run,
             state_path=self.state_path,
         )
         scheduler.start()

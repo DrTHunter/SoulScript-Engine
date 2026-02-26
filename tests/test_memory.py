@@ -487,14 +487,14 @@ def test_token_overlap_dedup():
         v = MemoryVault(path, similarity_threshold=0.70, token_overlap_threshold=0.60)
 
         v.add_memory(
-            "Burst mode enforces 1 tool call per tick in the runtime",
+            "The runtime enforces 1 tool call per tick by default",
             "shared", "constraint"
         )
 
         # Same concept, different phrasing — token overlap should catch it
         try:
             v.add_memory(
-                "In burst mode only 1 tool call is allowed per tick",
+                "Only 1 tool call is allowed per tick in the runtime",
                 "shared", "constraint"
             )
             check("token-overlap duplicate blocked", False, "should have raised")
@@ -510,7 +510,7 @@ def test_token_overlap_dedup():
 
         # Same concept but in different scope — should pass
         id3 = v.add_memory(
-            "Burst mode enforces 1 tool call per tick in the runtime",
+            "The runtime enforces 1 tool call per tick by default",
             "orion", "constraint"
         )
         check("same text different scope allowed", id3 is not None)
@@ -651,7 +651,7 @@ def test_write_gate():
 
         # Should reject text with journal-only signal
         try:
-            vault.add_memory("tick marker for burst 5", "shared", "meta")
+            vault.add_memory("tick marker for loop 5", "shared", "meta")
             check("rejects tick marker", False, "should have raised")
         except ValueError as e:
             check("rejects tick marker", "journal-only signal" in str(e))
@@ -742,7 +742,7 @@ def test_update_by_topic():
         # First call creates new
         mem1 = vault.update_by_topic(
             "top_priorities", "shared",
-            "1) Memory upgrade  2) Stabilize burst mode",
+            "1) Memory upgrade  2) Stabilize the runtime",
             category="goal",
         )
         check("creates new register", mem1.version == 1)
@@ -752,7 +752,7 @@ def test_update_by_topic():
         # Second call updates existing
         mem2 = vault.update_by_topic(
             "top_priorities", "shared",
-            "1) Memory upgrade  2) Email integration  3) Stabilize burst",
+            "1) Memory upgrade  2) Email integration  3) Stabilize runtime",
         )
         check("updates same id", mem2.id == mem1.id)
         check("version bumped", mem2.version == 2)

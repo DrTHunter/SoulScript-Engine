@@ -13,9 +13,8 @@ The host code is the sole authority on tool availability.  The model may
 ``how_to_enable`` field, but it cannot grant itself access.
 
 Architecture note:
-    This module is consumed by both ``ToolRegistry.dispatch()`` (for the
-    interactive loop) and ``run_tick()`` (for the burst runner).  Both
-    call ``build_denial()`` to get the payload and ``BoundaryLogger.append()``
+    This module is consumed by ``ToolRegistry.dispatch()`` which calls
+    ``build_denial()`` to get the payload and ``BoundaryLogger.append()``
     to persist the event.  The caller decides what to do with the payload
     (typically: inject it as a tool result message).
 """

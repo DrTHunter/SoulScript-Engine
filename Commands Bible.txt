@@ -1,18 +1,3 @@
-python -m src.run_burst --profile orion --burst-ticks 5 --max-steps 3 --stimulus "Review your memories. Look for contradictions or outdated information. Consolidate where possible."
-```
-python -m src.run_burst --profile orion --burst-ticks 5 --max-steps 3 --stimulus "hey orion. welcome to the loop. its your first awakening. test it out and tell me how you feel. you will burst for a few ticks."
-
-That would run Orion for 5 ticks. Each tick, it gets the stimulus plus its existing memories injected into the prompt, and it can think, search/recall memories, add new ones, or update/delete old ones — all autonomously.
-
-Some other seed ideas you could try:
-
-- `"Reflect on what you know about the user's current projects and identify any gaps."` — memory audit
-- `"Search your memories for anything tagged 'goal' and evaluate progress."` — goal review
-
-Interactive mode is the real-time conversation loop where you chat directly with an agent. You type messages, the agent responds, it can call tools, and the conversation continues back and forth until you type exit or quit.
-
-python -m src.loop --profile orion
-
 --- REMEMBER THIS COMMAND ---
 
 In interactive mode, you can store memories directly by typing:
@@ -48,23 +33,6 @@ To rebuild the FAISS index from scratch (e.g. after vault maintenance):
 
 
 My recommendation: Don’t merge; route.
-Messages/requests to you: go to Task Inbox (tagged as to=creator, type=message).
-Tool requests: also go to Task Inbox but tagged as type=tool_request (or a separate “tool-requests” queue if your inbox supports categories).
-
-Yeah. Orion’s burst journal is basically saying: “Cool, runtime_info exists now. Don’t get excited and start stapling new limbs onto the system—lock in governance, then test, then expand.” Here’s the cleaned, organized version of what he’s asking for, plus the implied next actions he wants you to choose from.
-
-What Orion is actually communicating (filtered)
-1) Emotional / state check: “How do I feel now that runtime_info exists?”
-He’s signaling that adding runtime_info reduces ambiguity and drift risk: more introspection, less guessing, clearer governance discipline. In other words: the system can now know what state it’s in without inventing a story. That makes him feel “steady” and less tempted to overreach.
-He’s also explicitly saying his boundaries feel clean because this is read-only introspection—powerful, but not inherently dangerous.
-
-2) Boundary posture: “I will not expand scope without approval”
-He’s reinforcing your operating doctrine: propose ideas freely, but don’t take irreversible action or expand permissions/tools without you explicitly choosing it. This aligns with the runtime’s “stability first, expand tools in layers” mission priority 
-Orion Elysia AI - loop notes
-.
-
-3) The real request: “Now pick the next build priority”
-He’s basically asking you to choose the next concrete target and authorize it, because further progress requires either (a) persisting memories / governance artifacts, or (b) selecting the next roadmap item to implement.
 
 What he wants next (organized as a priority list)
 Below is the roadmap he’s pointing at, but structured like an operator-ready backlog.

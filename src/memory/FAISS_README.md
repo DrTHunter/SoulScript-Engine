@@ -188,7 +188,7 @@ sentence-transformers>=2.2.0
 
 1. **Add to runtime:** Integrate FAISS search into agent tools
 2. **Auto-sync:** Hook into vault writes to auto-update index
-3. **Expand sources:** Ingest burst journals, narratives, etc.
+3. **Expand sources:** Ingest narratives, journals, etc.
 4. **Cluster analysis:** Use FAISS for memory clustering/organization
 5. **Hybrid search:** Combine FAISS with keyword/metadata filters
 

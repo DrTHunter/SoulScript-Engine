@@ -4,7 +4,7 @@ Reads metering data from the observability layer and enforces:
   - Monthly hard cap (default $20)
   - Soft limit (default 80% of hard cap) — triggers warnings and tier demotion
   - Per-session caps
-  - Per-tick caps (for burst mode)
+  - Per-tick caps
 
 Persists budget state to data/shared/budget_state.json.
 """
@@ -90,7 +90,7 @@ class BudgetTracker:
     per_session_cap : float
         Maximum spending per interactive session.
     per_tick_cap : float
-        Maximum spending per burst tick.
+        Maximum spending per tick.
     state_path : str, optional
         Override path for budget state file.
     """

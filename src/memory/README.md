@@ -17,7 +17,7 @@ The Memory Vault — durable, scoped, append-only memory system with AGI-like se
 |------|---------|-----------|---------|
 | **CANON** | Durable invariants — mission, bio, identity, hard constraints | Rarely changes; always high-priority in injection | `"CANON: Mission — stabilize runtime, explore boundaries, add tools in layers"` |
 | **REGISTER** | Mutable state — one record per `topic_id`, version-bumped in place | Updated frequently via `update_by_topic()` | `topic_id="current_projects"` → auto-upserts each write |
-| **LOG** | Ephemeral — tick markers, runtime snapshots, check-ins | Write-gate **rejects** these; they belong in the burst journal only | `"tick marker for burst 5"` → blocked |
+| **LOG** | Ephemeral — tick markers, runtime snapshots, check-ins | Write-gate **rejects** these; they do not belong in the vault | `"tick marker"` → blocked |
 
 ## Storage
 
@@ -56,7 +56,7 @@ Each record has an `id` and `version` (starts at 1). On read, the vault scans al
 
 Every `add_memory()` / `bulk_add()` call passes through the write-gate before storage:
 
-1. **Reject LOG-tier noise** — scans text for journal-only signals (`tick marker`, `runtime snapshot`, `check-in`, `heartbeat`, `burst tick`, `no changes`, `nothing to report`, `status unchanged`, `routine scan`, `ephemeral`)
+1. **Reject LOG-tier noise** — scans text for journal-only signals (`tick marker`, `runtime snapshot`, `check-in`, `heartbeat`, `no changes`, `nothing to report`, `status unchanged`, `routine scan`, `ephemeral`)
 2. **Reject `tier="log"`** — explicit log tier is always blocked
 3. **Length gate** — text over 1200 chars is rejected (compress or split first)
 4. **Scope / tier / source validation**
@@ -132,7 +132,7 @@ Token overlap + substring bonus (+0.3) + SequenceMatcher ratio × 0.4. Requires 
 | Current projects, priorities, agent self-state | Vault **register** with `topic_id` | Mutable, auto-upserts, in snapshot |
 | Behavioral rules, identity modules | **Directives** (relevance-filtered) | Pulled on-demand |
 | Quick-reference context | **Notes** (always injected) | Small, manually curated |
-| Tick events, runtime snapshots, check-ins | **Burst journal** only | Write-gate blocks from vault |
+| Tick events, runtime snapshots, check-ins | **Journal** only | Write-gate blocks from vault |
 
 ## Key Config (in profile YAML)
 

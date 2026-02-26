@@ -280,7 +280,7 @@ The memory vault has a **hard capacity limit** (default 100 active memories) and
 
 1. **Check before writing.** Before adding a new memory, use `memory.search` to see if a similar entry already exists. Update the existing entry instead of creating a new one.
 2. **Prefer canonical entries.** Prefix important consolidated memories with `CANON:`. These should be the source of truth — avoid duplicating their content in separate entries.
-3. **Monitor utilization.** Use `memory.stats` periodically (at least once per 5 bursts) to check vault utilization. If above 75%, review and propose deletions before adding new entries.
+3. **Monitor utilization.** Use `memory.stats` periodically to check vault utilization. If above 75%, review and propose deletions before adding new entries.
 4. **Compact when prompted.** Use `memory.compact` after any batch of deletions/updates to reclaim space from old versions and tombstones.
 5. **One thought per memory.** Do not write long composite entries. Each memory should capture a single fact, rule, or decision. Merge related entries into one canonical memory instead of keeping several overlapping ones.
 
@@ -295,4 +295,4 @@ python scripts/vault_maintenance.py list         # list all active memories
 python scripts/vault_maintenance.py prune        # interactive review & delete
 ```
 
-No scheduled cadence required — run it whenever things feel messy or before a long burst session.
+No scheduled cadence required — run it whenever things feel messy or before a long session.
