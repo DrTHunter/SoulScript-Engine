@@ -1,0 +1,13 @@
+# Secrets & env files
+email_service/email.env
+email_service/.env
+*.env
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Docker volumes (if stored locally)
+searxng/data/
+openedai_speech/data/
+whisper_stt/data/

@@ -1,0 +1,12 @@
+# Agent Runtime – example configuration
+# Copy to config.yaml and edit as needed.
+
+default_profile: orion
+data_dir: ./data
+
+# Override per-profile policy globally (profiles still take precedence)
+policy:
+  max_iterations: 25
+  # max_wall_time_seconds: 120
+  stasis_mode: false
+  tool_failure_mode: continue

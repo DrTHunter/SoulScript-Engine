@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Edit — {{ note.title }} — SoulScript Engine{% endblock %}
+
+{% block content %}
+<style>
+  .editor-wrap {
+    max-width:56rem; margin:0 auto;
+  }
+  .title-row {
+    display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;
+  }
+  .emoji-btn {
+    font-size:1.75rem; background:none; border:1px solid transparent;
+    border-radius:0.5rem; cursor:pointer; padding:0.25rem 0.5rem;
+    transition:all 0.15s;
+  }
+  .emoji-btn:hover { border-color:#2a2a3a; background:rgba(26,26,36,0.6); }
+  .title-input {
+    flex:1; background:transparent; border:none; outline:none;
+    font-size:1.5rem; font-weight:700; color:#fff;
+    border-bottom:1px solid transparent; padding:0.25rem 0;
+  }
+  .title-input:focus { border-bottom-color:#6366f1; }
+  .section-input {
+    background:rgba(42,42,58,0.5); border:1px solid #2a2a3a;
+    border-radius:0.375rem; padding:0.375rem 0.75rem; font-size:0.8125rem;
+    color:#a1a1aa; outline:none; max-width:16rem;
+  }
+  .section-input:focus { border-color:#6366f1; color:#e4e4e7; }
+  .content-editor {
+    width:100%; min-height:24rem; background:rgba(15,15,20,0.6);
+    border:1px solid #2a2a3a; border-radius:0.75rem;
+    padding:1.25rem 1.5rem; color:#d4d4d8;
+    font-size:0.875rem; line-height:1.7; outline:none;
+    resize:vertical;
+  }
+  .content-editor:focus { border-color:#6366f1; }
+  .save-bar {
+    position:sticky; bottom:0; background:rgba(15,15,20,0.9);
+    border-top:1px solid #2a2a3a; padding:0.75rem 0;
+    display:flex; align-items:center; gap:1rem;
+    backdrop-filter:blur(8px);
+  }
+</style>
+
+<div class="editor-wrap">
+  <div class="mb-4">
+    <a href="/knowledge" class="filter-btn" style="cursor:pointer;">← Back to Knowledge</a>
+  </div>
+
+  <div class="title-row">
+    <button class="emoji-btn" id="emoji-btn" onclick="cycleEmoji()" title="Click to change emoji">{{ note.emoji or '📄' }}</button>
+    <input type="text" id="note-title" class="title-input" value="{{ note.title }}" placeholder="Untitled">
+  </div>
+
+  <div class="mb-4">
+    <label class="text-xs text-forge-muted mr-2">Section:</label>
+    <input type="text" id="note-section" class="section-input" value="{{ note.section or 'Uncategorized' }}" placeholder="e.g. Lore, Identity, Rules">
+  </div>
+
+  <div id="note-content" class="content-editor" contenteditable="true">{{ note.content_html | safe }}</div>
+
+  <div class="save-bar">
+    <button onclick="saveNote()" class="filter-btn active" style="cursor:pointer;">Save</button>
+    <span id="save-status" class="text-xs text-forge-success" style="display:none;">Saved ✓</span>
+    <span class="text-xs text-forge-muted ml-auto">Last updated: {{ note.updated or note.created or 'never' }}</span>
+  </div>
+</div>
+
+<script>
+const _noteId = '{{ note.id }}';
+const _emojis = ['📄','📝','🧠','⚡','🎯','💡','🔮','📜','🗡️','🛡️','🌟','🔥','💎','🎭','📖'];
+let _emojiIdx = _emojis.indexOf('{{ note.emoji or "📄" }}');
+
+function cycleEmoji() {
+  _emojiIdx = (_emojiIdx + 1) % _emojis.length;
+  document.getElementById('emoji-btn').textContent = _emojis[_emojiIdx];
+}
+
+async function saveNote() {
+  const contentEl = document.getElementById('note-content');
+  const resp = await fetch('/api/knowledge/' + _noteId, {
+    method:'PUT', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      title: document.getElementById('note-title').value,
+      emoji: document.getElementById('emoji-btn').textContent.trim(),
+      content_html: contentEl.innerHTML,
+      preview: contentEl.textContent.substring(0, 200),
+      section: document.getElementById('note-section').value,
+    }),
+  });
+  if (resp.ok) {
+    const status = document.getElementById('save-status');
+    status.style.display = '';
+    setTimeout(() => status.style.display = 'none', 2000);
+  }
+}
+
+// Auto-save on Ctrl+S
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveNote();
+  }
+});
+</script>
+{% endblock %}

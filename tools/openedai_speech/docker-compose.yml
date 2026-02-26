@@ -1,0 +1,21 @@
+name: openedai-speech
+
+services:
+  openedai-speech:
+    image: ghcr.io/matatonic/openedai-speech:latest
+    container_name: openedai-speech
+    restart: unless-stopped
+    ports:
+      - "5050:8000"
+    volumes:
+      - speech_data:/app/voices
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+volumes:
+  speech_data:

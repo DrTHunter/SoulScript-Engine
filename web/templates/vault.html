@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Memory Vault — SoulScript Engine{% endblock %}
+
+{% block content %}
+<style>
+  .action-btn {
+    padding:0.25rem 0.75rem; font-size:0.75rem; border-radius:0.375rem;
+    border:1px solid rgba(63,63,70,0.5); background:rgba(24,24,27,0.6);
+    color:#d4d4d8; cursor:pointer; transition:all 0.15s;
+  }
+  .action-btn:hover { background:rgba(63,63,70,0.5); color:#fff; }
+  .action-btn.danger { border-color:rgba(239,68,68,0.3); color:#fca5a5; }
+  .action-btn.danger:hover { background:rgba(239,68,68,0.2); color:#fff; }
+  .action-btn.compact { border-color:rgba(234,179,8,0.3); color:#fcd34d; }
+  .action-btn.compact:hover { background:rgba(234,179,8,0.15); }
+  .action-btn.success { border-color:rgba(16,185,129,0.3); color:#6ee7b7; }
+  .action-btn.success:hover { background:rgba(16,185,129,0.15); }
+  .item-check { width:1rem; height:1rem; accent-color:#818cf8; cursor:pointer; flex-shrink:0; }
+  .sel-count { font-size:0.75rem; color:#818cf8; font-weight:600; min-width:5rem; }
+  .memory-entry.selected { border-color:rgba(129,140,248,0.4)!important; background:rgba(129,140,248,0.05)!important; }
+  .max-active-input {
+    width:4.5rem; padding:0.125rem 0.375rem; font-size:0.8125rem;
+    background:rgba(24,24,27,0.8); border:1px solid rgba(63,63,70,0.5);
+    border-radius:0.25rem; color:#fff; text-align:center;
+  }
+  .toast {
+    position:fixed; bottom:2rem; right:2rem; padding:0.75rem 1.25rem;
+    background:rgba(16,185,129,0.9); color:#fff; border-radius:0.5rem;
+    font-size:0.8125rem; z-index:999; animation:fadeInOut 3s ease-in-out forwards;
+  }
+  .toast.error { background:rgba(239,68,68,0.9); }
+  @keyframes fadeInOut { 0%{opacity:0;transform:translateY(10px)} 10%{opacity:1;transform:translateY(0)} 85%{opacity:1} 100%{opacity:0} }
+  .manage-toggle {
+    background:none; border:1px solid transparent; border-radius:0.375rem;
+    color:#71717a; cursor:pointer; padding:0.25rem 0.5rem; font-size:0.875rem;
+    transition:all 0.15s;
+  }
+  .manage-toggle:hover { color:#a1a1aa; background:rgba(63,63,70,0.3); }
+  .manage-toggle.active { color:#fca5a5; border-color:rgba(239,68,68,0.3); background:rgba(239,68,68,0.1); }
+</style>
+
+<div>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-white">Memory Vault</h1>
+    <p class="text-sm text-forge-muted mt-1">Browse, search, and manage persistent agent memories (FAISS-indexed)</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="card mb-6">
+    <div class="flex flex-wrap items-center gap-6">
+      <div>
+        <span class="text-xs text-forge-muted uppercase tracking-wider">Active</span>
+        <p class="text-xl font-bold text-white">{{ stats.active_count }}<span class="text-sm text-forge-muted font-normal"> / {{ stats.max_active }}</span></p>
+      </div>
+      <div class="w-48">
+        <span class="text-xs text-forge-muted uppercase tracking-wider">Utilization</span>
+        <div class="stat-bar mt-1.5">
+          <div class="stat-bar-fill {% if stats.utilization_pct|default(0) < 60 %}bg-forge-success{% elif stats.utilization_pct|default(0) < 85 %}bg-forge-warn{% else %}bg-forge-danger{% endif %}"
+               style="width:{{ stats.utilization_pct|default(0) }}%"></div>
+        </div>
+        <p class="text-xs text-forge-muted mt-0.5">{{ stats.utilization_pct|default(0) }}%</p>
+      </div>
+      {% for scope, count in (stats.by_scope or {}).items()|sort %}
+      <div>
+        <span class="badge badge-scope">{{ scope }}</span>
+        <span class="text-sm text-white ml-1">{{ count }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Search + Filters -->
+  <div class="flex flex-wrap items-center gap-3 mb-4">
+    <form method="get" action="/vault" class="flex gap-2 flex-1 min-w-[200px] max-w-md">
+      <input type="text" name="q" value="{{ search_query }}" placeholder="Search memories…" class="search-input flex-1">
+      {% if current_scope %}<input type="hidden" name="scope" value="{{ current_scope }}">{% endif %}
+      <button type="submit" class="filter-btn">Search</button>
+    </form>
+    <div class="flex gap-1.5">
+      <a href="/vault" class="filter-btn {% if not current_scope %}active{% endif %}">All</a>
+      {% for scope in scopes %}
+      <a href="/vault?scope={{ scope }}{% if search_query %}&q={{ search_query }}{% endif %}"
+         class="filter-btn {% if current_scope == scope %}active{% endif %}">{{ scope }}</a>
+      {% endfor %}
+    </div>
+    {% if search_query or current_scope or current_category %}
+    <a href="/vault" class="text-xs text-forge-accent hover:text-forge-accent2">Clear filters</a>
+    {% endif %}
+  </div>
+
+  <!-- Action Bar -->
+  <div class="flex items-center gap-2 mb-4">
+    <span class="text-xs text-forge-muted">{{ memories|length }} memor{{ "y" if memories|length == 1 else "ies" }}{% if search_query %} matching "{{ search_query }}"{% endif %}</span>
+    <button onclick="toggleManage()" class="manage-toggle" id="manage-toggle" title="Manage memories">🗑</button>
+    <span class="sel-count manage-ctrl" id="sel-count" style="display:none;"></span>
+    <button onclick="deleteSelected()" id="btn-delete-sel" class="action-btn danger manage-ctrl" style="display:none;">Delete Selected</button>
+  </div>
+
+  <!-- Memory List -->
+  <div class="space-y-3" id="memory-list">
+    {% for m in memories %}
+    {% set mem = m if m is mapping else m.__dict__ if m.__dict__ is defined else {} %}
+    <div class="memory-entry" data-id="{{ mem.id or m.id }}" id="mem-{{ mem.id or m.id }}">
+      <div class="flex items-start gap-3">
+        <input type="checkbox" class="item-check mem-check manage-ctrl" data-id="{{ mem.id or m.id }}" onchange="updateSelCount()" style="display:none;">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span class="badge badge-scope">{{ mem.scope or m.scope or '' }}</span>
+            <span class="badge badge-category">{{ mem.category or m.category or '' }}</span>
+            <button onclick="deleteSingle('{{ mem.id or m.id }}')" class="action-btn danger manage-ctrl" style="display:none;padding:0.125rem 0.5rem;">✕</button>
+          </div>
+          <p class="text-sm text-zinc-300 leading-relaxed">{{ mem.text or m.text or '' }}</p>
+          <div class="flex items-center gap-2 mt-2 flex-wrap">
+            {% for tag in (mem.tags or m.tags or []) %}<span class="tag">{{ tag }}</span>{% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% if not memories %}
+    <div class="card text-center py-12">
+      <p class="text-forge-muted">No memories found{% if search_query %} for "{{ search_query }}"{% endif %}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function toast(msg, isError) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (isError ? ' error' : '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+let _manageMode = false;
+function toggleManage() {
+  _manageMode = !_manageMode;
+  document.getElementById('manage-toggle').classList.toggle('active', _manageMode);
+  document.querySelectorAll('.manage-ctrl').forEach(el => {
+    el.style.display = _manageMode ? '' : 'none';
+  });
+  if (!_manageMode) document.querySelectorAll('.mem-check').forEach(c => c.checked = false);
+  updateSelCount();
+}
+
+function updateSelCount() {
+  const ids = [...document.querySelectorAll('.mem-check:checked')].map(c => c.dataset.id);
+  document.getElementById('sel-count').textContent = ids.length ? ids.length + ' selected' : '';
+  document.getElementById('btn-delete-sel').style.display = (ids.length && _manageMode) ? '' : 'none';
+}
+
+async function deleteSingle(id) {
+  if (!confirm('Delete this memory?')) return;
+  const r = await fetch('/api/vault/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids:[id]})});
+  const d = await r.json();
+  if (d.deleted?.length) { document.getElementById('mem-'+id)?.remove(); toast('Deleted 1 memory'); }
+  else toast('Delete failed', true);
+}
+
+async function deleteSelected() {
+  const ids = [...document.querySelectorAll('.mem-check:checked')].map(c => c.dataset.id);
+  if (!ids.length) return;
+  if (!confirm('Delete ' + ids.length + ' selected memories?')) return;
+  const r = await fetch('/api/vault/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids})});
+  const d = await r.json();
+  if (d.deleted) { d.deleted.forEach(id => document.getElementById('mem-'+id)?.remove()); toast('Deleted ' + d.deleted.length); updateSelCount(); }
+}
+
+async function compactVault() {
+  const r = await fetch('/api/vault/compact');
+  const d = await r.json();
+  toast('Compacted: ' + (d.before_lines||'?') + ' → ' + (d.after_lines||'?') + ' lines');
+  setTimeout(() => location.reload(), 1500);
+}
+</script>
+{% endblock %}

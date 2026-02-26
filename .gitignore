@@ -1,0 +1,38 @@
+# ── Python ──────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ── Backup / temp files ────────────────────────
+*.bak
+*.old
+*.swp
+*.swo
+*~
+
+# ── FAISS binary indexes (rebuilt at runtime) ───
+data/memory/faiss/*.faiss
+data/memory/faiss/*.pkl
+data/memory/faiss/*.json
+
+# ── Secrets / local config ─────────────────────
+.env
+*.env
+config/connections.json
+
+# ── OS junk ────────────────────────────────────
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ── IDE ────────────────────────────────────────
+.vscode/
+.idea/
+*.code-workspace
+
+# ── Uploads (user-specific) ────────────────────
+data/uploads/

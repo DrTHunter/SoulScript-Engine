@@ -1,0 +1,327 @@
+/* ═══════════════ SoulScript Engine — Clean MVP Styles ═══════════════ */
+
+/* ── Sidebar Navigation ── */
+
+.main-nav {
+  width: 14rem;
+  min-height: 100vh;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  background: #12121a;
+  border-right: 1px solid #2a2a3a;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.75rem;
+  z-index: 40;
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+.main-nav.collapsed { width: 3.5rem; padding: 1rem 0.5rem; }
+
+.main-content {
+  margin-left: 14rem;
+  width: calc(100% - 14rem);
+  padding: 1rem 1.5rem;
+  transition: margin-left 0.25s ease, width 0.25s ease;
+  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.main-content.nav-collapsed {
+  margin-left: 3.5rem;
+  width: calc(100% - 3.5rem);
+}
+
+/* Logo */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding: 0 0.25rem;
+  min-height: 2.75rem;
+}
+
+.nav-logo-full {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.nav-logo-diamond {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.nav-logo-text {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #e4e4e7;
+  letter-spacing: 0.02em;
+}
+
+.nav-logo-sub {
+  font-size: 0.625rem;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.nav-toggle-btn {
+  background: none;
+  border: none;
+  color: #52525b;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.nav-toggle-btn:hover { color: #a1a1aa; }
+
+.collapsed .nav-logo-full > div { display: none; }
+.collapsed .nav-label { display: none; }
+.collapsed .nav-divider { display: none; }
+.collapsed .nav-footer { display: none; }
+.collapsed .nav-toggle-btn { margin-left: -0.15rem; }
+
+/* Nav Links */
+.nav-links-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: #a1a1aa;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.nav-link:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: #e4e4e7;
+}
+
+.nav-link.active {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.nav-icon {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  flex-shrink: 0;
+  width: 1rem;
+  text-align: center;
+}
+
+.nav-label { white-space: nowrap; }
+
+.nav-footer {
+  padding: 0.75rem 0.25rem 0;
+  border-top: 1px solid #2a2a3a;
+  margin-top: 0.5rem;
+}
+
+/* ── Card ── */
+
+.card {
+  background: #1a1a24;
+  border: 1px solid #2a2a3a;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+.card-header {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #71717a;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Badge ── */
+
+.badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-scope {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+}
+
+.badge-category {
+  background: rgba(34, 211, 238, 0.12);
+  color: #22d3ee;
+}
+
+.badge-type {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+/* ── Filter Button ── */
+
+.filter-btn {
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  background: rgba(42, 42, 58, 0.5);
+  color: #a1a1aa;
+  border: 1px solid #2a2a3a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.filter-btn:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: #e4e4e7;
+}
+
+.filter-btn.active {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+/* ── Search Input ── */
+
+.search-input {
+  background: rgba(42, 42, 58, 0.5);
+  border: 1px solid #2a2a3a;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #e4e4e7;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.search-input:focus { border-color: #6366f1; }
+.search-input::placeholder { color: #52525b; }
+
+/* ── Stats Bar ── */
+
+.stat-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #27272a;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* ── Tag ── */
+
+.tag {
+  display: inline-block;
+  padding: 0.0625rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.6875rem;
+  background: rgba(113, 113, 122, 0.15);
+  color: #a1a1aa;
+}
+
+/* ── Memory Entry ── */
+
+.memory-entry {
+  border-left: 3px solid transparent;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(26, 26, 36, 0.5);
+  transition: all 0.15s ease;
+}
+
+.memory-entry:hover {
+  background: rgba(26, 26, 36, 0.8);
+  border-left-color: #6366f1;
+}
+
+/* ── Chat Message Bubbles ── */
+
+.msg-bubble {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  max-width: 85%;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.msg-user {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  margin-left: auto;
+}
+
+.msg-assistant {
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid rgba(34, 211, 238, 0.15);
+  color: #a5f3fc;
+}
+
+/* ── Scrollbar ── */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a2a3a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a4a; }
+
+* { scrollbar-width: thin; scrollbar-color: #2a2a3a transparent; }
+
+/* ── Pulse Animation ── */
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ── Select Styling ── */
+
+select.search-input {
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  padding-right: 1.75rem;
+}
+
+select.search-input option {
+  background: #1a1a24;
+  color: #e4e4e7;
+}

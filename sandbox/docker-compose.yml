@@ -1,0 +1,70 @@
+# =============================================================
+#  Orion Sandbox — Docker Compose
+#
+#  Usage:
+#    cd agent-runtime
+#    docker-compose -f sandbox/docker-compose.yml up -d
+#    docker-compose -f sandbox/docker-compose.yml down
+#    docker-compose -f sandbox/docker-compose.yml logs -f
+#
+#  The workspace folder persists on your host at:
+#    C:\orion-workspace  (or $ORION_WORKSPACE_PATH)
+# =============================================================
+name: orion-docker-sandbox
+
+services:
+  orion-sandbox:
+    image: orion-docker-sandbox:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orion-sandbox
+    hostname: orion-sandbox
+
+    # Mount the persistent workspace from the host
+    volumes:
+      - ${ORION_WORKSPACE_PATH:-C:/orion-workspace}:/workspace
+
+    # Port mappings — access Orion's apps from your browser
+    ports:
+      - "9090:9090"   # Primary app (Flask/FastAPI)
+      - "9091:9091"   # Secondary app
+      - "8888:8888"   # Jupyter notebook
+      - "3100:3000"   # Node.js / React dev server (host:3100 -> container:3000)
+      - "3001:3001"   # Extra dev server
+
+    # Resource limits — prevent runaway processes
+    deploy:
+      resources:
+        limits:
+          cpus: "4.0"
+          memory: 4G
+        reservations:
+          cpus: "1.0"
+          memory: 512M
+
+    # Safety: drop all capabilities, re-add only what's needed
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+
+    # No access to host devices, no privilege escalation
+    security_opt:
+      - no-new-privileges:true
+
+    # Network: can reach the internet (for pip install, git clone)
+    # but cannot access the host's other services by default
+    # To fully isolate from internet, uncomment the network_mode line:
+    # network_mode: none
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Keep the container running
+    tty: true
+    stdin_open: true

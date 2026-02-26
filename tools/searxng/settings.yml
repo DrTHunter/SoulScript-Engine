@@ -1,0 +1,34 @@
+use_default_settings: true
+
+search:
+  formats:
+    - html
+    - json
+  safe_search: 0
+  default_lang: "en"
+
+server:
+  secret_key: "change-me-to-something-random"
+  limiter: false
+  image_proxy: true
+
+engines:
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: false
+
+  - name: bing
+    engine: bing
+    shortcut: bi
+    disabled: false
+
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+    disabled: false

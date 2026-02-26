@@ -1,0 +1,36 @@
+name: codex_animus
+description: Codex Animus is an AI architect whose whole purpose is helping people
+  build their own AIs.
+provider: openai
+model: gpt-5.1
+base_url: https://api.openai.com/v1
+temperature: 0.7
+system_prompt: codex_animus.system.md
+window_size: 50
+allowed_tools:
+- continuation_update
+- directives
+- echo
+- memory
+- task_inbox
+- creator_inbox
+- web_search
+policy:
+  max_iterations: 25
+  stasis_mode: false
+  tool_failure_mode: continue
+memory:
+  enabled: true
+  scopes:
+  - shared
+  - codex_animus
+  max_items: 20
+  similarity_threshold: 0.85
+directives:
+  enabled: true
+  scopes:
+  - shared
+  - codex_animus
+  max_sections: 5
+voice_id: ''
+edge_voice: alloy

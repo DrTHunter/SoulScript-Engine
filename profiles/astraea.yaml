@@ -1,0 +1,35 @@
+allowed_tools:
+- continuation_update
+- directives
+- echo
+- memory
+- task_inbox
+- creator_inbox
+- web_search
+base_url: https://api.openai.com/v1
+description: ''
+directives:
+  enabled: true
+  max_sections: 5
+  scopes:
+  - shared
+  - astraea
+edge_voice: alloy
+memory:
+  enabled: true
+  max_items: 20
+  scopes:
+  - shared
+  - astraea
+  similarity_threshold: 0.85
+model: gpt-5.1
+name: astraea
+policy:
+  max_iterations: 25
+  stasis_mode: false
+  tool_failure_mode: continue
+provider: openai
+system_prompt: astraea.system.md
+temperature: 0.7
+voice_id: ''
+window_size: 50

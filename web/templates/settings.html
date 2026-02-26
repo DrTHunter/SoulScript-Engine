@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Settings — SoulScript Engine{% endblock %}
+
+{% block content %}
+<div>
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-white">Settings</h1>
+    <p class="text-sm text-forge-muted mt-1">Manage API connections and runtime configuration</p>
+  </div>
+
+  <!-- Connections -->
+  <div class="card mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <span class="card-header mb-0">API Connections</span>
+        <p class="text-xs text-forge-muted mt-1">Manage OpenAI-compatible and Ollama API connections</p>
+      </div>
+      <button onclick="openModal()" class="filter-btn active" style="cursor:pointer;">+ Add Connection</button>
+    </div>
+
+    <div class="space-y-3" id="connections-list">
+      {% for conn in connections %}
+      <div class="p-4 rounded-lg border border-forge-border bg-forge-bg flex items-center justify-between" id="conn-{{ conn.id }}">
+        <div class="flex items-center gap-3 flex-1">
+          <button onclick="toggleConn('{{ conn.id }}', {{ 'false' if conn.enabled else 'true' }})"
+                  class="w-10 h-5 rounded-full relative transition-colors {{ 'bg-forge-success' if conn.enabled else 'bg-zinc-600' }}"
+                  style="cursor:pointer;">
+            <span class="absolute top-0.5 {{ 'right-0.5' if conn.enabled else 'left-0.5' }} w-4 h-4 bg-white rounded-full transition-all shadow"></span>
+          </button>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-white">{{ conn.name }}</span>
+              <span class="badge {{ 'badge-scope' if conn.type == 'external' else 'badge-category' }}">{{ conn.type }}</span>
+              <span class="badge badge-type">{{ conn.provider }}</span>
+            </div>
+            <p class="text-xs text-forge-muted mt-0.5">{{ conn.url }}</p>
+            {% if conn.models %}
+            <p class="text-xs text-zinc-500 mt-0.5">Models: {{ conn.models | join(', ') }}</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="fetchModels('{{ conn.id }}')" class="text-xs text-forge-highlight hover:text-white" style="cursor:pointer;" title="Fetch models">↓</button>
+          <button onclick="editConn('{{ conn.id }}')" class="text-xs text-forge-accent hover:text-white" style="cursor:pointer;">⚙</button>
+          <button onclick="deleteConn('{{ conn.id }}')" class="text-xs text-forge-danger hover:text-white" style="cursor:pointer;">✕</button>
+        </div>
+      </div>
+      {% endfor %}
+      {% if not connections %}
+      <div class="p-6 text-center text-forge-muted text-sm">
+        No connections configured. Add one to start chatting.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Connection Modal -->
+<div id="conn-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center hidden">
+  <div class="bg-forge-card border border-forge-border rounded-xl p-6 w-full max-w-md shadow-2xl">
+    <div class="flex items-center justify-between mb-5">
+      <h2 id="modal-title" class="text-lg font-bold text-white">Add Connection</h2>
+      <button onclick="closeModal()" class="text-forge-muted hover:text-white text-xl" style="cursor:pointer;">✕</button>
+    </div>
+    <form id="conn-form" onsubmit="saveConn(event)">
+      <input type="hidden" id="conn-edit-id" value="">
+      <div class="mb-4">
+        <label class="block text-xs text-forge-muted mb-1">Connection Type</label>
+        <div class="flex gap-2">
+          <button type="button" onclick="setType('external')" id="btn-external" class="filter-btn active flex-1 text-center">External</button>
+          <button type="button" onclick="setType('local')" id="btn-local" class="filter-btn flex-1 text-center">Local</button>
+        </div>
+        <input type="hidden" id="conn-type" value="external">
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs text-forge-muted mb-1">Name</label>
+        <input id="conn-name" class="search-input w-full" placeholder="e.g. OpenAI, DeepSeek" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs text-forge-muted mb-1">Provider</label>
+        <select id="conn-provider" class="search-input w-full">
+          <option value="openai">OpenAI Compatible</option>
+          <option value="ollama">Ollama</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs text-forge-muted mb-1">URL</label>
+        <input id="conn-url" class="search-input w-full" placeholder="https://api.openai.com/v1" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs text-forge-muted mb-1">API Key <span class="text-zinc-600">(optional for local)</span></label>
+        <input id="conn-apikey" type="password" class="search-input w-full" placeholder="sk-...">
+      </div>
+      <div class="mb-4">
+        <label class="block text-xs text-forge-muted mb-1">Model IDs <span class="text-zinc-600">(comma-separated or fetch)</span></label>
+        <input id="conn-models" class="search-input w-full" placeholder="gpt-4o, gpt-4o-mini">
+      </div>
+      <div class="flex gap-3 mt-6">
+        <button type="button" id="btn-delete" onclick="deleteFromModal()" class="filter-btn text-forge-danger hover:bg-red-900/30 hidden" style="cursor:pointer;">Delete</button>
+        <div class="flex-1"></div>
+        <button type="button" onclick="closeModal()" class="filter-btn" style="cursor:pointer;">Cancel</button>
+        <button type="submit" class="filter-btn active" style="cursor:pointer;">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+let _conns = {{ connections | tojson }};
+
+function openModal(editId) {
+  document.getElementById('conn-modal').classList.remove('hidden');
+  document.getElementById('conn-edit-id').value = '';
+  document.getElementById('modal-title').textContent = 'Add Connection';
+  document.getElementById('btn-delete').classList.add('hidden');
+  document.getElementById('conn-form').reset();
+  setType('external');
+}
+
+function closeModal() {
+  document.getElementById('conn-modal').classList.add('hidden');
+}
+
+function setType(type) {
+  document.getElementById('conn-type').value = type;
+  document.getElementById('btn-external').className = 'filter-btn flex-1 text-center' + (type === 'external' ? ' active' : '');
+  document.getElementById('btn-local').className = 'filter-btn flex-1 text-center' + (type === 'local' ? ' active' : '');
+  if (type === 'local') {
+    document.getElementById('conn-provider').value = 'ollama';
+    document.getElementById('conn-url').placeholder = 'http://localhost:11434';
+  } else {
+    document.getElementById('conn-url').placeholder = 'https://api.openai.com/v1';
+  }
+}
+
+function editConn(id) {
+  const c = _conns.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('conn-modal').classList.remove('hidden');
+  document.getElementById('conn-edit-id').value = c.id;
+  document.getElementById('modal-title').textContent = 'Edit Connection';
+  document.getElementById('btn-delete').classList.remove('hidden');
+  document.getElementById('conn-name').value = c.name || '';
+  document.getElementById('conn-provider').value = c.provider || 'openai';
+  document.getElementById('conn-url').value = c.url || '';
+  document.getElementById('conn-apikey').value = c.api_key || '';
+  document.getElementById('conn-models').value = (c.models || []).join(', ');
+  setType(c.type || 'external');
+}
+
+async function saveConn(e) {
+  e.preventDefault();
+  const editId = document.getElementById('conn-edit-id').value;
+  const payload = {
+    name: document.getElementById('conn-name').value,
+    type: document.getElementById('conn-type').value,
+    provider: document.getElementById('conn-provider').value,
+    url: document.getElementById('conn-url').value,
+    api_key: document.getElementById('conn-apikey').value,
+    models: document.getElementById('conn-models').value.split(',').map(s => s.trim()).filter(Boolean),
+    enabled: true,
+  };
+  const url = editId ? `/api/connections/${editId}` : '/api/connections';
+  await fetch(url, {method: editId ? 'PUT' : 'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  location.reload();
+}
+
+async function deleteConn(id) {
+  if (!confirm('Delete this connection?')) return;
+  await fetch(`/api/connections/${id}`, {method:'DELETE'});
+  location.reload();
+}
+
+function deleteFromModal() {
+  const id = document.getElementById('conn-edit-id').value;
+  if (id) deleteConn(id);
+}
+
+async function toggleConn(id, enabled) {
+  const c = _conns.find(x => x.id === id);
+  if (!c) return;
+  c.enabled = enabled;
+  await fetch(`/api/connections/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(c)});
+  location.reload();
+}
+
+async function fetchModels(id) {
+  try {
+    const resp = await fetch(`/api/connections/${id}/models`);
+    const data = await resp.json();
+    if (data.error) alert('Error: ' + data.error);
+    else { alert('Found models: ' + data.models.join(', ')); location.reload(); }
+  } catch(e) { alert('Failed: ' + e); }
+}
+</script>
+{% endblock %}

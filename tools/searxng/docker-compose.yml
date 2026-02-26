@@ -1,0 +1,18 @@
+name: searxng-ai-web-search
+
+services:
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:3000/
+    volumes:
+      - ./settings.yml:/etc/searxng/settings.yml:ro
+      - ./limiter.toml:/etc/searxng/limiter.toml:ro
+      - searxng_data:/etc/searxng
+
+volumes:
+  searxng_data:

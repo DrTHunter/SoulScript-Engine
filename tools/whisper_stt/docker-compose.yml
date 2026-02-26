@@ -1,0 +1,22 @@
+name: whisper-stt
+
+services:
+  whisper-stt:
+    image: fedirz/faster-whisper-server:latest-cpu
+    container_name: whisper-stt
+    restart: unless-stopped
+    ports:
+      - "8060:8000"
+    environment:
+      - WHISPER__MODEL=base
+    # --- GPU variant (uncomment and replace image above) ---
+    # image: fedirz/faster-whisper-server:latest-cuda
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # environment:
+    #   - WHISPER__MODEL=large-v3

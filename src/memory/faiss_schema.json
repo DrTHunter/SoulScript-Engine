@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FAISS Memory Entry",
+  "description": "Schema for memory entries stored in the FAISS vector database",
+  "type": "object",
+  "required": ["id", "text", "source", "created_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this memory (UUID or hash)"
+    },
+    "text": {
+      "type": "string",
+      "description": "The actual memory content - stored verbatim, never summarized or paraphrased"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["vault", "user_notes", "manual", "import"],
+      "description": "Origin of this memory"
+    },
+    "source_file": {
+      "type": "string",
+      "description": "Original file path or identifier"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when memory was created"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp when memory was last updated"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata from source (tier, scope, category, tags, etc.)",
+      "properties": {
+        "tier": {
+          "type": "string",
+          "description": "Memory tier (canon, register, etc.)"
+        },
+        "scope": {
+          "type": "string",
+          "description": "Memory scope (shared, orion, elysia, etc.)"
+        },
+        "category": {
+          "type": "string",
+          "description": "Memory category (bio, mission, constraint, etc.)"
+        },
+        "tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Tags for filtering and organization"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title from user notes"
+        },
+        "emoji": {
+          "type": "string",
+          "description": "Emoji from user notes"
+        },
+        "section": {
+          "type": "string",
+          "description": "Section from user notes"
+        }
+      }
+    },
+    "embedding_model": {
+      "type": "string",
+      "description": "Name of the embedding model used"
+    },
+    "char_count": {
+      "type": "integer",
+      "description": "Character count of the text"
+    },
+    "vector_id": {
+      "type": "integer",
+      "description": "Integer ID in the FAISS index"
+    }
+  }
+}
