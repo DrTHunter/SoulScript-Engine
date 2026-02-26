@@ -1,4 +1,4 @@
-"""Tests for governance modules: ActiveDirectives, ChangeLog, validate_manifest.
+"""Tests for governance modules: ActiveDirectives, validate_manifest.
 
 Run from project root:
     python -m tests.test_governance
@@ -14,13 +14,6 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.governance.active_directives import ActiveDirectives, _ActiveEntry
-from src.governance.change_log import (
-    build_governance_snapshot,
-    build_change_record,
-    _diff_summary,
-    ChangeLog,
-    _VALID_CHANGE_TYPES,
-)
 from src.directives.manifest import (
     validate_manifest,
     generate_manifest,
@@ -234,184 +227,6 @@ def test_active_entry_slots():
 
 
 # ==================================================================
-# ChangeLog tests
-# ==================================================================
-
-def test_build_governance_snapshot():
-    print("\n=== build_governance_snapshot ===")
-    profile = {
-        "model": "gpt-5.2",
-        "provider": "openai",
-        "base_url": "https://api.openai.com/v1",
-        "allowed_tools": ["memory.recall", "memory.add"],
-        "memory": {"enabled": True, "scopes": ["shared", "orion"]},
-    }
-    snap = build_governance_snapshot(profile)
-    check("model set", snap["model"] == "gpt-5.2")
-    check("provider set", snap["provider"] == "openai")
-    check("base_url redacted", snap["base_url_host"] == "api.openai.com")
-    check("no raw url", "https://" not in json.dumps(snap))
-    check("allowed_tools list", snap["allowed_tools"] == ["memory.recall", "memory.add"])
-    check("memory present", "memory" in snap)
-    check("active_directives default", snap["active_directives"]["count"] == 0)
-
-
-def test_build_governance_snapshot_with_policy():
-    print("\n=== build_governance_snapshot: with policy ===")
-    from src.runtime_policy import RuntimePolicy
-    profile = {"model": "m", "provider": "p", "base_url": "http://localhost:11434"}
-    policy = RuntimePolicy(max_iterations=10, stasis_mode=True)
-    snap = build_governance_snapshot(profile, policy=policy)
-    check("policy max_iterations", snap["policy"]["max_iterations"] == 10)
-    check("policy stasis_mode", snap["policy"]["stasis_mode"] is True)
-    check("localhost redacted", snap["base_url_host"] == "localhost")
-
-
-def test_build_governance_snapshot_with_active_directives():
-    print("\n=== build_governance_snapshot: with active_directives ===")
-    profile = {"model": "m", "provider": "p"}
-    ad_summary = {"count": 3, "ids": ["a", "b", "c"], "scopes": ["shared"]}
-    snap = build_governance_snapshot(profile, active_directives_summary=ad_summary)
-    check("active_directives passed", snap["active_directives"]["count"] == 3)
-    check("ids passed through", snap["active_directives"]["ids"] == ["a", "b", "c"])
-
-
-def test_diff_summary():
-    print("\n=== _diff_summary ===")
-    before = {"model": "gpt-4", "tools": ["a", "b"]}
-    after = {"model": "gpt-5", "tools": ["a", "b"]}
-    diffs = _diff_summary(before, after)
-    check("1 diff", len(diffs) == 1)
-    check("model field changed", "model" in diffs[0])
-    check("arrow in diff", "→" in diffs[0])
-
-    # no changes
-    same = _diff_summary({"a": 1}, {"a": 1})
-    check("no diffs when equal", len(same) == 0)
-
-    # new key
-    added = _diff_summary({}, {"new_key": "val"})
-    check("added key shows up", len(added) == 1)
-    check("new_key in diff", "new_key" in added[0])
-
-
-def test_build_change_record():
-    print("\n=== build_change_record ===")
-    before = {"model": "gpt-4", "tools": ["a"]}
-    after = {"model": "gpt-5", "tools": ["a", "b"]}
-    rec = build_change_record(
-        change_type="config",
-        scope="shared",
-        requestor="creator",
-        rationale="Model upgrade",
-        before_snapshot=before,
-        after_snapshot=after,
-        approver="creator",
-        needs_approval=True,
-    )
-    check("has change_id", "change_id" in rec)
-    check("has timestamp_utc", "timestamp_utc" in rec)
-    check("change_type=config", rec["change_type"] == "config")
-    check("scope=shared", rec["scope"] == "shared")
-    check("requestor=creator", rec["requestor"] == "creator")
-    check("approver=creator", rec["approver"] == "creator")
-    check("needs_approval=True", rec["needs_approval"] is True)
-    check("rationale set", rec["rationale"] == "Model upgrade")
-    check("before_snapshot present", rec["before_snapshot"] == before)
-    check("after_snapshot present", rec["after_snapshot"] == after)
-    check("diff_summary is list", isinstance(rec["diff_summary"], list))
-    check("diff_summary non-empty", len(rec["diff_summary"]) > 0)
-
-    # Verify no forbidden fields
-    rec_json = json.dumps(rec)
-    check("no raw prompt text", "system_prompt" not in rec_json)
-    check("no api_key field", "api_key" not in rec_json)
-
-
-def test_change_record_defaults():
-    print("\n=== build_change_record: defaults ===")
-    rec = build_change_record(
-        change_type="directive",
-        scope="orion",
-        requestor="system",
-        rationale="Session start",
-        before_snapshot={},
-        after_snapshot={"model": "gpt-5"},
-    )
-    check("approver defaults to system", rec["approver"] == "system")
-    check("needs_approval defaults false", rec["needs_approval"] is False)
-
-
-def test_valid_change_types():
-    print("\n=== _VALID_CHANGE_TYPES ===")
-    check("tool in types", "tool" in _VALID_CHANGE_TYPES)
-    check("directive in types", "directive" in _VALID_CHANGE_TYPES)
-    check("policy in types", "policy" in _VALID_CHANGE_TYPES)
-    check("memory in types", "memory" in _VALID_CHANGE_TYPES)
-    check("config in types", "config" in _VALID_CHANGE_TYPES)
-    check("5 valid types", len(_VALID_CHANGE_TYPES) == 5)
-
-
-def test_changelog_append_and_read():
-    print("\n=== ChangeLog: append / read ===")
-    tmp = tempfile.mkdtemp()
-    try:
-        log_path = os.path.join(tmp, "test_change_log.jsonl")
-        cl = ChangeLog(path=log_path)
-
-        rec1 = build_change_record(
-            "directive", "shared", "system", "boot",
-            {"a": 1}, {"a": 2},
-        )
-        rec2 = build_change_record(
-            "tool", "orion", "orion", "tool call",
-            {"b": 1}, {"b": 1},
-        )
-        cl.append(rec1)
-        cl.append(rec2)
-
-        all_recs = cl.read_all()
-        check("read_all returns 2", len(all_recs) == 2)
-        check("first is directive", all_recs[0]["change_type"] == "directive")
-        check("second is tool", all_recs[1]["change_type"] == "tool")
-
-        recent = cl.read_recent(1)
-        check("read_recent(1) returns 1", len(recent) == 1)
-        check("recent is last", recent[0]["change_type"] == "tool")
-    finally:
-        shutil.rmtree(tmp)
-
-
-def test_changelog_empty_read():
-    print("\n=== ChangeLog: empty file ===")
-    tmp = tempfile.mkdtemp()
-    try:
-        log_path = os.path.join(tmp, "empty.jsonl")
-        cl = ChangeLog(path=log_path)
-        check("read_all on missing file", cl.read_all() == [])
-        check("read_recent on missing file", cl.read_recent() == [])
-    finally:
-        shutil.rmtree(tmp)
-
-
-def test_changelog_jsonl_format():
-    print("\n=== ChangeLog: JSONL format ===")
-    tmp = tempfile.mkdtemp()
-    try:
-        log_path = os.path.join(tmp, "fmt.jsonl")
-        cl = ChangeLog(path=log_path)
-        cl.append(build_change_record("policy", "shared", "sys", "test", {}, {"x": 1}))
-        cl.append(build_change_record("memory", "elysia", "sys", "test2", {"y": 2}, {}))
-
-        with open(log_path, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        check("2 lines in file", len(lines) == 2)
-        check("each line is valid JSON", all(json.loads(l) for l in lines))
-        check("newline-terminated", all(l.endswith("\n") for l in lines))
-    finally:
-        shutil.rmtree(tmp)
-
-
 # ==================================================================
 # validate_manifest tests
 # ==================================================================
@@ -520,8 +335,9 @@ def test_validate_manifest_sha256_drift():
 def test_validate_manifest_enum_constants():
     print("\n=== validate_manifest: enum constants ===")
     check("shared in scopes", "shared" in _VALID_SCOPES)
-    check("orion in scopes", "orion" in _VALID_SCOPES)
-    check("elysia in scopes", "elysia" in _VALID_SCOPES)
+    check("astraea in scopes", "astraea" in _VALID_SCOPES)
+    check("callum in scopes", "callum" in _VALID_SCOPES)
+    check("codex_animus in scopes", "codex_animus" in _VALID_SCOPES)
     check("active in statuses", "active" in _VALID_STATUSES)
     check("deprecated in statuses", "deprecated" in _VALID_STATUSES)
     check("experimental in statuses", "experimental" in _VALID_STATUSES)
@@ -578,18 +394,6 @@ if __name__ == "__main__":
     test_active_directives_ids()
     test_active_directives_summary()
     test_active_entry_slots()
-
-    # ChangeLog tests
-    test_build_governance_snapshot()
-    test_build_governance_snapshot_with_policy()
-    test_build_governance_snapshot_with_active_directives()
-    test_diff_summary()
-    test_build_change_record()
-    test_change_record_defaults()
-    test_valid_change_types()
-    test_changelog_append_and_read()
-    test_changelog_empty_read()
-    test_changelog_jsonl_format()
 
     # validate_manifest tests
     test_validate_manifest_valid()

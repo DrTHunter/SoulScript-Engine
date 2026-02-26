@@ -241,19 +241,19 @@ def test_tool():
         defn = tool.definition()
         check("tool definition has name", defn["name"] == "directives")
 
-        # List action
-        result = json.loads(tool.execute({"action": "list"}))
+        # List action (pass scope=orion to include shared + orion)
+        result = json.loads(tool.execute({"action": "list", "scope": "orion"}))
         check("list returns ok", result["status"] == "ok")
         check("list count is 5", result["count"] == 5)
 
         # Search action
-        result2 = json.loads(tool.execute({"action": "search", "query": "type hints PEP 8"}))
+        result2 = json.loads(tool.execute({"action": "search", "query": "type hints PEP 8", "scope": "orion"}))
         check("search returns ok", result2["status"] == "ok")
         check("search finds results", result2["count"] > 0)
         check("search has sections", len(result2["sections"]) > 0)
 
         # Get action
-        result3 = json.loads(tool.execute({"action": "get", "heading": "Debug Protocol"}))
+        result3 = json.loads(tool.execute({"action": "get", "heading": "Debug Protocol", "scope": "orion"}))
         check("get returns ok", result3["status"] == "ok")
         check("get has body", "traceback" in result3["body"].lower())
 
@@ -313,7 +313,7 @@ def test_manifest_generation():
         write_file(os.path.join(tmp, "orion.md"), SAMPLE_ORION)
         write_file(os.path.join(tmp, "elysia.md"), "<!-- empty -->")
 
-        manifest = generate_manifest(directives_dir=tmp)
+        manifest = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         check("manifest_version is 1", manifest["manifest_version"] == 1)
         check("hash_algo is sha256", manifest["hash_algo"] == "sha256")
         check("generated_utc present", "generated_utc" in manifest)
@@ -358,7 +358,7 @@ def test_manifest_save_load():
         write_file(os.path.join(tmp, "orion.md"), SAMPLE_ORION)
         write_file(os.path.join(tmp, "elysia.md"), "<!-- empty -->")
 
-        manifest = generate_manifest(directives_dir=tmp)
+        manifest = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         manifest_path = os.path.join(tmp, "manifest.json")
         save_manifest(manifest, path=manifest_path)
 
@@ -396,7 +396,7 @@ def test_tool_manifest():
         write_file(os.path.join(tmp, "elysia.md"), "<!-- empty -->")
 
         # Generate and save a manifest so the tool can load it
-        manifest = generate_manifest(directives_dir=tmp)
+        manifest = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         manifest_path = os.path.join(tmp, "manifest.json")
         save_manifest(manifest, path=manifest_path)
 
@@ -419,12 +419,12 @@ def test_manifest_diff():
         write_file(os.path.join(tmp, "elysia.md"), "<!-- empty -->")
 
         # Generate baseline and save
-        baseline = generate_manifest(directives_dir=tmp)
+        baseline = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         manifest_path = os.path.join(tmp, "manifest.json")
         save_manifest(baseline, path=manifest_path)
 
         # No changes — diff should be clean
-        live = generate_manifest(directives_dir=tmp)
+        live = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         diff = diff_manifest(baseline, live)
         check("no changes: added=0", diff["total_added"] == 0)
         check("no changes: removed=0", diff["total_removed"] == 0)
@@ -434,7 +434,7 @@ def test_manifest_diff():
         # Add a new section to orion
         updated_orion = SAMPLE_ORION + "\n## New Orion Section\nBrand new content.\n"
         write_file(os.path.join(tmp, "orion.md"), updated_orion)
-        live2 = generate_manifest(directives_dir=tmp)
+        live2 = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         diff2 = diff_manifest(baseline, live2)
         check("added section: added=1", diff2["total_added"] == 1)
         check("added section: name correct", diff2["added"][0]["scope"] == "orion")
@@ -444,7 +444,7 @@ def test_manifest_diff():
         write_file(os.path.join(tmp, "shared.md"), modified_shared)
         # Reset orion to baseline so only shared changes are measured
         write_file(os.path.join(tmp, "orion.md"), SAMPLE_ORION)
-        live3 = generate_manifest(directives_dir=tmp)
+        live3 = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         diff3 = diff_manifest(baseline, live3)
         check("modified section: changed>0", diff3["total_changed"] > 0)
         check("changed entry has old_sha256", "old_sha256" in diff3["changed"][0])
@@ -454,7 +454,7 @@ def test_manifest_diff():
         # Remove a section by rewriting shared with fewer sections
         minimal_shared = "## First Words Protocol\nWhen greeting the user.\n"
         write_file(os.path.join(tmp, "shared.md"), minimal_shared)
-        live4 = generate_manifest(directives_dir=tmp)
+        live4 = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         diff4 = diff_manifest(baseline, live4)
         check("removed sections: removed>0", diff4["total_removed"] > 0)
     finally:
@@ -464,6 +464,9 @@ def test_manifest_diff():
 def test_audit_changes():
     print("\n=== Audit Changes ===")
     tmp = tempfile.mkdtemp()
+    import src.directives.manifest as _mmod
+    orig_scopes = _mmod.SCOPES
+    _mmod.SCOPES = ("shared", "orion")
     try:
         write_file(os.path.join(tmp, "shared.md"), SAMPLE_SHARED)
         write_file(os.path.join(tmp, "orion.md"), SAMPLE_ORION)
@@ -475,11 +478,12 @@ def test_audit_changes():
         check("fresh audit: none removed", diff["total_removed"] == 0)
 
         # Save manifest, then audit again — should be clean
-        manifest = generate_manifest(directives_dir=tmp)
+        manifest = generate_manifest(directives_dir=tmp, scopes=("shared", "orion"))
         save_manifest(manifest, path=os.path.join(tmp, "manifest.json"))
         diff2 = audit_changes(directives_dir=tmp, manifest_path_override=os.path.join(tmp, "manifest.json"))
         check("saved audit: no changes", diff2["total_added"] == 0 and diff2["total_changed"] == 0)
     finally:
+        _mmod.SCOPES = orig_scopes
         shutil.rmtree(tmp, ignore_errors=True)
 
 
