@@ -52,12 +52,6 @@ I built my own UI specialized for this, which I’ll be releasing soon.
 
 # **🧠 System Architecture Overview**
 
-![Image](https://www.researchgate.net/publication/392133195/figure/fig1/AS%3A11431281469515805%401748403425116/ector-database-creation-using-FAISS-Clinical-notes-are-chunked-embedded-and-indexed.jpg)
-
-![Image](https://blog.promptlayer.com/content/images/2024/11/How-a-Prompt-Engineering-Tool-Improves-AI-Model-Performance--28-.png)
-
-![Image](https://cdn.prod.website-files.com/660ef16a9e0687d9cc27474a/685b45d53af03e1976d8a773_direct_vs_indirect_prompt_injection.png)
-
 ### **LLM Loading & Injection Flow**
 
 1. Prompt is received
