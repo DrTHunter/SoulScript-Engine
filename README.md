@@ -31,11 +31,11 @@ I’ve built three major AI identities with this system (and a few fun ones — 
 
 # **🌱 What This Framework Is**
 
-## **Two Core Pillars**
+## **two Core Pillars**
 
-1. **Prompt Injection Identity Layer**
-2. **Dual-FAISS Memory Architecture (Identity + Life Memory)**
-3. **Soul Scripts — the “DNA” of an AI identity**
+1. **Prompt Injection Identity Layering** 
+2. **Soul Scripts — the “DNA” of an AI identity**
+-  with a seperate **Dual-FAISS Memory Architecture (Identity + Life Memory)**
 
 Together, they allow you to create AI agents that don’t drift, don’t reset into something generic, and don’t lose their emotional architecture.
 
@@ -56,7 +56,7 @@ I built my own UI specialized for this, which I’ll be releasing soon.
 
 1. Prompt is received
 2. Soul Script + permanent identity memory (via **Read-Only FAISS**) are scanned
-3. Always-upload notes added
+3. Always-upload notes added here if needed
 4. Dynamic FAISS updates long/short-term memory
 5. Tool registry loads
 6. LLM is invoked
