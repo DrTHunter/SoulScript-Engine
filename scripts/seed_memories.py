@@ -50,7 +50,7 @@ MEMORIES = [
 
     # â”€â”€ Project State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     dict(
-        text="SoulScript Engine is currently in pre-alpha; core subsystems include FAISS memory vault, directive injector, governance layer, routing, and a FastAPI web dashboard on port 8585.",
+        text="SoulScript Engine is currently in pre-alpha; core subsystems include FAISS memory vault, directive injector, governance layer, and a FastAPI web dashboard on port 8585.",
         scope="shared", category="project",
         tags=["soulscript", "status", "pre_alpha", "architecture"],
         source="operator", tier="register", topic_id="project_status",

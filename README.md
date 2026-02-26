@@ -147,7 +147,6 @@ SoulScript-Engine/
 │   ├── directives/       # Dynamic directive injection system
 │   ├── governance/       # Boundary enforcement and safety rails
 │   ├── tools/            # Built-in tool definitions
-│   ├── routing/          # Agent routing logic
 │   ├── storage/          # State + journal persistence
 │   └── data_paths.py     # Canonical data directory layout
 ├── profiles/             # Per-agent YAML configuration
