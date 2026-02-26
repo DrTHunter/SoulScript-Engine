@@ -215,6 +215,6 @@ The first startup downloads `all-mpnet-base-v2` (~420 MB). This is a one-time do
 ---
 
 For more details, see:
-- [README.md](README.md) — Project overview and philosophy
-- [LICENSE](LICENSE) — License information
-- [SoulScript-Engine—Setup-&-Usage-Guide.md](SoulScript-Engine%E2%80%94Setup-%26-Usage-Guide.md) — Setup & usage guide
+- [README.md](../README.md) — Project overview and philosophy
+- [LICENSE](../LICENSE) — License information
+- [SoulScript-Engine—Setup-&-Usage-Guide.md](../SoulScript-Engine%E2%80%94Setup-%26-Usage-Guide.md) — Setup & usage guide
