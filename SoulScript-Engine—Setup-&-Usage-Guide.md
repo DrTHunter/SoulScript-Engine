@@ -10,7 +10,7 @@ The web dashboard lets you chat with agents, manage their memories, attach knowl
 
 - [README.md](README.md) — Project overview, architecture, and agent roster
 - [LICENSE](LICENSE) — Apache 2.0 license
-- [soul_script-engine-ui-testi-example.md](docs/soul_script-engine-ui-testi-example.md) — Full AI engine + UI test walkthrough (installation, configuration, running, troubleshooting)
+- [soul_script-engine-ui-testi-example.md](soul_script-engine-ui-test-example/docs/soul_script-engine-ui-testi-example.md) — Full AI engine + UI test walkthrough (installation, configuration, running, troubleshooting)
 
 ---
 
@@ -33,7 +33,7 @@ python -m uvicorn web.app:app --host 0.0.0.0 --port 8585
 ```
 
 For the full step-by-step walkthrough (virtual environments, API key setup, agent profiles, troubleshooting), see:
-**[soul_script-engine-ui-testi-example.md](docs/soul_script-engine-ui-testi-example.md)**
+**[soul_script-engine-ui-testi-example.md](soul_script-engine-ui-test-example/docs/soul_script-engine-ui-testi-example.md)**
 
 ## Included Agents
 
@@ -49,4 +49,4 @@ Apache 2.0 — see [LICENSE](LICENSE) for details.
 
 Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt.
 
-See [UNIQUE-AGENT-BEHAVIOR.md](docs/UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of distinct agent identities in action.
+See [UNIQUE-AGENT-BEHAVIOR.md](soul_script-engine-ui-test-example/docs/UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of distinct agent identities in action.

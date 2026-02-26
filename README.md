@@ -41,17 +41,8 @@ Web Dashboard (FastAPI + Jinja2)  ─→  Chat ─→  Tool dispatch ─→  LLM
 
 | Directory | Purpose |
 |-----------|---------|
-| `config/` | Runtime configuration, connections, settings |
 | `data/` | Runtime data — chats, memory vault, FAISS indexes, user notes |
-| `directives/` | User-authored directive files (agent-readable, agent-immutable) |
-| `notes/` | Always-injected markdown notes per agent |
-| `profiles/` | YAML configuration per agent |
-| `prompts/` | Base system prompt files per agent |
-| `scripts/` | Utility scripts (memory seeding) |
-| `src/` | Core Python source — LLM clients, memory, directives, tools, policy |
-| `tests/` | Test suites |
-| `tools/` | External service setup (SearXNG, TTS, STT, email) |
-| `web/` | Orion Forge web dashboard (FastAPI + Jinja2) |
+| `soul_script-engine-ui-test-example/` | All engine source, config, agents, web UI, and docs |
 
 ## Key Dependencies
 
@@ -71,4 +62,4 @@ Apache 2.0 — see [LICENSE](LICENSE) for details.
 
 Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt. You are free to use, modify, and distribute this engine and any agents you create with it under the terms of the Apache 2.0 license.
 
-See [UNIQUE-AGENT-BEHAVIOR.md](docs/UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of distinct agent identities in action.
+See [UNIQUE-AGENT-BEHAVIOR.md](soul_script-engine-ui-test-example/docs/UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of distinct agent identities in action.

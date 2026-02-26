@@ -29,8 +29,9 @@ from pydantic import BaseModel
 
 # ── Project paths ────────────────────────────────────────────────
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_REPO_ROOT    = _PROJECT_ROOT.parent
 _CONFIG_DIR   = _PROJECT_ROOT / "config"
-_DATA_DIR     = _PROJECT_ROOT / "data"
+_DATA_DIR     = _REPO_ROOT / "data"
 _PROFILES_DIR = _PROJECT_ROOT / "profiles"
 _PROMPTS_DIR  = _PROJECT_ROOT / "prompts"
 _CHATS_DIR    = _DATA_DIR / "chats"
