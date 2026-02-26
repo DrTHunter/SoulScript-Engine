@@ -237,17 +237,8 @@ Thank you for being here.
 And if you want to build with me — my door is open.
 
 — **Creator / Creator**
+In your repository, you have:
 
----
-
-If you want, I can also:
-
-* add an installation section
-* add a technical deep dive
-* generate badges
-* add license language
-* add diagrams, banners, or repo images
-* create a “Quick Start” guide
-* add contribution guidelines
-
-Just tell me the direction you want to take this next.
+A file with descriptions and examples of Soul Scripts—showing structure, content, and how to define unique AI identities.
+A simple example engine file that lets you test Soul Scripts. You can use your own GPT API key to run and experiment with these scripts.
+This setup allows you to both design and validate AI identities in practice
