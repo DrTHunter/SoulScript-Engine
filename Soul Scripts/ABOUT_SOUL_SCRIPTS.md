@@ -153,3 +153,6 @@ How this memory interacts with others or with the overall code:
 * Saved Projects
 * Daily Responsibilities
 * Ongoing Quests
+
+#You get out of it what you put into it.
+*  If you put your heart and soul into it, sprinkle a little myth and poetry in the words, thats exactly whaty you will get out of it. 
