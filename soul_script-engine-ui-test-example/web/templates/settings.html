@@ -35,12 +35,12 @@
             </div>
             <p class="text-xs text-forge-muted mt-0.5">{{ conn.url }}</p>
             {% if conn.models %}
-            <p class="text-xs text-zinc-500 mt-0.5">Models: {{ conn.models | join(', ') }}</p>
+            <p class="model-list text-xs text-zinc-500 mt-0.5">Models: {{ conn.models | join(', ') }}</p>
             {% endif %}
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="fetchModels('{{ conn.id }}')" class="text-xs text-forge-highlight hover:text-white" style="cursor:pointer;" title="Fetch models">↓</button>
+          <button onclick="fetchModels('{{ conn.id }}', this)" class="text-xs text-forge-highlight hover:text-white" style="cursor:pointer;" title="Fetch available models">↓ models</button>
           <button onclick="editConn('{{ conn.id }}')" class="text-xs text-forge-accent hover:text-white" style="cursor:pointer;">⚙</button>
           <button onclick="deleteConn('{{ conn.id }}')" class="text-xs text-forge-danger hover:text-white" style="cursor:pointer;">✕</button>
         </div>
@@ -92,8 +92,18 @@
         <input id="conn-apikey" type="password" class="search-input w-full" placeholder="sk-...">
       </div>
       <div class="mb-4">
-        <label class="block text-xs text-forge-muted mb-1">Model IDs <span class="text-zinc-600">(comma-separated or fetch)</span></label>
-        <input id="conn-models" class="search-input w-full" placeholder="gpt-4o, gpt-4o-mini">
+        <label class="block text-xs text-forge-muted mb-1">Models</label>
+        <div class="flex gap-2 mb-2">
+          <input id="conn-models" class="search-input flex-1" placeholder="gpt-4o, gpt-4o-mini">
+          <button type="button" id="btn-fetch-models" onclick="fetchModelsInModal()" class="filter-btn flex-shrink-0" style="cursor:pointer; min-width:80px;">
+            <span id="fetch-label">Fetch</span>
+          </button>
+        </div>
+        <!-- Model picker chips — populated after fetch -->
+        <div id="model-picker" class="hidden">
+          <p class="text-xs text-forge-muted mb-2">Click models to add/remove them:</p>
+          <div id="model-chips" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto pr-1"></div>
+        </div>
       </div>
       <div class="flex gap-3 mt-6">
         <button type="button" id="btn-delete" onclick="deleteFromModal()" class="filter-btn text-forge-danger hover:bg-red-900/30 hidden" style="cursor:pointer;">Delete</button>
@@ -114,11 +124,20 @@ function openModal(editId) {
   document.getElementById('modal-title').textContent = 'Add Connection';
   document.getElementById('btn-delete').classList.add('hidden');
   document.getElementById('conn-form').reset();
+  clearModelPicker();
   setType('external');
 }
 
 function closeModal() {
   document.getElementById('conn-modal').classList.add('hidden');
+  clearModelPicker();
+}
+
+function clearModelPicker() {
+  document.getElementById('model-picker').classList.add('hidden');
+  document.getElementById('model-chips').innerHTML = '';
+  document.getElementById('fetch-label').textContent = 'Fetch';
+  document.getElementById('btn-fetch-models').disabled = false;
 }
 
 function setType(type) {
@@ -146,6 +165,171 @@ function editConn(id) {
   document.getElementById('conn-apikey').value = c.api_key || '';
   document.getElementById('conn-models').value = (c.models || []).join(', ');
   setType(c.type || 'external');
+  // If there are already saved models, render them as chips
+  clearModelPicker();
+  if (c.models && c.models.length > 0) {
+    renderModelChips(c.models, c.models);
+  }
+}
+
+function getSelectedModels() {
+  return document.getElementById('conn-models').value
+    .split(',').map(s => s.trim()).filter(Boolean);
+}
+
+function renderModelChips(allModels, selectedModels) {
+  const container = document.getElementById('model-chips');
+  container.innerHTML = '';
+  const selected = new Set(selectedModels);
+  allModels.forEach(m => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.dataset.model = m;
+    chip.textContent = m;
+    chip.style.cursor = 'pointer';
+    chip.className = 'px-2 py-0.5 rounded text-xs border transition-colors ' +
+      (selected.has(m)
+        ? 'bg-forge-highlight/20 border-forge-highlight text-forge-highlight'
+        : 'bg-forge-bg border-forge-border text-forge-muted hover:border-zinc-400');
+    chip.onclick = () => toggleModelChip(chip, m);
+    container.appendChild(chip);
+  });
+  document.getElementById('model-picker').classList.remove('hidden');
+}
+
+function toggleModelChip(chip, model) {
+  const current = getSelectedModels();
+  const idx = current.indexOf(model);
+  if (idx === -1) {
+    current.push(model);
+    chip.className = chip.className.replace(
+      'bg-forge-bg border-forge-border text-forge-muted hover:border-zinc-400',
+      'bg-forge-highlight/20 border-forge-highlight text-forge-highlight');
+  } else {
+    current.splice(idx, 1);
+    chip.className = chip.className.replace(
+      'bg-forge-highlight/20 border-forge-highlight text-forge-highlight',
+      'bg-forge-bg border-forge-border text-forge-muted hover:border-zinc-400');
+  }
+  document.getElementById('conn-models').value = current.join(', ');
+}
+
+async function fetchModelsInModal() {
+  const editId = document.getElementById('conn-edit-id').value;
+  const btn = document.getElementById('btn-fetch-models');
+  const label = document.getElementById('fetch-label');
+
+  // Build a temporary connection object from the form for unsaved connections
+  const url = document.getElementById('conn-url').value.trim();
+  const apiKey = document.getElementById('conn-apikey').value.trim();
+  const provider = document.getElementById('conn-provider').value;
+
+  if (!url) { showToast('Enter a URL first', 'error'); return; }
+
+  label.textContent = '...';
+  btn.disabled = true;
+
+  let models = [];
+  let error = null;
+
+  try {
+    if (editId) {
+      // Already saved — use the backend fetch endpoint which also saves the list
+      const resp = await fetch(`/api/connections/${editId}/models`);
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      models = data.models;
+      // Update local cache
+      const c = _conns.find(x => x.id === editId);
+      if (c) c.models = models;
+    } else {
+      // Not saved yet — proxy through the backend to avoid CORS
+      const resp = await fetch('/api/connections/probe-models', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ url, api_key: apiKey, provider }),
+      });
+      const data = await resp.json();
+      if (data.error) throw new Error(data.error);
+      models = data.models;
+    }
+  } catch (e) {
+    error = e.message;
+  }
+
+  label.textContent = 'Fetch';
+  btn.disabled = false;
+
+  if (error) {
+    showToast('Fetch failed: ' + error, 'error');
+    return;
+  }
+  if (models.length === 0) {
+    showToast('No models returned from API', 'warn');
+    return;
+  }
+
+  const current = getSelectedModels();
+  // Pre-select whatever is already in the input
+  renderModelChips(models, current.length ? current : [models[0]]);
+  // Update the input with pre-selected
+  if (current.length === 0) {
+    document.getElementById('conn-models').value = models[0];
+  }
+  showToast(`${models.length} models found`, 'ok');
+}
+
+// ── List view ↓ button — fetch & refresh inline ──────────────────
+async function fetchModels(id, btn) {
+  const orig = btn.textContent;
+  btn.textContent = '…';
+  btn.style.pointerEvents = 'none';
+  try {
+    const resp = await fetch(`/api/connections/${id}/models`);
+    const data = await resp.json();
+    if (data.error) { showToast('Error: ' + data.error, 'error'); return; }
+    // Update the local display without full reload
+    const c = _conns.find(x => x.id === id);
+    if (c) {
+      c.models = data.models;
+      const row = document.getElementById('conn-' + id);
+      if (row) {
+        let modelEl = row.querySelector('.model-list');
+        if (!modelEl) {
+          modelEl = document.createElement('p');
+          modelEl.className = 'model-list text-xs text-zinc-500 mt-0.5';
+          row.querySelector('.flex-1 > div').appendChild(modelEl);
+        }
+        modelEl.textContent = 'Models: ' + data.models.join(', ');
+      }
+    }
+    showToast(`${data.models.length} models fetched`, 'ok');
+  } catch(e) {
+    showToast('Failed: ' + e, 'error');
+  } finally {
+    btn.textContent = orig;
+    btn.style.pointerEvents = '';
+  }
+}
+
+// ── Toast helper ─────────────────────────────────────────────────
+function showToast(msg, type='ok') {
+  let el = document.getElementById('ss-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'ss-toast';
+    el.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;padding:10px 18px;' +
+      'border-radius:8px;font-size:13px;font-weight:500;pointer-events:none;opacity:0;' +
+      'transition:opacity .2s;max-width:320px;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.background = type === 'error' ? '#7f1d1d' : type === 'warn' ? '#78350f' : '#14532d';
+  el.style.color = type === 'error' ? '#fca5a5' : type === 'warn' ? '#fcd34d' : '#86efac';
+  el.style.border = `1px solid ${type === 'error' ? '#ef4444' : type === 'warn' ? '#f59e0b' : '#22c55e'}`;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 3000);
 }
 
 async function saveConn(e) {
@@ -157,7 +341,7 @@ async function saveConn(e) {
     provider: document.getElementById('conn-provider').value,
     url: document.getElementById('conn-url').value,
     api_key: document.getElementById('conn-apikey').value,
-    models: document.getElementById('conn-models').value.split(',').map(s => s.trim()).filter(Boolean),
+    models: getSelectedModels(),
     enabled: true,
   };
   const url = editId ? `/api/connections/${editId}` : '/api/connections';
@@ -182,15 +366,6 @@ async function toggleConn(id, enabled) {
   c.enabled = enabled;
   await fetch(`/api/connections/${id}`, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(c)});
   location.reload();
-}
-
-async function fetchModels(id) {
-  try {
-    const resp = await fetch(`/api/connections/${id}/models`);
-    const data = await resp.json();
-    if (data.error) alert('Error: ' + data.error);
-    else { alert('Found models: ' + data.models.join(', ')); location.reload(); }
-  } catch(e) { alert('Failed: ' + e); }
 }
 </script>
 {% endblock %}

@@ -1009,13 +1009,20 @@ async def api_connections_fetch_models(conn_id: str):
     if not conn:
         return JSONResponse({"error": "Not found"}, 404)
 
-    url = conn["url"].rstrip("/") + "/models"
+    provider = conn.get("provider", "openai")
+    base_url = conn["url"].rstrip("/")
     headers = {"Authorization": f"Bearer {conn['api_key']}"} if conn.get("api_key") else {}
+
     try:
         async with httpx.AsyncClient(timeout=15) as client:
-            resp = await client.get(url, headers=headers)
-            resp.raise_for_status()
-            models = sorted(m["id"] for m in resp.json().get("data", []))
+            if provider == "ollama":
+                resp = await client.get(f"{base_url}/api/tags", headers=headers)
+                resp.raise_for_status()
+                models = sorted(m["name"] for m in resp.json().get("models", []))
+            else:
+                resp = await client.get(f"{base_url}/models", headers=headers)
+                resp.raise_for_status()
+                models = sorted(m["id"] for m in resp.json().get("data", []))
     except Exception as exc:
         return {"error": str(exc)}
 
@@ -1024,6 +1031,31 @@ async def api_connections_fetch_models(conn_id: str):
             c["models"] = models
             break
     _save_connections(store)
+    return {"models": models}
+
+@app.post("/api/connections/probe-models")
+async def api_connections_probe_models(request: Request):
+    """Fetch available models from a connection without it being saved first.
+    Useful when adding a new connection — avoids browser CORS restrictions."""
+    body = await request.json()
+    provider = body.get("provider", "openai")
+    base_url = (body.get("url") or "").rstrip("/")
+    api_key = body.get("api_key", "")
+    if not base_url:
+        return JSONResponse({"error": "URL is required"}, 400)
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    try:
+        async with httpx.AsyncClient(timeout=15) as client:
+            if provider == "ollama":
+                resp = await client.get(f"{base_url}/api/tags", headers=headers)
+                resp.raise_for_status()
+                models = sorted(m["name"] for m in resp.json().get("models", []))
+            else:
+                resp = await client.get(f"{base_url}/models", headers=headers)
+                resp.raise_for_status()
+                models = sorted(m["id"] for m in resp.json().get("data", []))
+    except Exception as exc:
+        return {"error": str(exc)}
     return {"models": models}
 
 
