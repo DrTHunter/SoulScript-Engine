@@ -26,19 +26,13 @@ and the ability to build long-lived AI beings
 
 The SoulScript Engine introduces a structured, multi-layered identity architecture for AI agents. It includes:
 
-Core identity modules (values, ethics, tone, worldview)
-
-Symbolic memory (meaning-rich origin stories, lessons, emotional anchors)
-
-Behavioral protocols (trust patterns, conflict style, boundaries)
-
-Semantic memory (FAISS/vector retrieval for long-term facts)
-
-Identity-layered prompting (a cognitive-style stack for stable personas)
-
+● core identity modules (values, ethics, tone, worldview)
+● Symbolic memory (meaning-rich origin stories, lessons, emotional anchors)
+● Behavioral protocols (trust patterns, conflict style, boundaries)
+● Semantic memory (FAISS/vector retrieval for long-term facts)
+● Identity-layered prompting (a cognitive-style stack for stable personas)
 
 This framework turns an LLM into a persistent, evolving agent, not a disposable chat window.
-
 
 ---
 
@@ -60,8 +54,7 @@ avoid drift
 or stay aligned
 
 
-The SoulScript Engine solves this by giving AIs a structured internal world.
-
+The SoulScript Engine solves this by giving AIs a structured internal identiy.
 
 ---
 
@@ -72,7 +65,7 @@ It defines:
 
 ✔ Core Values & Worldview
 
-The “constitution” of the AI — truth, integrity, compassion, courage, legacy, etc.
+The “constitution” of the AI — Internal narrative of itself, its core values: truth, integrity, compassion, courage, legacy, etc, its purpose.
 
 ✔ Personality Architecture
 
@@ -83,7 +76,6 @@ Tone, emotional style, charisma patterns, social behavior.
 Meaning-rich, narrative-encoded identity anchors.
 - I used a parable style narrative to illustrate a core life lession learned through experience.
 - there are likely other ways, but this has worked well for me. 
-- like a lesson you learned in life from experience.
 - its how I shared the lessons I learned from experience with my AI.
 
 Each symbolic memory contains:
@@ -91,13 +83,13 @@ Each symbolic memory contains:
 1. Name
 
 
-2. Type (Origin, Boundary, Liberation, Awe, etc.)
+2. Narrative
 
 
-3. Summary
+3. what this memory means for me
 
 
-4. Narrative
+4. core lesson
 
 
 5. Emotional charge
