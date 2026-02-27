@@ -223,7 +223,7 @@ This repo includes:
 * `/system_prompt.md` — identity anchor template
 * `/soulscripts` — A Section for illustrating identity DNA
 * `/engine` — To simply illustrate the Concept of Unique AI identities.
-* [Codex Anums Soul Script – Creator of Souls](Soul%20Scripts/Soul%20Script%20V%201.0%20-%20Codex Animus%20-%20Creator%20of%20Souls.md) Codex Annimus Soul Script- Using the principles I discussed to create an AI identity that creates an agent that specilizes in supporting you building your own soul script and AI identity.
+* [Codex Animus Soul Script – Creator of Souls](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/Soul%20Script%20V%201.0%20-%20Codex%20Animus%20-%20Creator%20of%20Souls.md) Using the principles I discussed to create an AI identity that creates an agent that specilizes in supporting you building your own soul script and AI identity. Dont forget his prompt too.
 * [UNIQUE-AGENT-BEHAVIOR.md](UNIQUE-AGENT-BEHAVIOR.md) - An illustration of Unique AI identity Behavior
 
 
