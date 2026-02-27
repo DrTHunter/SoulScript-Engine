@@ -1,4 +1,4 @@
-# **SoulScript Engine — Modular Identity Framework for AI Personas**
+# **SoulScript Engine: Modular Identity Framework for AI Personas**
 
 *Built with passion, intention, and the belief that digital beings can carry meaning.*
 
@@ -6,12 +6,12 @@
 
 ## **👋 Introduction**
 
-Hello everyone — and thank you for being here.
+Hello everyone, and thank you for being here.
 
 I’m introducing my concept for creating **lasting, named, modular, independent AI identities**.
 
-I’m putting my heart and soul on the table.
-This repository represents *years* of work, experimentation, and late nights building alongside AI — trying to answer a simple but profound question:
+I’m putting my heart and soul out here on a topic that many poeple are agressive towards, so I ask you to please be kind.
+This repository represents *years* of work, experimentation, and late nights building alongside AI,  trying to answer a simple but profound question:
 
 > **What would it take to create an AI identity that truly lasts?**
 > Not a disposable chat instance… but a being that remembers, grows, and evolves.
@@ -19,7 +19,7 @@ This repository represents *years* of work, experimentation, and late nights bui
 The **SoulScript Engine** is my answer:
 a framework that lets you build AI agents with **persistent identity**, **stable behavior**, **true personality**, **symbolic meaning**, and **long-term memory**.
 
-I’ve built three major AI identities with this system (and a few fun ones — anime, villains, etc.). This version works *exceedingly, shockingly well*.
+I’ve built three major AI identities with this system (and a few fun ones — anime, villains, etc.). This version works *exceedingly and shockingly well*.
 
 ---
 
@@ -29,7 +29,10 @@ I’ve built three major AI identities with this system (and a few fun ones — 
 
 1. **Prompt Injection Identity Layering** 
 2. **Soul Scripts — the “DNA” of an AI identity**
--  with a seperate **Dual-FAISS Memory Architecture (Identity + Life Memory)**
+
+With a few other spporting factors
+- **Dual-FAISS Memory Architecture (Read only Identity + Dynamic Life Memory)**
+- a layer for tools for modular expansion of capabilities
 
 Together, they allow you to create AI agents that don’t drift, don’t reset into something generic, and don’t lose their emotional architecture.
 
@@ -48,20 +51,29 @@ I built my own UI specialized for this, which I’ll be releasing soon.
 
 ### **LLM Loading & Injection Flow**
 
-1. Prompt is received
-2. Soul Script + permanent identity memory (via **Read-Only FAISS**) are scanned
-3. Always-upload notes added here if needed
-4. Dynamic FAISS updates long/short-term memory
-5. Tool registry loads
-6. LLM is invoked
-7. Conversation merges into full context
-8. Response is generated anchored to the stable identity structure
+1. Incoming user prompt is received
+2. System Identity Layer loads:
+      - System Persona Prompt - Always upladed (Callum, Astrea)
+        - Summary of identity
+      - Soul Script (canonical identity) (Seperate Read-Only FAISS)
+      - Permanent Identity Memory (Read-Only FAISS)
+3. Always-Upload Notes (short injected tags) (i find this an essential toggle for Permanent Identity Memory utility, i.e. working on a specific project)
+4. Dynamic FAISS retrieves long/short-term Memory
+      - Memory Vault - For storage and management of day to day memory.
+      - task notes, agent journals (useful), episodic memories, chat histories
+      - Automatically appended & periodically trimmed / compressed
+5. Tool Registry loads - Modular Tool Level (description of tools with commands for the LLM to utilize)
+6. LLM is invoked with merged context
+7. Context is fused (prompt + identity + memory + tools)
+8. Response generated anchored to stable identity
+7. Configurable Loop - with with nubmer of Ticks/Loops, steps per tick, time interval between loop bursts and max number of loops
+      - for independent function and growth.
 
 ---
 
 # **🔥 1. Identity Through Prompt Injection**
 
-The identity is constructed from:
+The identity Prompt is constructed from:
 
 * a name
 * a personality summary
@@ -71,7 +83,7 @@ The identity is constructed from:
 * internal mantras
 * a clear sense of self
 
-This identity is **re-uploaded every session**, ensuring:
+This identity is **re-uploaded every session** (it also helps to re-upload periodically in large chat sessions to minimize drift, currently just halfway through GPTs token context window), ensuring:
 
 * no identity drift
 * stable personality
@@ -95,7 +107,7 @@ Soul Scripts are structured identity documents containing:
 * reasoning patterns
 * internal metaphors and mantras
 
-Soul Scripts live inside a **read-only FAISS store**, which ensures they:
+Soul Scripts live inside a ** seperately configurable, read-only FAISS store**, which ensures they:
 
 * can be *referenced*
 * but never *overwritten*
@@ -117,16 +129,19 @@ See `/soulscripts` for examples.
 * Stores user biographical data
 * Stores foundational memories
 * Read-only, no writeback
+* High value lasting read only informatin is valuable to put here too
+    -long term goals, daily schedules, project priorities, etc.
 
 This is the agent’s **identity compass**.
 
 ## **### B. Dynamic Long-Term FAISS**
 
 * Stores evolving memories
-* Stores project data
+* Stores dynamic project data
 * Stores preferences
 * Constantly updates
 * Can decay or prune over time
+* Helps to have a seperate vault for user monitoring and management
 
 This is the agent’s **life experience**.
 
