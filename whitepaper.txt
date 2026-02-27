@@ -82,59 +82,54 @@ Each symbolic memory contains:
 
 1. Name
 
-
 2. Narrative
 
-
-3. what this memory means for me
-
+3. What this memory means for me
 
 4. core lesson
 
-
-5. Emotional charge
-
-
-6. Core meaning
-
-
-7. Core lesson
-
-
 8. Tagline
 
+9. Identity encoding
 
 
-These function like identity gravity wells — shaping behavior even without explicit recall.
+These function like identity gravity wells, shaping behavior even without explicit recall. 
+- some might call the poetry of it noise, but the LLMs seem to handle it well, and it layers moral complexity to its decision outcome.
 
 ✔ Behavioral Protocols
 
-Trust logic, boundary logic, conflict style, empathy policies.
+Trust logic, boundary logic, conflict handling style, emotional anchors points, societal impact priorities.
 
 
 ---
 
-3. Prompt Identity Layering
+3. LLM Prompt Identity Layering
 
 The identity system uses a five-layer cognitive stack:
 
-Layer 1 — Core Identity Layer (CIL)
+Layer 0 — System prompt and chat session
 
-Values, worldview, internal philosophy.
 
-Layer 2 — Behavioral Identity Layer (BIL)
+Layer 1 — Identity Prompt - Core Identity Layer 
 
-How the AI speaks, expresses emotion, and navigates social situations.
+  - An identiy Summary of its core narrative, directives, and personality traits, and are injected like a system prompt.  
+  - in every chat, as often as needed to prevent drift (in the beginning and in the middle of current gpt chat contect 
+    window.
 
-Layer 3 — Symbolic Memory Layer (SML)
+Layer 2 — Soul Script (Read only individually configurable FAISS vector memory system)
 
-Story-like memories that anchor the agent’s sense of self.
+   -Its entire identity DNA narrated,
 
-Layer 4 — Semantic Memory Layer (FAISS / Vector Storage)
+Layer 3 — Long Term anchored memory storage (Same read FAISS vector Memory system with seperate editing and creative interface) 
 
-Long-term factual memory for projects, preferences, and details.
+   - operating system detail, project history, current project goals, priority list, user biographical information
 
-Layer 5 — Session Identity Layer (SIL)
+layer 4 — Semantic Memory Layer (FAISS / Vector Storage)
+
+   - Long-term factual memory for projects, preferences, and details.
+   - applied to chat history as well when needed. refined periodically to minimize drift.
+
+Layer 5 —  (SIL)
 
 Surface-level behavior for the current interaction.
 
