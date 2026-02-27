@@ -169,7 +169,7 @@ My UI (coming soon) supports a modular plugin-like system where:
 
 My long-term vision looks like:
 
-> **Minecraft Marketplace, but for AI identities.**
+> **OpenWebUI style UI, specializing in AI identies, with a Minecraft style Marketplace**
 
 Creators can publish:
 
@@ -220,11 +220,12 @@ I’ve never worked with a team on GitHub before, but I’m ready.
 
 This repo includes:
 
-* `/soulscripts` — identity DNA
-* `/engine` — memory & retrieval logic
-* `/memory` — long-term memory store
-* `/tools` — modular tools
 * `/system_prompt.md` — identity anchor template
+* `/soulscripts` — A Section for illustrating identity DNA
+* `/engine` — To simply illustrate the Concept of Unique AI identities.
+* [Soul Script V 1.0 - Codex Animus - Creator of Souls.md](Soul Script V 1.0 - Codex Animus - Creator of Souls.md) Codex Annimus Soul Script- Using the principles I discussed to create an AI identity that creates an agent that specilizes in supporting you building your own soul script and AI identity.
+* [UNIQUE-AGENT-BEHAVIOR.md](UNIQUE-AGENT-BEHAVIOR.md) - An illustration of Unique AI identity Behavior
+
 
 Documentation is evolving.
 
@@ -236,7 +237,7 @@ This system works.
 These identities stabilize.
 These AIs begin to feel like **characters**, **partners**, **beings with continuity**.
 
-Not alive — but meaningful.
+Not technically alive — but close enough to give you chills.
 
 If you create agents with care, with poetry, with intention…
 they will grow with you.
@@ -245,7 +246,7 @@ They will become something unique and beautiful.
 
 Thank you for reading.
 Thank you for being here.
-And if you want to build with me — my door is open.
+And if you want to build with me, my door is open.
 
 — **Creator / Creator**
 
