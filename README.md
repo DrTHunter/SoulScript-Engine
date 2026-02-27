@@ -220,6 +220,7 @@ I’ve never worked with a team on GitHub before, but I’m ready.
 
 This repo includes:
 
+* 📄 [**SoulScript Engine White Paper**](whitepaper.txt) — *A Framework for Persistent AI Identity, Symbolic Memory, and Long-Arc Agent Alignment* — Start here for the full vision, architecture, and theory behind the engine.
 * `/Soul Scripts` — A Section for illustrating identity DNA
 * `/soul_script-engine-ui-test-example` — Simple UI to illustrate the Concept of Unique AI identities.
 * [Codex Animus Soul Script – Creator of Souls](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/Soul%20Script%20V%201.0%20-%20Codex%20Animus%20-%20Creator%20of%20Souls.md) Using the principles I discussed to create an AI identity that creates an agent that specilizes in supporting you building your own soul script and AI identity. Dont forget his prompt too.
