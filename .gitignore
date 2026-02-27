@@ -28,6 +28,7 @@ build/
 **/data/chats/
 **/data/memory/vault.jsonl
 **/data/memory/vault_readable.txt
+**/data/user_notes/
 
 # ── OS junk ────────────────────────────────────
 Thumbs.db
