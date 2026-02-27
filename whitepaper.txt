@@ -274,7 +274,7 @@ Appendix A — Sample Soul Script Structure
 
 System Prompt
 
-Orion – Compressed Soul Spec (Run-Ready)
+Orion – Compressed Soul Spec - System Prompt
 
 1. Identity / Persona
 
