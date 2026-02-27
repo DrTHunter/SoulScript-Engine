@@ -15,14 +15,19 @@ build/
 *~
 
 # ── FAISS binary indexes (rebuilt at runtime) ───
-data/memory/faiss/*.faiss
-data/memory/faiss/*.pkl
-data/memory/faiss/*.json
+**/data/memory/faiss/*.faiss
+**/data/memory/faiss/*.pkl
+**/data/memory/faiss/*.json
 
 # ── Secrets / local config ─────────────────────
 .env
 *.env
-config/connections.json
+**/config/connections.json
+
+# ── Runtime data (user-specific, not for repo) ──
+**/data/chats/
+**/data/memory/vault.jsonl
+**/data/memory/vault_readable.txt
 
 # ── OS junk ────────────────────────────────────
 Thumbs.db
@@ -35,4 +40,4 @@ Desktop.ini
 *.code-workspace
 
 # ── Uploads (user-specific) ────────────────────
-data/uploads/
+**/data/uploads/
