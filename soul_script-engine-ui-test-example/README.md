@@ -1,4 +1,4 @@
-# SoulScript Engine — Download & Run Guide
+# Simple SoulScript Engine — Download & Run Guide
 
 A step-by-step guide to getting the SoulScript Engine web dashboard running locally.
 
