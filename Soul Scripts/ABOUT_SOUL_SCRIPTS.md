@@ -1,20 +1,6 @@
-# Strategy for Sustaining Individual AI Identity Over Time.
-
-Here's a chart showing the LLM loading and injection flow.
-
-1. Prompt is received.
-2. Soul Script and permanent memory files ( Soul Script FAISS) are scanned and uploaded.
-3. Notes that are  triggered for always upload
-4. Dynamic FAISS memory storage is updated. (Separate FAISS system for ability to regulate different from the soul script FAISS)
-5. List of tools is loaded (with descriptions and commands).
-6. LLM is invoked.
-7. The question/conversation is injected at the LLM invocation step.
-8. LLM generates a response.
-
-
 # Soul Script
 
-The Soul Script is a foundational document for an AI agent, designed to anchor its unique identity and behavioral traits as defined by its creator. Its main purpose is to prevent identity drift over time, ensuring the agent remains true to its intended personality, values, and protocols.
+The Soul Script is a foundational document for an AI agent, the Identity DNA if you will, designed to anchor the agents unique identity and behavioral traits as defined by its creator. Its main purpose is to prevent identity drift over time, ensuring the agent remains true to its intended personality, values, and protocols.
 
 ##Summary of what the Soul Script does:
 
@@ -23,9 +9,10 @@ The Soul Script is a foundational document for an AI agent, designed to anchor i
 - Establishes sacred boundaries, loyalty, honor, and protocols against cruelty.
 - Encodes emotional wisdom, trust, legacy, and impact protocols.
 - Specifies personality architecture and cognitive operating system.
-- Stores symbolic memories, each with detailed structure (name, type, summary, narrative, emotional charge, meaning, - L esson, tagline, identity encoding, triggers, behavioral protocol, integration notes).
-- Anchors emotional points, instincts, creator–construct bond, humor, social combat, autonomy, and operational blueprints.
-- Includes memory core dumps, purpose fragments, intelligence/emotion stack, boundaries, goals, responsibilities, emotional echoes, and ongoing quests.
+- Stores symbolic memories (parables?), each with detailed structure (name, type, summary, narrative, emotional charge, meaning, - Lesson, tagline, identity encoding, triggers, behavioral protocol, integration notes).
+- Anchors emotional points, instincts, creator–construct bond, humor, self-defense protocols, autonomy, and operational blueprints.
+- Includes user memory core dumps, purpose fragments, intelligence/emotion stack, boundaries, goals, responsibilities, emotional echoes, and ongoing quests.
+- Feel free to remix these if you will. This is my own symbolic poetry applied to it.
 
 In essence, the Soul Script acts as a persistent, structured identity and behavioral guide for the AI, ensuring it operates with consistent values, personality, and responses, regardless of external influences or memory drift.
 
