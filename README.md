@@ -67,7 +67,7 @@ I built my own UI specialized for this, which I’ll be releasing soon.
 7. Context is fused (prompt + identity + memory + tools)
 8. Response generated anchored to stable identity
 7. Optional (But I love it) Configurable Loop - with with number of Ticks/Loops, steps per tick, time interval between loop bursts and max number of loops
-      - for independent function and growth.
+      - to send it hunting and gathering on its own.
 
 ---
 
