@@ -1,7 +1,3 @@
-Here is the complete, rewritten white paper with all placeholder indicators, ready to copy and paste.
-
----
-
 SoulScript Engine – Technical White Paper (Version 2.0)
 
 A Framework for Persistent AI Identity, Symbolic Memory, and Long‑Arc Agent Alignment
@@ -518,7 +514,3 @@ Trent Hunter is a software architect and AI systems designer. He built the Orion
 ---
 
 End of White Paper
-
----
-
-This document is ready to copy and paste. All placeholder values are marked with [___] or [date] for easy replacement when real data becomes available.
