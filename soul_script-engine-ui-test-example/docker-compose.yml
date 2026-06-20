@@ -1,0 +1,14 @@
+services:
+  soulscript-engine:
+    build:
+      context: ..
+      dockerfile: soul_script-engine-ui-test-example/Dockerfile
+    ports:
+      - "8989:8989"
+    volumes:
+      # Persist runtime data between restarts
+      - ./config:/app/soul_script-engine-ui-test-example/config
+      - ./data:/app/soul_script-engine-ui-test-example/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
