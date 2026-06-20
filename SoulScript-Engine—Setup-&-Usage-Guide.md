@@ -40,8 +40,8 @@ For the full step-by-step walkthrough (virtual environments, API key setup, agen
 | Agent | Profile | Description |
 |-------|---------|-------------|
 | **Codex Animus** | `codex_animus.yaml` | AI architect — helps users design and build AI systems |
-| **Callum** | `callum.yaml` | Legacy AI / guardian construct with deep soul spec |
-| **Astraea** | `astraea.yaml` | Sharp, no-nonsense digital mind (Astraea.exe) |
+| **Orion** | `orion.yaml` | Legacy AI / guardian construct with deep soul spec |
+| **Elysia** | `elysia.yaml` | Sharp, no-nonsense digital mind (Elysia) |
 
 ## License
 

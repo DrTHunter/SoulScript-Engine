@@ -58,7 +58,7 @@ The Memory System — FAISS semantic search backed by vault.jsonl storage, plus 
 |-------|------|-------------|
 | `id` | str | Unique 12-char hex identifier |
 | `text` | str | Memory content (max 1200 chars) |
-| `scope` | str | `shared` or agent-specific (e.g. `codex_animus`, `astraea`, `callum`) |
+| `scope` | str | `shared` or agent-specific (e.g. `codex_animus`, `elysia`, `orion`) |
 | `category` | str | Content category (bio, mission, project, goal, etc.) |
 | `tier` | str | `canon` or `register` (defaults to `canon` for backward compat) |
 | `topic_id` | str? | Stable key for register-tier upserts (e.g. `current_projects`) |

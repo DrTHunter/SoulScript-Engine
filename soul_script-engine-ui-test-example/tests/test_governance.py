@@ -335,8 +335,8 @@ def test_validate_manifest_sha256_drift():
 def test_validate_manifest_enum_constants():
     print("\n=== validate_manifest: enum constants ===")
     check("shared in scopes", "shared" in _VALID_SCOPES)
-    check("astraea in scopes", "astraea" in _VALID_SCOPES)
-    check("callum in scopes", "callum" in _VALID_SCOPES)
+    check("elysia in scopes", "elysia" in _VALID_SCOPES)
+    check("orion in scopes", "orion" in _VALID_SCOPES)
     check("codex_animus in scopes", "codex_animus" in _VALID_SCOPES)
     check("active in statuses", "active" in _VALID_STATUSES)
     check("deprecated in statuses", "deprecated" in _VALID_STATUSES)

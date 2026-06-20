@@ -1,3 +1,3 @@
-<!-- callum-only directives — only callum sees these. -->
+<!-- orion-only directives — only orion sees these. -->
 <!-- Organize content under ## Headings. Only relevant sections are loaded per session. -->
 

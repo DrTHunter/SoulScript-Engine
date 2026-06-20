@@ -19,8 +19,8 @@ Rich notes created via the web dashboard's Knowledge page with formatting, secti
 | File | Who Sees It |
 |------|-------------|
 | `shared.md` | All agents |
-| `astraea.md` | Only Astraea |
-| `callum.md` | Only Callum |
+| `elysia.md` | Only Elysia |
+| `orion.md` | Only Orion |
 | `codex_animus.md` | Only Codex Animus |
 
 ## How to Use

@@ -1,4 +1,4 @@
-﻿"""Memory injector - builds context blocks for system-prompt injection.
+"""Memory injector - builds context blocks for system-prompt injection.
 
 Uses FAISSMemory to produce a compact Markdown block of relevant
 memories.  Two modes:
@@ -32,7 +32,7 @@ def build_memory_block(
     faiss_mem : FAISSMemory
         The FAISS-backed memory instance.
     scopes : str | list[str]
-        Scope filter(s) — e.g. `"shared"` or `["shared", "callum"]`.
+        Scope filter(s) — e.g. `"shared"` or `["shared", "orion"]`.
     max_items : int
         Maximum memories to include.
     query : str | None

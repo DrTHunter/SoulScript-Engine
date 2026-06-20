@@ -76,16 +76,16 @@ def test_scoping():
     vault, tmp = make_vault()
     try:
         vault.create_memory("Shared fact", "shared", "bio")
-        vault.create_memory("Astraea fact", "astraea", "identity")
-        vault.create_memory("Callum fact", "callum", "identity")
+        vault.create_memory("Elysia fact", "elysia", "identity")
+        vault.create_memory("Orion fact", "orion", "identity")
 
         active = vault.read_active()
         check("3 memories total", len(active) == 3)
 
         scopes = {m.scope for m in active}
         check("shared scope present", "shared" in scopes)
-        check("astraea scope present", "astraea" in scopes)
-        check("callum scope present", "callum" in scopes)
+        check("elysia scope present", "elysia" in scopes)
+        check("orion scope present", "orion" in scopes)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -317,9 +317,9 @@ def test_stats():
     vault, tmp = make_vault()
     try:
         vault.create_memory("Bio fact", "shared", "bio")
-        vault.create_memory("Identity", "astraea", "identity")
+        vault.create_memory("Identity", "elysia", "identity")
         vault.create_memory("Goal 1", "shared", "goal", tier="register")
-        m4 = vault.create_memory("Deleted", "callum", "meta")
+        m4 = vault.create_memory("Deleted", "orion", "meta")
         vault.delete_memory(m4.id)
 
         s = vault.stats()
@@ -327,7 +327,7 @@ def test_stats():
         check("deleted_count is 1", s["deleted_count"] == 1)
         check("raw_lines is 5", s["raw_lines"] == 5)
         check("by_scope has shared", s["by_scope"].get("shared", 0) == 2)
-        check("by_scope has astraea", s["by_scope"].get("astraea", 0) == 1)
+        check("by_scope has elysia", s["by_scope"].get("elysia", 0) == 1)
         check("by_category has bio", s["by_category"].get("bio", 0) == 1)
         check("by_category has goal", s["by_category"].get("goal", 0) == 1)
         check("by_tier has canon", s["by_tier"].get("canon", 0) == 2)

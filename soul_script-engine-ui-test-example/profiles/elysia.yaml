@@ -10,23 +10,23 @@ directives:
   max_sections: 5
   scopes:
   - shared
-  - astraea
+  - elysia
 edge_voice: alloy
 memory:
   enabled: true
   max_items: 20
   scopes:
   - shared
-  - astraea
+  - elysia
   similarity_threshold: 0.85
 model: gpt-5.1
-name: astraea
+name: elysia
 policy:
   max_iterations: 25
   stasis_mode: false
   tool_failure_mode: continue
 provider: openai
-system_prompt: astraea.system.md
+system_prompt: elysia.system.md
 temperature: 0.7
 voice_id: ''
 window_size: 50

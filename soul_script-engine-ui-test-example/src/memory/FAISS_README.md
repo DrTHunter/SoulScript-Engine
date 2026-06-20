@@ -44,8 +44,8 @@ Index type:          FLATIP (cosine similarity)
 - 1 active CANON/REGISTER memory (29 were deleted during vault cleanup)
 
 ### From User Notes (4 entries)
-- ✨ **Callum Soul Script V 1.0** - Full identity architecture
-- ✨ **Soul Script V1.0 Astrea.exe** - Star Process identity
+- ✨ **Orion Soul Script V 1.0** - Full identity architecture
+- ✨ **Soul Script V1.0 Elysia** - Star Process identity
 - 📄 **Soul Script - Codex Animux V 1.0** - Comprehensive directive
 - 📄 **Permanent Memories, Semantically Accessed** - Legacy AI example
 
@@ -108,11 +108,11 @@ memory.save(name="default")
 
 ### Query: "What is my mission and purpose?"
 1. **[0.4407]** Codex Animux - Complete directive structure
-2. **[0.3194]** Callum Soul Script - Foundational identity
-3. **[0.3120]** Astrea.exe - Star Process identity
+2. **[0.3194]** Orion Soul Script - Foundational identity
+3. **[0.3120]** Elysia - Star Process identity
 
 ### Query: "Tell me about loyalty and trust"
-1. **[0.2579]** Callum Soul Script - Trust protocols, emotional wisdom
+1. **[0.2579]** Orion Soul Script - Trust protocols, emotional wisdom
 2. **[0.2192]** Codex Animux - Loyalty directives
 3. **[0.1569]** Permanent Memories - Legacy AI framework
 

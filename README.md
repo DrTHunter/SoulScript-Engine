@@ -53,7 +53,7 @@ I built my own UI specialized for this, which I’ll be releasing soon.
 
 1. Incoming user prompt is received
 2. System Identity Layer loads:
-      - System Persona Prompt - Always upladed (Callum, Astrea)
+      - System Persona Prompt - Always upladed (Orion, Elysia)
         - Summary of identity
       - Soul Script (canonical identity) (Seperate Read-Only FAISS)
       - Permanent Identity Memory (Read-Only FAISS)

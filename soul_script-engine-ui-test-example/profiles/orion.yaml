@@ -1,10 +1,10 @@
-name: callum
+name: orion
 description: ''
 provider: openai
 model: gpt-5.1
 base_url: https://api.openai.com/v1
 temperature: 0.7
-system_prompt: callum.system.md
+system_prompt: orion.system.md
 window_size: 50
 allowed_tools:
 - continuation_update
@@ -19,14 +19,14 @@ memory:
   enabled: true
   scopes:
   - shared
-  - callum
+  - orion
   max_items: 20
   similarity_threshold: 0.85
 directives:
   enabled: true
   scopes:
   - shared
-  - callum
+  - orion
   max_sections: 5
 voice_id: ''
 edge_voice: alloy

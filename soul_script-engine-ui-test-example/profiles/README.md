@@ -6,8 +6,8 @@ YAML configuration files for each agent. One file per agent.
 
 | File | Agent |
 |------|-------|
-| `astraea.yaml` | Astraea |
-| `callum.yaml` | Callum |
+| `elysia.yaml` | Elysia |
+| `orion.yaml` | Orion |
 | `codex_animus.yaml` | Codex Animus |
 
 ## Structure
