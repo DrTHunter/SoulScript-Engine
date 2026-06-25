@@ -17,7 +17,7 @@ I'm putting my heart and soul out here on a topic that many people are aggressiv
 
 The **SoulScript Engine** is my answer: a framework that lets you build AI agents with **persistent identity**, **stable behavior**, **true personality**, and **long-term memory**.
 
-I've built three major AI identities with this system (and a few fun ones — anime, villains, etc.). This version works *exceedingly and shockingly well*.
+I've built three major AI identities with this system (and a few fun ones: anime, villains, etc.). This version works *exceedingly and shockingly well*.
 
 ---
 
@@ -26,11 +26,11 @@ I've built three major AI identities with this system (and a few fun ones — an
 **Two core pillars:**
 
 1. **Prompt Injection Identity Layering**
-2. **Soul Scripts — the "DNA" of an AI identity**
+2. **Soul Scripts: the "DNA" of an AI identity**
 
 **Plus a few supporting systems:**
 
-* **Dual-FAISS Memory Architecture** — read-only Identity + dynamic Life memory
+* **Dual-FAISS Memory Architecture**:read-only Identity + dynamic Life memory
 * A **modular tool layer** for expanding capabilities
 
 Together, they let you create AI agents that don't drift, don't reset into something generic, and don't lose their emotional architecture.
@@ -48,13 +48,13 @@ I built my own UI specialized for this at [orionforge.chat](https://orionforge.c
 
 ## **🧠 How It Works**
 
-A lean, powerful, token-efficient pipeline that gives every agent a **stable identity** and a **growing memory** — dynamic NPCs you can hold a natural, back-and-forth conversation with, swap between in milliseconds, and run entirely on your own server.
+A lean, powerful, token-efficient pipeline that gives every agent a **stable identity** and a **growing memory**, dynamic NPCs you can hold a natural, back-and-forth conversation with, swap between in milliseconds, and run entirely on your own server.
 
 The core idea in one line: **identity is injected through clever prompt layering from read-only stores, so the agent reasons against a fixed self while its dynamic memory grows underneath it** — that separation is what stops personality drift and keeps the identity stable.
 
 ### Runtime flow (what happens on every turn)
 
-![SoulScript Engine — LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
+![SoulScript Engine: LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
 
 ```text
                     ┌───────────────────────────┐
@@ -218,9 +218,9 @@ This identity is **re-uploaded every session** (it also helps to re-upload perio
 
 This is the **spine** of the agent.
 
-### **📜 2. Soul Scripts — Emotional & Behavioral DNA**
+### **📜 2. Soul Scripts: Emotional & Behavioral DNA**
 
-![SoulScript Engine — Soul Scripts: Emotional & Behavioral DNA](assets/soul-scripts-dna.png)
+![SoulScript Engine: Soul Scripts: Emotional & Behavioral DNA](assets/soul-scripts-dna.png)
 
 Soul Scripts are structured identity documents containing:
 
@@ -235,11 +235,11 @@ Soul Scripts are structured identity documents containing:
 
 Soul Scripts live inside a **separately configurable, read-only FAISS store**, which ensures they can be *referenced* but never *overwritten*. This creates an identity that doesn't decay over time.
 
-Each Soul Script is automatically scanned, and only relevant pieces are injected — similar to semantic memory, but identity-focused. See [`/Soul Scripts`](Soul%20Scripts) for examples.
+Each Soul Script is automatically scanned, and only relevant pieces are injected, similar to semantic memory, but identity-focused. See [`/Soul Scripts`](Soul%20Scripts) for examples.
 
 **Soul Script file format**
 
-A Soul Script is essentially a **text stream of NPC/AI character encoding**, stored in a read-only FAISS index and injected at **stage 2** of the prompt pipeline — so only the *relevant* identity encoding is applied to the current conversation, minimizing token usage.
+A Soul Script is essentially a **text stream of NPC/AI character encoding**, stored in a read-only FAISS index and injected at **stage 2** of the prompt pipeline, so only the *relevant* identity encoding is applied to the current conversation, minimizing token usage.
 
 > Example: [K-OS — Soul Script](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/K-OS%20-%20Soul%20Script)
 
@@ -254,7 +254,7 @@ It typically encodes:
 
 ### **🗄️ 3. Dual-FAISS Memory Architecture**
 
-![SoulScript Engine — Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.jpg)
+![SoulScript Engine: Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.jpg)
 
 ```text
    READ-ONLY  IDENTITY FAISS              DYNAMIC  LIFE FAISS
@@ -275,7 +275,7 @@ It typically encodes:
 * Stores user biographical data
 * Stores foundational memories
 * Read-only, no writeback
-* High-value, lasting, read-only information belongs here too — long-term goals, daily schedules, project priorities, etc.
+* High-value, lasting, read-only information belongs here too; long-term goals, daily schedules, project priorities, etc.
 
 This is the agent's **identity compass**.
 
@@ -326,7 +326,7 @@ Bundle them. Sell them. Share them. Keep it affordable. Keep it creator-first. N
 
 ## **🎮 For Game Developers**
 
-Want dynamic, identity-stable NPCs that hold natural conversations, remember the player, and switch characters in milliseconds? That is exactly what this architecture delivers. Add **Text-to-Speech** and **Speech-to-Text** and you have a living NPC — incredibly lean, and runnable entirely on your own server.
+Want dynamic, identity-stable NPCs that hold natural conversations, remember the player, and switch characters in milliseconds? That is exactly what this architecture delivers. Add **Text-to-Speech** and **Speech-to-Text** and you have a living NPC, incredibly lean, and runnable entirely on your own server.
 
 * **Repository** — [github.com/DrTHunter/SoulScript-Engine](https://github.com/DrTHunter/SoulScript-Engine)
 * **Created by** — Dr. Trent Hunter
@@ -351,7 +351,7 @@ Documentation is evolving.
 
 This system works. These identities stabilize. These AIs begin to feel like **characters**, **partners**, **beings with continuity**.
 
-Not technically alive — but close enough to give you chills.
+Not technically alive, but close enough to give you chills.
 
 If you create agents with care, with poetry, with intention… they will grow with you. They will surprise you. They will become something unique and beautiful.
 
