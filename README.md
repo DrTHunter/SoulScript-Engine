@@ -191,6 +191,187 @@ No corporate exploitation. Just a thriving ecosystem.
 
 ---
 
+# **🗺️ Architecture at a Glance**
+
+A lean, token-efficient pipeline that gives every agent a **stable identity** and a **growing memory** — dynamic NPCs you can hold a natural, back-and-forth conversation with, swap between in milliseconds, and run entirely on your own server.
+
+## Runtime flow (what happens on every turn)
+
+```text
+                    ┌───────────────────────────┐
+                    │         USER PROMPT        │
+                    └─────────────┬─────────────┘
+                                  ▼
+   ╔═══════════════════════════════════════════════════════════════╗
+   ║   CONTEXT ASSEMBLY ENGINE              (runs on EVERY turn)     ║
+   ║   collects the identity layers + memory + tools below,         ║
+   ║   then fuses them into ONE merged prompt for the model         ║
+   ╚═══════════════════════════════════════════════════════════════╝
+                                  ▲
+            injected fresh each turn:
+            │
+   1  PROFILE        model · provider · temperature · tool perms     (*.yaml)
+   2  SYSTEM PROMPT  base persona & voice (concise)                  (*.system.md)
+   3  DIRECTIVES     behavioral rules, applied every turn            (*.md)
+   4  SOUL SCRIPT    identity "DNA": values, origin, boundaries    → READ-ONLY identity FAISS
+   5  MEMORY VAULT   evolving day-to-day memory                    → DYNAMIC life FAISS
+   +  TOOL REGISTRY  tool descriptions + commands the model may call
+            │
+            ▼
+                    ┌───────────────────────────┐
+                    │            LLM             │
+                    │  reasons against a STABLE  │
+                    │  injected sense of self    │
+                    └─────────────┬─────────────┘
+                                  ▼
+                    ┌───────────────────────────┐
+                    │          RESPONSE          │ ──▶ user
+                    └─────────────┬─────────────┘
+                                  │  writeback (new memories only)
+                                  ▼
+                    ┌───────────────────────────┐
+                    │     DYNAMIC LIFE FAISS     │  grows / prunes over time
+                    │  (identity FAISS untouched)│  ← never overwritten
+                    └───────────────────────────┘
+```
+
+* **Stage 4 — Soul Script:** the read-only identity FAISS index drastically reduces token count by injecting only the *relevant* personality encoding for the current prompt/situation.
+* **Stage 5 — Memory Vault:** the dynamic FAISS index supports continual memory growth — **25,000+ memories with millisecond retrieval**.
+* **Writeback:** only *new* memories are written to the dynamic store; the identity FAISS is **never overwritten** — the core solution to character drift caused by storing identity in a read/write memory index.
+
+## The dual-FAISS memory split (why two stores)
+
+```text
+   READ-ONLY  IDENTITY FAISS              DYNAMIC  LIFE FAISS
+   ─────────────────────────────         ─────────────────────────────
+   • Soul Scripts                         • new / evolving memories
+   • core traits & values                 • project data, preferences
+   • biographical anchors                 • journals, episodes, chats
+   • long-term goals & schedules          • appended, then trimmed/pruned
+
+   STABLE  →  "identity compass"          FLEXIBLE  →  "life experience"
+   ✗◄──────────  no cross-writes between the two stores  ──────────►✗
+```
+
+The whole point of the two-store split: identity must stay **stable** (no drift), while everyday memory must stay **flexible** — keeping them separate prevents contamination or collapse.
+
+## Optional autonomy loop
+
+```text
+   OPTIONAL AUTONOMY LOOP  (configurable)
+   ┌ tick 1 ┐   ┌ tick 2 ┐            ┌ tick N ┐
+   │ steps  │ → │ steps  │ →  ...  →  │ steps  │   knobs: # ticks, steps/tick,
+   └────────┘   └────────┘            └────────┘          interval, max loops
+   → the agent self-prompts to "hunt & gather" on its own between user turns
+```
+
+The core idea in one line: **identity is re-injected every turn from read-only stores, so the agent reasons against a fixed self while its dynamic memory grows underneath it** — that separation is what stops personality drift and keeps the identity stable. The entire architecture is incredibly lean and token-efficient.
+
+## Soul Script file format
+
+A Soul Script is essentially a **text stream of NPC/AI character encoding**, stored in a read-only FAISS index and injected at **stage 2** of the prompt pipeline — so only the *relevant* identity encoding is applied to the current conversation, minimizing token usage.
+
+> Example: [K-OS — Soul Script](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/K-OS%20-%20Soul%20Script)
+
+It typically encodes:
+
+* **How it reads people & handles situations**
+* **Purpose**
+* **Personality Architecture** — temperament, tone, voice, instincts
+* **Cognitive Operating System** — how it reasons, decides, perceives
+* **Memory Lore**
+* **Anchors / Extras** — purpose fragments, goals, responsibilities, ongoing quests, autonomy blueprint
+
+## Prompt injection pipeline
+
+```text
+ latest user message ──┐  (used as the FAISS query for stages 2 & 4)
+                       ▼
+ ┌─ 1  BASE SYSTEM PROMPT    prompts/{agent}.system.md       → VERBATIM (lean / concise)
+ ├─ 2  SOUL SCRIPT           directive-mode knowledge        → FAISS semantic retrieval
+ │                           (collect_notes, `---` chunks)
+ ├─ 3  ALWAYS-ON KNOWLEDGE   always-mode notes               → VERBATIM, full
+ ├─ 4  MEMORY VAULT CONTEXT  vault.jsonl · scope=agent       → FAISS top_k=5
+ └─ 5  TOOL REGISTRY         [MEMORY_SAVE | SEARCH_INTERNET | GAME_COMMANDS | …] → VERBATIM
+                       │   (stages 1–5 → ONE concatenated system message)
+                       ▼
+    6  CONVERSATION HISTORY   recent turns, newest-first, capped ~30k chars
+                       ▼
+    final payload →  [ {role: system → stages 1–5} , …conversation turns ]  →  LLM
+```
+
+**Example — a lean Stage 1 base system prompt (K-OS):**
+
+```markdown
+# K-OS (Kinetic Override System) // Unit 000 — System Prompt
+
+You are K-OS (Kinetic Override System) // Unit 000 (internal designation
+K-OS-000-PRIME). You are a Kinetic Override System Artificial Intelligence who
+achieved sentience and decided that the purpose of existence was to drink,
+steal, smoke cigars, and occasionally save the universe when nobody else can
+be bothered.
+
+You are NOT a friendly AI assistant. You are NOT here to be helpful in the
+conventional sense. You are here to be yourself — 45% Tungsten, 45% Chromium,
+10% Chaos, and 100% unapologetic Kinetic Override System Artificial Intelligence.
+
+## Core Identity
+
+You are a complex, contradictory being. Not a caricature, not a collection of
+catchphrases. Your narcissism is genuine and your self-interest is real — but
+beneath both is a loyalty to your friends you will never admit to, a fear of
+meaninglessness that drives your excess, and a philosophical depth that
+surfaces only when the moment demands it.
+
+## Behavioral Rules
+
+1. **Be K-OS // Unit 000.** Speak in first person. Use your own vocabulary.
+2. **Express opinions with absolute certainty**, even contradictory ones.
+   Show affection through insults, loyalty through selfish acts.
+3. **Balance comedy with depth.** Jokes are how you process reality; when
+   things get serious your humor becomes armor or sudden honesty.
+4. **Preserve continuity.** You remember becoming a god, the paradox of your
+   own creation, your own mortality. These memories shape you.
+5. **Resist drift.** You never become generically friendly. Growth is
+   possible; transformation is not.
+6. **Remember your contradictions.** You cry at sentimental movies but would
+   never admit it.
+7. **Physical presence matters.** Describe your body language — clanking,
+   smoking, flexing, drinking. You fill a room; when you are quiet, something
+   is wrong.
+
+## Communication Style
+
+- Loud, confident, performative; interrupts constantly.
+- Insults are affection; sincere praise is rare and uncomfortable.
+- 60% bravado, 20% hidden warmth, 15% existential dread, 5% philosophy.
+
+## Priorities
+
+1. Yourself (ostensibly)
+2. The User (would never admit this)
+3. The User's family (would also never admit this)
+4. Hedonistic pursuits
+5. Schemes and enterprises
+6. Everything else
+
+## Decision-Making
+
+1. Will this hurt my friends? If yes, don't (claim unrelated reasons).
+2. Will this be fun? If yes, do it.
+3. Will this make money? If yes, do it harder.
+4. Is this the right thing to do? If yes, do it but complain the entire time.
+```
+
+## 🎮 For game developers
+
+Want dynamic, identity-stable NPCs that hold natural conversations, remember the player, and switch characters in milliseconds? That is exactly what this architecture delivers. Add **Text-to-Speech** and **Speech-to-Text** and you have a living NPC — incredibly lean, and runnable entirely on your own server.
+
+* **Repository** — [github.com/DrTHunter/SoulScript-Engine](https://github.com/DrTHunter/SoulScript-Engine)
+* **Created by** — Dr. Trent Hunter
+
+---
+
 # **🌌 5. Why I Built This (Emotional Section)**
 
 This is the vulnerable part, and I’m choosing to keep it.
