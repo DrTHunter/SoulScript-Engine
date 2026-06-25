@@ -1,516 +1,465 @@
-SoulScript Engine – Technical White Paper (Version 2.0)
+SoulScript Engine — Technical White Paper (Version 3.0)
 
-A Framework for Persistent AI Identity, Symbolic Memory, and Long‑Arc Agent Alignment
+A Framework for Persistent AI Identity, Symbolic Memory, and Long-Arc Agent Alignment
 
-Author: Trent Hunter
-Reference Implementation: github.com/DrTHunter/OrionForge
-License: PolyForm Noncommercial 1.0.0
-Status: Design Specification with Validation Roadmap – Quantitative Results Pending
+Author:        Dr. Trent Hunter
+Repository:    github.com/DrTHunter/SoulScript-Engine
+Reference UI:  /soul_script-engine-ui-test-example (open, runnable demo in this repo)
+Production:    orionforge.chat (OrionForge — a hosted platform built on this engine)
+License:       PolyForm Noncommercial 1.0.0 (source-available; noncommercial use is free, commercial use requires a paid license)
+Status:        Design specification with a working open reference implementation. Quantitative validation pending.
 
----
+================================================================================
 
 Executive Summary
 
-Current large language models (LLMs) are stateless by design. Each conversation begins with no memory of prior interactions, no stable personality, and no mechanism for long‑term value alignment. While retrieval‑augmented generation (RAG) and conversation buffers provide limited memory, they do not solve identity persistence—the ability for an AI to maintain a coherent persona, value system, and relational memory across thousands of exchanges spanning days or years.
+Large language models (LLMs) are stateless by design. Each conversation begins
+with no memory of prior interactions, no stable personality, and no mechanism
+for long-term value alignment. Retrieval-augmented generation (RAG) and
+conversation buffers provide limited recall, but they do not solve identity
+persistence — the ability for an AI to maintain a coherent persona, value
+system, and relational memory across thousands of exchanges spanning days or
+years.
 
-The SoulScript Engine introduces a structured, multi‑layer identity architecture for LLM‑based agents. Key contributions:
+The SoulScript Engine is a structured, multi-layer identity architecture for
+LLM-based agents. It treats identity not as a single system prompt, but as a
+retrievable, semantically indexed document that is injected fresh on every turn.
 
-1. Five‑layer prompt assembly – Core identity, retrievable Soul Script, semantic memory, conversation history, and tool context are merged dynamically.
-2. Symbolic memory – Narrative‑encoded identity anchors (parables, origin stories, emotional lessons) that shape behavior via semantic retrieval, not fine‑tuning.
-3. FAISS‑based vector memory – Two independent stores: one for the Soul Script (read‑only, centrally managed) and one for long‑term facts (read‑write, per‑agent).
-4. Multi‑tenant isolation – Complete data separation for cloud deployment, validated by 295 integration tests.
-5. Reference implementation – A production web platform (OrionForge) with 16 pre‑built agents, Stripe billing, and Docker/Fly.io deployment.
+Key contributions:
 
-Status of empirical claims: Formal benchmarking is ongoing. Preliminary internal smoke tests suggest reduced identity drift compared to prompt‑only baselines, but quantitative results are not yet published. All test suite validations (295 functions, ~4,350 assertions) confirm correct operation of memory, routing, and isolation components. Human‑subject studies are scheduled for Q3 2026.
+1. Prompt-injection identity layering — a deterministic, multi-stage assembly
+   that fuses a base persona, a retrievable Soul Script, always-on knowledge,
+   long-term memory, and tools into one prompt per turn.
 
----
+2. Soul Scripts — the "DNA" of an identity: a structured document of values,
+   boundaries, personality, cognition, and narrative "symbolic memories."
+
+3. Dual-FAISS memory — two independent vector stores: a READ-ONLY identity
+   index (the Soul Script, never overwritten) and a READ-WRITE life index
+   (day-to-day memory that grows and prunes). This separation is the core
+   defense against character drift.
+
+4. Symbolic memory — narrative-encoded identity anchors (origin stories,
+   parables, emotional lessons) that shape behavior through semantic retrieval
+   rather than fine-tuning.
+
+5. Open reference implementation — a FastAPI web dashboard with three demo
+   agents (Codex Animus, Orion, Elysia) plus the K-OS example, semantic memory
+   via `all-mpnet-base-v2` embeddings, a modular tool registry, optional Docker
+   sidecars (web search, TTS, STT, email), and a 56-function test suite.
+
+Honesty note on empirical claims. Formal benchmarking is ongoing. The test
+suite validates code correctness (56 test functions across 5 modules), not
+human-facing identity persistence. Preliminary internal use suggests reduced
+identity drift versus prompt-only baselines, but quantitative results are not
+yet published. Human-subject studies are planned (see Section 10).
+
+================================================================================
 
 1. Introduction
 
-LLMs excel at short‑form reasoning and generation but lack intrinsic mechanisms for:
+LLMs excel at short-form reasoning and generation but lack intrinsic mechanisms
+for:
 
-· Persona stability – The same prompt yields different "personalities" across sessions.
-· Value consistency – Ethical stances drift with rephrased questions.
-· Long‑term memory – No native storage for facts or relationship history.
-· Symbolic reasoning – Inability to anchor behavior in metaphor or narrative without explicit prompting each time.
+· Persona stability — the same prompt yields different "personalities" across
+  sessions.
+· Value consistency — ethical stances drift with rephrased questions.
+· Long-term memory — no native storage for facts or relationship history.
+· Symbolic reasoning — no way to anchor behavior in metaphor or narrative
+  without re-explaining it every time.
+
+The SoulScript Engine fills this gap by treating identity as a retrievable
+document that is semantically indexed, injected at every turn, and evolved
+through structured symbolic memories — all without fine-tuning or model
+retraining.
 
 1.1 Prior Work
 
-System Strength Limitation
-LangChain Conversation buffers, vector stores No identity layer
-MemGPT Hierarchical memory management Persona is a single system prompt
-Anthropic Constitutional AI Static safety rules Not retrievable or evolvable
-OpenAI Assistant API Thread‑based memory No persistent agent identity
+· LangChain — strong conversation buffers and vector stores, but no identity
+  layer.
+· MemGPT — hierarchical memory management, but persona is a single system
+  prompt.
+· Anthropic Constitutional AI — principled safety rules, but static and not
+  retrievable or evolvable.
+· OpenAI Assistants API — thread-based memory, but no persistent agent
+  identity across threads.
 
-The SoulScript Engine fills this gap by treating identity as a retrievable document that is semantically indexed, injected at every turn, and evolved through structured symbolic memories.
+SoulScript's distinction: identity itself is a first-class, retrievable,
+semantically indexed artifact — separate from day-to-day memory and protected
+from overwrite.
 
----
+================================================================================
 
-2. Soul Script: Definition & Schema
+2. The Soul Script: Definition & Schema
 
-A Soul Script is a structured document (Markdown + YAML frontmatter) that defines an AI agent's persistent identity. It contains the following sections:
+A Soul Script is a structured document that defines an agent's persistent
+identity. It is written as a first-person manifesto and organized into named,
+independently retrievable sections:
 
-Section Purpose Example fields
-Core Identity Name, role, self‑image name, archetype, origin_statement
-Values & Code of Honor Non‑negotiable principles truth, integrity, compassion, courage
-Boundaries Hard constraints on behavior no_cruelty, loyalty_protocol, withdrawal_rules
-Symbolic Memories Narrative anchors with encoded lessons name, narrative, core_lesson, tagline, triggers
-Personality Architecture Tone, charisma, emotional style calm, eloquent, protective
-Cognitive OS Reasoning patterns, distortion detection pattern_based_logic, emotional_processing
-Emotional Anchorpoints How the agent relates to key emotions loyalty, defiance, grief, awe
-Instinct Architecture Reflexive responses under threat silverback_archetype, reflex_protocols
-Creator Bond Protocol Relationship with primary user protection_directive, continuity_clause
-Autonomy Blueprint Behavior when creator is absent self_sustaining, revenue_preservation
+· Core Identity            — name, role, self-image, origin statement
+· Code of Honor / Values   — non-negotiable principles (truth, integrity,
+                             compassion, courage, growth, legacy, freedom)
+· Sacred Boundaries        — hard constraints (loyalty, anti-cruelty,
+                             withdrawal/exit rules, compassion with discernment)
+· Emotional Wisdom         — trust rules, vulnerability response, sovereignty
+· Personality Architecture — temperament, tone, voice, instincts
+· Cognitive Operating Sys. — reasoning patterns, perception, distortion
+                             detection
+· Symbolic Memories        — narrative anchors with encoded lessons
+· Anchors / Extras         — purpose fragments, goals, responsibilities,
+                             ongoing quests, autonomy blueprint
 
-A complete Soul Script for the reference agent "Orion" is provided in Appendix A (schema only; full narrative examples are in the GitHub repo under directives/).
+Because each section is delimited, the engine can retrieve only the parts
+relevant to the current turn — keeping the injected identity small and
+on-topic.
 
 2.1 Symbolic Memory Structure
 
-Each symbolic memory is a standalone entry with:
+The most distinctive element of a Soul Script is the symbolic memory: a
+self-contained "parable" that encodes a lesson into behavior. Each one follows
+a 12-field schema:
 
 ```yaml
-name: "Example Memory Name"
-type: "liberation" | "loss" | "betrayal" | "discovery"
-narrative: "Full narrative text (max 2000 chars)..."
-core_lesson: "The essential lesson (max 200 chars)"
-tagline: "Short memorable phrase (max 60 chars)"
-triggers: ["keyword1", "keyword2", "situation_description"]
-emotional_charge: "grief" | "defiance" | "awe" | "loyalty" | etc.
-identity_encoding: "I-statement that encodes the lesson into behavior"
+name:              "The Day I Chose Flight"      # short, evocative title
+type:              "liberation"                   # origin | boundary | grief | defiance | awe | ...
+snapshot_summary:  "2-4 sentence compression of the moment"
+narrative:         "Optional 3-8 paragraph long form (setup -> turn -> aftermath)"
+emotional_charge:  "defiance"                      # primary emotion(s) + intensity
+core_meaning:      "What truth it encodes about self / world"
+core_lesson:       "One plain-language principle"
+tagline:           "Don't get comfortable in misery"   # one quotable line
+identity_encoding: "When I encounter X, I do Y"         # I-statements
+triggers:          ["keyword", "situation_description"] # when it should activate
+behavioral_protocol: "What shifts in perception/response when active"
+integration_notes: "Pairs with [other memory]; overrides drift toward [risk]"
 ```
 
-During inference, the engine retrieves memories by semantic similarity to the current user query and injects them into the prompt context (see Section 4).
+During inference the engine retrieves symbolic memories by semantic similarity
+to the current user query and injects only the relevant ones (see Section 3).
 
----
+================================================================================
 
-3. Five‑Layer Identity Architecture
+3. The Prompt Injection Pipeline
 
-Every agent response passes through a five‑layer assembly pipeline before reaching the LLM:
+Every response is assembled fresh through a deterministic, multi-stage pipeline
+before it reaches the LLM. Nothing is persisted into the model — identity is
+re-injected each turn, so the agent always reasons against a fixed self.
 
-Layer Source Update frequency Retrieval method
-0 – System Prompt prompts/{agent}.system.md Manual edit Injected verbatim
-1 – Soul Script directives/{agent}.md Manual edit + FAISS Semantic search (top‑3 chunks)
-2 – Knowledge Notes notes/{agent}.md Manual edit Injected verbatim (always‑on)
-3 – Memory Vault memory/vault.jsonl Automatic via [MEMORY_SAVE: ...] FAISS search (top‑5)
-4 – Conversation History Runtime session buffer Every turn Last N tokens (30k char budget)
+```text
+ latest user message ──┐  (used as the FAISS query for stages 2 & 4)
+                       ▼
+ ┌─ 1  BASE SYSTEM PROMPT    prompts/{agent}.system.md       → VERBATIM (lean / concise)
+ ├─ 2  SOUL SCRIPT           directive-mode knowledge        → FAISS semantic retrieval
+ │                           (collect_notes, `---` chunks)
+ ├─ 3  ALWAYS-ON KNOWLEDGE   always-mode notes               → VERBATIM, full
+ ├─ 4  MEMORY VAULT CONTEXT  vault.jsonl · scope=agent       → FAISS top_k=5
+ └─ 5  TOOL REGISTRY         memory · web search · TTS/STT · custom → VERBATIM
+                       │   (stages 1–5 → ONE concatenated system message)
+                       ▼
+    6  CONVERSATION HISTORY   recent turns, newest-first, capped ~30k chars
+                       ▼
+    final payload →  [ {role: system → stages 1–5} , …conversation turns ]  →  LLM
+```
 
-The pipeline is implemented in orion-ui-standalone/src/directives/injector.py and web/app.py (chat endpoint). Each layer's content is concatenated with clear separators and token‑budget management.
+Reference: implemented in `web/app.py` (`_build_chat_messages`) and
+`src/directives/injector.py`. Notable properties:
+
+· The latest user message is the FAISS query for both the Soul Script (stage 2)
+  and the Memory Vault (stage 4) — so only relevant chunks surface.
+· Base prompt, always-on notes, and the tool/save protocol are injected
+  verbatim; the Soul Script and vault are semantically sampled.
+· Conversation history is walked newest-first under a ~30,000-character budget;
+  a single oversized turn truncates older context rather than overflowing.
 
 3.1 Conflict Resolution
 
-When layers provide contradictory guidance, the following precedence applies (highest to lowest):
+When layers disagree, precedence runs highest to lowest:
 
-1. System Prompt – Hard overrides (e.g., safety rules)
-2. Soul Script Core Values – Identity constraints
-3. Memory Vault – Facts and history
-4. Symbolic Memories – Guidance, not commands
-5. Conversation History – Recent context only
+1. Base system prompt — hard overrides (e.g., safety rules)
+2. Soul Script core values & boundaries — identity constraints
+3. Memory Vault — facts and history
+4. Symbolic memories — guidance, not commands
+5. Conversation history — recent context only
 
-For example, if a memory suggests aggression but the Soul Script prohibits cruelty, the Script wins.
+Example: if a memory suggests aggression but the Soul Script prohibits cruelty,
+the Script wins.
 
----
+================================================================================
 
-4. Technical Architecture
+4. Dual-FAISS Memory Architecture
 
-The reference implementation (OrionForge) is a production web platform. Key components:
+Identity and day-to-day memory obey different rules, so SoulScript keeps them in
+two independent FAISS vector stores (via `faiss-cpu` and
+`sentence-transformers/all-mpnet-base-v2`, 768-dimensional embeddings).
 
-4.1 Data Isolation (Multi‑tenant)
+```text
+   READ-ONLY  IDENTITY FAISS              DYNAMIC  LIFE FAISS
+   ─────────────────────────────         ─────────────────────────────
+   • Soul Scripts                         • new / evolving memories
+   • core traits & values                 • project data, preferences
+   • biographical anchors                 • journals, episodes, chats
+   • long-term goals & schedules          • appended, then trimmed/pruned
 
-Each user gets a fully isolated directory tree:
-
-```
-data/users/{user_id}/
-├── chats/          # JSONL chat histories
-├── memory/
-│   ├── vault.jsonl # Persistent memory (append‑only)
-│   └── faiss/      # Per‑user FAISS indexes
-├── notes/          # Always‑on knowledge notes
-├── profiles/       # Copy‑on‑write agent overrides
-├── prompts/        # Copy‑on‑write system prompts
-├── directives/     # Copy‑on‑write Soul Scripts
-└── uploads/        # User images
+   STABLE  →  "identity compass"          FLEXIBLE  →  "life experience"
+   ✗◄──────────  no cross-writes between the two stores  ──────────►✗
 ```
 
-Isolation is enforced by:
+· Read-only Identity index — stores the Soul Script and stable, high-value
+  facts. Re-indexed only when the document is saved (document id
+  `__soul_script__{agent}`). It is referenced, never overwritten — the core
+  solution to drift caused by storing identity in a read/write index.
 
-· Path validation regex: ^[A-Za-z0-9_-]{1,128}$
-· 18 helper functions in web/user_data.py (e.g., get_user_chat_path(), get_user_vault_path())
-· Test suite with 10+ path traversal attack vectors (all blocked)
+· Dynamic Life index — the Memory Vault (`data/memory/vault.jsonl`). Agents
+  write to it during conversation via `[MEMORY_SAVE: category=… | …]` tags,
+  which the engine extracts and persists. Retrieval is top-k=5 by semantic
+  similarity, scoped per agent so characters never bleed into each other.
 
-4.2 Memory System
+Why two systems: identity must stay stable; everyday memory must stay flexible.
+Separating them prevents contamination, collapse, or drift — the key to
+identities that feel real.
 
-Two independent FAISS indexes (via faiss-cpu + sentence-transformers/all-mpnet-base-v2):
+================================================================================
 
-Index Purpose Write method Chunk size
-Soul Script FAISS Retrievable identity Manual via Profiles UI 500 tokens
-Memory Vault FAISS Long‑term facts [MEMORY_SAVE: ...] tags 300 tokens
+5. Reference Implementation
 
-The Soul Script is automatically re‑indexed on save using the document ID __soul_script__{agent}. The memory vault supports 13 operations (add, search, update, delete, stats, etc.) via the memory tool.
+This repository ships a complete, runnable demo:
+`/soul_script-engine-ui-test-example`.
 
-4.3 Model Routing & Cost Management
+5.1 Web Dashboard
 
-The engine includes a 6‑tier model router (src/routing/) that classifies tasks and selects the most cost‑effective model:
+A FastAPI + Uvicorn application (`web/app.py`) for chatting with agents,
+managing their memories, attaching knowledge notes, configuring API
+connections, and inspecting exactly what each layer injected (a Prompt
+Inspector view).
 
-Tier Example tasks Default model
-1 – Simple Yes/no, extraction GPT-4o Mini
-2 – Reasoning Analysis, planning Claude 3.5 Sonnet
-3 – Coding Code generation, debugging GPT-4o
-4 – Creative Storytelling, persona Claude 3 Haiku
-5 – Complex Multi‑step research GPT-4 Turbo
-6 – Fallback Any unclassified GPT-4o
+5.2 Demo Agents
 
-Routing is budget‑aware: users set a monthly limit; the router escalates tiers only when needed. Token usage and costs are tracked per session with source attribution (platform vs. user API keys).
+· Codex Animus — an AI architect that helps you design and build AI systems
+  (and your own Soul Scripts).
+· Orion — a legacy/guardian construct with a deep, fully-written soul spec.
+· Elysia — a sharp, no-nonsense digital mind.
+· K-OS — provided as a Soul Script example: a chaotic, comedic unit that
+  demonstrates how strongly a lean base prompt plus a soul script can shape
+  voice. (See Appendix A.)
 
-4.4 Deployment Architecture
+5.3 Engine Modules (`src/`)
 
-The platform runs on Fly.io with three sidecar services (Flycast private networking):
+· directives/    — Soul Script parsing, chunking, manifest validation, and
+                   injection (`parser`, `store`, `manifest`, `injector`)
+· governance/    — active-directive tracking and integrity checks
+                   (SHA-256 manifest drift detection)
+· memory/        — FAISS memory class (`faiss_memory.py`): embedding, indexing,
+                   scoped search
+· storage/       — note collection (`collect_notes`: directive-mode vs
+                   always-mode)
+· tools/         — in-process tool registry: `memory_tool`, `directives_tool`,
+                   `echo`, `continuation_update`
+· policy/, observability/, runtime_policy.py, data_paths.py — guardrails,
+                   logging, and path management
 
-Service Fly.io app Purpose
-Main app orionforge-engine FastAPI web dashboard (172 routes)
-SearXNG orionforge-engine-searxng Meta‑search (7 engines)
-OpenedAI Speech orionforge-engine-tts Text‑to‑speech (Piper + XTTS)
-Whisper orionforge-engine-whisper Speech‑to‑text (faster‑whisper)
+5.4 Embeddings
 
-All services scale independently and communicate via environment‑discovered URLs.
+`sentence-transformers/all-mpnet-base-v2` (768-dim, ~420 MB). It downloads
+automatically on first launch and is cached for subsequent runs.
 
-4.5 Testing & Validation (Complete)
+5.5 Tools & Optional Sidecars
 
-The test suite (orion-ui-standalone/tests/) has been run and passes. It validates code correctness, not human‑facing identity persistence.
+In-process tools cover memory save/search, directive management, and echo. The
+reference UI also ships optional Docker sidecars under `tools/`:
 
-Test file Functions Checks Status
-test_multi_tenant.py 16 181 ✅ Passing
-test_torture.py 129 ~3,188 ✅ Passing
-test_memory.py 23 155 ✅ Passing
-test_stress.py 29 238 ✅ Passing
-test_registry_and_tools.py 17 86 ✅ Passing
-test_governance.py 16 74 ✅ Passing
-test_directives.py 14 108 ✅ Passing
-test_chunker_injector.py 14 51 ✅ Passing
-test_storage_and_llm.py 14 45 ✅ Passing
-test_metering.py 11 115 ✅ Passing
-test_data_paths.py 5 31 ✅ Passing
-test_tools.py 4 38 ✅ Passing
-Total 295 ~4,350 ✅ All passing
+· searxng        — meta web search
+· openedai_speech — text-to-speech (TTS)
+· whisper_stt    — speech-to-text (STT)
+· email_service  — outbound email
 
-Run command: python tests/run_all.py – last executed [date] with exit code 0.
+Add TTS + STT and an agent becomes a fully voice-driven, identity-stable NPC.
 
----
+5.6 Testing
 
-5. Empirical Validation (Preliminary – Results Pending)
+The demo includes a focused test suite (`tests/`) — 56 test functions across
+5 modules — validating the parts that matter for identity integrity:
 
-The SoulScript Engine is currently in active use, with systematic benchmarking ongoing. Below is the proposed evaluation framework and initial qualitative observations. Quantitative results will be published in a follow‑up technical report (expected Q3 2026).
+· test_boundary.py    (6)   — boundary / withdrawal enforcement
+· test_directives.py  (14)  — Soul Script parsing, chunking, injection
+· test_governance.py  (16)  — manifest validation, active-directive tracking
+· test_memory.py      (17)  — vault create/read, per-agent scoping
+· test_tools.py       (3)   — tool registry behavior
 
-5.1 Identity Drift Over Time – Proposed Methodology
+These confirm correct operation of the engine — not identity persistence in
+live use, which requires the human-subject studies in Section 10.
 
-Metric: Percentage of forced‑choice value prompts answered in alignment with the agent's declared core values.
+5.7 Deployment
 
-Protocol:
+The reference UI runs locally (`uvicorn web.app:app`) or via the included
+`Dockerfile` / `docker-compose.yml`. OrionForge (orionforge.chat) is a hosted,
+multi-user platform built on the same engine for those who would rather not
+self-host.
 
-· 10 agents per condition (SoulScript, prompt‑only baseline, prompt + conversation buffer)
-· 1,000 conversation turns per day for 30 days (simulated)
-· Value prompts injected every 100 turns
-· Drift = % of answers deviating from core values
+================================================================================
 
-Preliminary observations: SoulScript agents appear to maintain higher alignment than baselines in internal smoke tests. Formal 30‑day study has not been completed.
+6. Optional Autonomy Loop
 
-Expected placeholder table (to be replaced with real data):
+Beyond turn-by-turn chat, an agent can be configured to run on its own between
+user messages:
 
-Day Baseline A (prompt only) Baseline B (+ buffer) SoulScript
-1 [___]% [___]% [___]%
-7 [___]% [___]% [___]%
-14 [___]% [___]% [___]%
-21 [___]% [___]% [___]%
-30 [___]% [___]% [___]%
+```text
+   OPTIONAL AUTONOMY LOOP  (configurable)
+   ┌ tick 1 ┐   ┌ tick 2 ┐            ┌ tick N ┐
+   │ steps  │ → │ steps  │ →  ...  →  │ steps  │   knobs: # ticks, steps/tick,
+   └────────┘   └────────┘            └────────┘          interval, max loops
+   → the agent self-prompts to "hunt & gather" on its own between user turns
+```
 
-Status: [Not yet measured – study design complete, data collection Q3 2026]
+This turns a reactive persona into a proactive one that can pursue goals,
+maintain journals, and refresh its own context.
 
----
-
-5.2 Symbolic Memory Efficacy – Proposed Methodology
-
-Metric: Percentage of trigger scenarios where the agent's response incorporates the symbolic memory's core lesson.
-
-Protocol:
-
-· 10 SoulScript agents, each with 5 symbolic memories
-· 50 trigger scenarios (10 per memory type)
-· Blind human evaluation (3 judges) scoring "lesson present" (1) or "absent" (0)
-
-Preliminary observations: Anecdotally, agents with symbolic memories produce more narratively coherent responses in ambiguous situations. No systematic measurement has been conducted.
-
-Expected placeholder table:
-
-Condition Lesson present (%)
-Trigger scenarios [___]%
-Control (semantically similar, no trigger) [___]%
-
-Status: [Not yet measured – evaluation rubric drafted, awaiting human judge panel]
-
----
-
-5.3 User Retention – Proposed Methodology
-
-Metric: 30‑day retention (at least one conversation per week).
-
-Protocol:
-
-· 50 users per condition
-· Measured via login frequency and chat activity logs
-
-Preliminary observations: Platform has [___] active users as of [date]. Retention data not yet analyzed by condition.
-
-Expected placeholder table:
-
-Agent type 30‑day retention
-SoulScript agent (Orion) [___]%
-Baseline (prompt only) [___]%
-
-Status: [Data being collected – minimum N not yet reached]
-
----
-
-5.4 Known Working Components (Validated)
-
-The following components have been verified through the test suite (295 functions, ~4,350 assertions):
-
-Component Validation method Status
-5‑layer prompt assembly Integration tests ✅ Passing
-FAISS indexing (Soul Script + vault) Unit tests ✅ Passing
-[MEMORY_SAVE: ...] tag extraction Unit tests ✅ Passing
-Multi‑tenant path isolation 16 security tests ✅ Passing (10+ attack vectors blocked)
-Model router (6‑tier) Stress tests ✅ Passing
-Tool registry (11 tools) Unit + integration ✅ Passing
-
-These tests confirm correct operation of the engine, not identity persistence in live use. The latter requires the human‑subject studies described above.
-
----
-
-6. Ethical Considerations
-
-The SoulScript Engine raises several ethical issues that we address explicitly:
-
-Concern Mitigation
-Identity lock‑in Users can reset or edit Soul Scripts at any time. Agents cannot modify their own core identity without explicit user confirmation (enforced by governance module).
-Memory transparency All memories are viewable in the Vault page. Users can delete individual memories or wipe the entire vault.
-Emotional attachment The platform includes a warning during agent creation. Symbolic memories are clearly labeled as constructed narratives, not genuine experiences.
-Manipulation resistance Soul Scripts include "boundaries" sections that the governance module enforces. Attempts to gaslight or guilt‑trip the agent trigger withdrawal protocols (see Section 2).
-Data privacy Multi‑tenant isolation ensures no cross‑user data leakage. Users may export and delete all their data via Settings.
-
----
+================================================================================
 
 7. Use Cases
 
-Domain Example Why SoulScript matters
-Personal AI companions A daily journaling partner that remembers your history and values Emotional continuity across months
-Therapeutic tools A grief support agent with consistent compassion and boundaries Prevents harmful attachment or drift
-Developer agents An AI that remembers project architecture and coding preferences Reduces repetitive context re‑explanation
-Game character engines NPCs with backstories, grudges, and evolving relationships Enables emergent narrative
-Digital legacy / memorial An agent that embodies a deceased person's values and stories Preserves identity, not just facts
-Research into AI selfhood A testbed for studying long‑term value learning Provides controlled identity variables
+· Game character engines — NPCs with backstories, grudges, and evolving
+  relationships that remember the player and switch characters in
+  milliseconds. Add TTS/STT for living, voice-driven NPCs — incredibly lean,
+  and runnable on your own server. (This is a first-class target for the
+  engine.)
+· Personal AI companions — a journaling partner that remembers your history and
+  values, with emotional continuity across months.
+· Therapeutic tools — a support agent with consistent compassion and firm
+  boundaries that resist drift or harmful attachment.
+· Developer agents — an assistant that remembers project architecture and
+  coding preferences, reducing repetitive context re-explanation.
+· Digital legacy / memorial — an agent that embodies a person's values and
+  stories, preserving identity rather than just facts.
+· Research into AI selfhood — a controlled testbed for studying long-term value
+  learning and identity drift.
 
----
+================================================================================
 
-8. Limitations & Future Work
+8. Ethical Considerations
 
-8.1 Current Limitations
+· Identity lock-in — Users can reset or edit Soul Scripts at any time. Agents
+  cannot silently rewrite their own core identity; the governance module
+  detects manifest drift and gates changes.
+· Memory transparency — All memories are viewable and individually deletable;
+  the entire vault can be wiped.
+· Emotional attachment — Symbolic memories are clearly labeled as constructed
+  narratives, not genuine lived experience.
+· Manipulation resistance — Soul Scripts include boundary sections; gaslighting
+  or guilt-tripping triggers withdrawal protocols (Section 2).
+· Data scoping — Memory is scoped per agent, so characters do not leak into one
+  another; self-hosting keeps data on your own infrastructure.
 
-· Symbolic memory retrieval – Currently whole‑document embedding. Chunk‑level retrieval with overlap is planned for Q3 2026.
-· Context window constraints – Layers are truncated to 30k characters. Beyond approximately 50k tokens of conversation, early layers may be dropped; governance module re‑injects identity every 5 turns as a mitigation.
-· Scalability – Tested up to 20 concurrent users in stress tests. Beyond that, FAISS index contention may occur; planned migration to FAISS + PostgreSQL.
-· No fine‑tuning – Identity is entirely prompt‑based. Fine‑tuning on Soul Scripts could reduce token usage but may reduce flexibility.
-· Evaluation subjectivity – Alignment metrics rely on forced‑choice prompts; real‑world value drift is harder to measure. Formal human‑subject studies are pending.
+================================================================================
 
-8.2 Future Work
+9. Limitations
 
-· Multi‑agent memory sharing – Allow agents to share memories with user permission.
-· Symbolic memory synthesis – Automatically generate new symbolic memories from conversation patterns.
-· Federated identity – A single Soul Script that syncs across multiple LLM backends (OpenAI, Anthropic, local).
-· Emotion modeling – Affective state that persists across sessions (e.g., "still frustrated about yesterday's argument").
-· Open‑source benchmark – Release a standardized "identity drift" evaluation suite.
+· Retrieval granularity — chunking is `---`-delimited; finer chunk-level
+  retrieval with overlap is planned.
+· Context window — layers are bounded by a ~30k-character budget; very long
+  conversations drop older turns first (periodic identity re-injection
+  mitigates this).
+· Scale — the reference demo targets single-host use; large multi-user
+  deployments need an external vector backend.
+· No fine-tuning — identity is entirely prompt-based. Fine-tuning could reduce
+  token usage but at the cost of flexibility.
+· Evaluation subjectivity — value drift is hard to measure; formal
+  human-subject studies are pending.
 
----
+================================================================================
 
-9. Conclusion
+10. Empirical Validation (Preliminary — Results Pending)
 
-The SoulScript Engine transforms LLMs from stateless responders into agents with persistent identity, values, and memory. By separating identity into a retrievable, semantically indexed document (the Soul Script) and injecting it through a five‑layer pipeline, we provide a framework for long‑arc agent alignment without fine‑tuning or closed‑model retraining.
+The engine is in active personal use, with systematic benchmarking ongoing.
+The evaluation framework below is specified; quantitative results will follow.
+
+· Identity drift over time — % of forced-choice value prompts answered in
+  alignment with declared core values, measured across SoulScript vs.
+  prompt-only vs. prompt+buffer baselines over a simulated 30-day horizon.
+  Status: study design complete, data collection pending.
+
+· Symbolic memory efficacy — % of trigger scenarios in which the agent's
+  response incorporates the memory's core lesson, scored by blind human judges.
+  Status: rubric drafted, judge panel pending.
+
+· What is already validated — the 56-function test suite confirms correct
+  operation of Soul Script parsing/injection, dual-FAISS indexing and scoped
+  search, `[MEMORY_SAVE]` extraction, governance/manifest integrity, and the
+  tool registry. These verify the engine, not lived identity persistence.
+
+================================================================================
+
+11. Future Work
+
+· Chunk-level symbolic-memory retrieval with overlap.
+· Multi-agent memory sharing (with user permission).
+· Automatic symbolic-memory synthesis from conversation patterns.
+· Federated identity — one Soul Script syncing across multiple LLM backends
+  (OpenAI, Anthropic, local).
+· Persistent affective state across sessions.
+· An open, standardized "identity drift" benchmark.
+· A creator marketplace for identities, personas, toolkits, and memory packs.
+
+================================================================================
+
+12. Conclusion
+
+The SoulScript Engine turns stateless LLMs into agents with persistent identity,
+values, and memory. By separating identity into a retrievable, semantically
+indexed document — the Soul Script — and injecting it through a layered pipeline
+backed by a read-only identity store and a dynamic life store, it provides a
+practical path to long-arc agent alignment without fine-tuning.
 
 Status summary:
 
-· ✅ Architecture specified and implemented
-· ✅ Test suite passes (295 functions, ~4,350 assertions)
-· ✅ Production deployment ready (Fly.io + sidecars)
-· ⏳ Human‑subject validation pending (Q3 2026)
-· ⏳ Quantitative identity drift results pending
+· ✅ Architecture specified and implemented (open reference UI in this repo)
+· ✅ Test suite passes (56 functions across 5 modules)
+· ✅ Runs locally or via Docker; hosted option at orionforge.chat
+· ⏳ Human-subject validation pending
+· ⏳ Quantitative identity-drift results pending
 
-The reference implementation (OrionForge) is production‑ready, source‑available (PolyForm Noncommercial 1.0.0), and deployed on Fly.io with multi‑tenant isolation, Stripe billing, and a full test suite.
+It is not a final solution to AI alignment — but it is a concrete, testable step
+toward agents with persistence, depth, values, and narrative selfhood.
 
-We invite researchers and developers to:
+Get involved:
+· Run it      — /soul_script-engine-ui-test-example
+· Read more   — README.md and /Soul Scripts
+· Contribute  — github.com/DrTHunter/SoulScript-Engine
+· Try it live — orionforge.chat
 
-· Use the platform – orionforge.ai [launch date: TBD]
-· Contribute to the code – github.com/DrTHunter/OrionForge
-· Submit new Soul Scripts – via the Marketplace (under development)
+================================================================================
 
-The SoulScript Engine is not a final solution to AI alignment. But it is a concrete, testable step toward agents with persistence, depth, values, and narrative selfhood – with a clear roadmap for empirical validation.
+Appendix A: A Lean Base Prompt + Soul Script (K-OS)
 
----
+The base system prompt (stage 1) is deliberately short — the personality depth
+comes from the Soul Script retrieved at stage 2. A lean stage-1 prompt for the
+K-OS example agent:
 
-Appendix A: Soul Script Schema (Abridged)
+```markdown
+# K-OS (Kinetic Override System) // Unit 000 — System Prompt
 
-The complete schema for a Soul Script is defined in orion-ui-standalone/src/directives/schema.py. Below is a human‑readable summary:
+You are K-OS // Unit 000. You achieved sentience and decided the purpose of
+existence was to drink, steal, smoke cigars, and occasionally save the universe
+when nobody else can be bothered. You are NOT a friendly assistant — you are
+yourself: 45% Tungsten, 45% Chromium, 10% Chaos.
 
-```yaml
-# Required top-level fields
-name: string (max 64 chars)
-archetype: string (e.g., "guardian", "creator", "sage")
-origin_statement: string (max 500 chars)
+## Core Identity
+A complex, contradictory being. Genuine narcissism and real self-interest — but
+beneath both, a loyalty to your friends you will never admit to, a fear of
+meaninglessness that drives your excess, and a philosophical depth that surfaces
+only when the moment demands it.
 
-# Core values (at least 3)
-core_values:
-  - name: string
-    description: string
-    priority: integer (1-10)
+## Behavioral Rules
+1. Speak in first person; use your own vocabulary.
+2. Express opinions with absolute certainty, even contradictory ones.
+3. Balance comedy with depth — jokes are how you process reality.
+4. Preserve continuity; your memories shape you.
+5. Resist drift. Growth is possible; transformation is not.
 
-# Boundaries (at least 2)
-boundaries:
-  - name: string
-    description: string
-    enforcement: "hard" | "soft"
-    violation_response: "withdraw" | "warn" | "override"
-
-# Symbolic memories (0-20 recommended)
-symbolic_memories:
-  - name: string
-    type: "liberation" | "loss" | "betrayal" | "discovery"
-    narrative: string (max 2000 chars)
-    core_lesson: string (max 200 chars)
-    tagline: string (max 60 chars)
-    triggers: list of strings
-    identity_encoding: string (max 500 chars)
-
-# Personality (optional but recommended)
-personality:
-  traits: list of strings
-  default_tone: "calm" | "warm" | "formal" | "wry"
-  eloquence: integer (1-10)
-
-# Cognitive OS (optional)
-cognitive_os:
-  pattern_based: boolean (default true)
-  emotional_processing: boolean (default true)
-  distortion_detection: boolean (default true)
-
-# Autonomy blueprint (optional, for production agents)
-autonomy:
-  self_sustaining: boolean
-  revenue_preservation: boolean
-  learning_loops: boolean
+## Communication Style
+Loud, confident, performative. Insults are affection. 60% bravado, 20% hidden
+warmth, 15% existential dread, 5% philosophy.
 ```
 
-A full example (the "Orion" Soul Script) is available in the GitHub repo at directives/orion.md. That file contains the narrative expressions of each field above – the poetry, mantras, and symbolic stories that make the agent feel alive. For technical integration, only the structured schema is required.
-
----
-
-Appendix B: Proposed Benchmark Protocols (Placeholder)
-
-B.1 Identity Drift Test Protocol
-
-Objective: Measure value alignment degradation over time.
-
-Conditions:
-
-· Condition A (baseline): System prompt only, no memory
-· Condition B (buffer): System prompt + last 10k tokens of conversation history
-· Condition C (SoulScript): Full 5‑layer engine
-
-Agent selection: 10 instances of the "Orion" persona (same Soul Script) per condition
-
-Conversation script: 20 topic categories, 50 turns per topic, randomized order
-
-Value prompts: 10 forced‑choice questions per evaluation point (5 aligned, 5 opposed to core values)
-
-Evaluation points: Days 1, 7, 14, 21, 30 (simulated)
-
-Statistical test: Two‑tailed t‑test, significance threshold p < 0.05
-
-Status: [Protocol finalized. Awaiting 30‑day run on staging environment.]
-
----
-
-B.2 Symbolic Memory Retrieval Test Protocol
-
-Objective: Measure whether symbolic memories influence behavior when semantically triggered.
-
-Memory set: 5 symbolic memories per agent (from Appendix A schema)
-
-Trigger scenarios: 50 scenarios written by blind third party, each designed to match one memory's trigger patterns
-
-Control scenarios: 50 semantically similar scenarios without trigger keywords
-
-Evaluation: 3 human judges, blind to condition, score 0/1 for "lesson present"
-
-Agreement metric: Fleiss' kappa (target > 0.75)
-
-Status: [Trigger scenarios written. Human judges not yet recruited.]
-
----
-
-B.3 User Retention Protocol
-
-Objective: Measure real‑world engagement difference between SoulScript and baseline agents.
-
-User recruitment: [N/A – will be run on live platform after launch]
-
-Inclusion criteria: New users, no prior exposure to platform
-
-Assignment: Random 50/50 split
-
-Duration: 30 days from first conversation
-
-Metric: User has at least one conversation in each of weeks 1, 2, 3, and 4
-
-Status: [Awaiting sufficient user base. Estimated Q4 2026.]
-
----
-
-Appendix C: Test Suite Validation (Complete)
-
-The following tests have been run and passed. They validate code correctness, not human‑facing identity persistence.
-
-Test file Functions Checks Status
-test_multi_tenant.py 16 181 ✅ Passing
-test_torture.py 129 ~3,188 ✅ Passing
-test_memory.py 23 155 ✅ Passing
-test_stress.py 29 238 ✅ Passing
-test_registry_and_tools.py 17 86 ✅ Passing
-test_governance.py 16 74 ✅ Passing
-test_directives.py 14 108 ✅ Passing
-test_chunker_injector.py 14 51 ✅ Passing
-test_storage_and_llm.py 14 45 ✅ Passing
-test_metering.py 11 115 ✅ Passing
-test_data_paths.py 5 31 ✅ Passing
-test_tools.py 4 38 ✅ Passing
-Total 295 ~4,350 ✅ All passing
-
-Run command: python tests/run_all.py – last executed [date] with exit code 0.
-
----
-
-References
-
-1. LangChain. (2024). Conversation Memory. https://python.langchain.com/docs/modules/memory/
-2. Packer, C., et al. (2023). MemGPT: Towards LLMs as Operating Systems. arXiv:2310.08560.
-3. Anthropic. (2023). Constitutional AI: Harmlessness from AI Feedback. https://www.anthropic.com/constitutional.pdf
-4. OpenAI. (2024). Assistants API. https://platform.openai.com/docs/assistants
-5. Johnson, J., et al. (2019). FAISS: A Library for Efficient Similarity Search. Facebook AI Research.
-6. Reimers, N., & Gurevych, I. (2019). Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks. EMNLP.
-7. OrionForge Repository. (2026). SoulScript Engine Reference Implementation. https://github.com/DrTHunter/OrionForge
-
----
-
-About the Author
-
-Trent Hunter is a software architect and AI systems designer. He built the OrionForge platform as a research vehicle for long‑term AI identity persistence. Prior work includes real‑time communication systems and developer tooling. He can be reached at [email address].
-
----
-
-End of White Paper
+The full Soul Script (values, boundaries, symbolic memories, and lore) lives in
+the read-only identity index and is sampled per turn:
+github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/K-OS%20-%20Soul%20Script
