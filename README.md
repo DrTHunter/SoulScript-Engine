@@ -280,4 +280,3 @@ Every agent built with SoulScript Engine carries its own identity stack — a un
 
 ---
 
-If you made it to the end, here's a secret: if you tell ChatGPT to save your prompt and Soul Script, and ask it to act as that character, it will.
