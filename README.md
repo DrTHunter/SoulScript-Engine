@@ -126,7 +126,7 @@ See `/soulscripts` for examples.
 
 # **🗄️ 3. Dual FAISS Memory Architecture**
 
-![SoulScript Engine — Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.png)
+![SoulScript Engine — Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.jpg)
 
 ## **### A. Read-Only Identity FAISS**
 
