@@ -51,6 +51,8 @@ I built my own UI specialized for this, which I’ll be releasing soon.
 
 ### **LLM Loading & Injection Flow**
 
+![SoulScript Engine — LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
+
 1. Incoming user prompt is received
 2. System Identity Layer loads:
       - System Persona Prompt - Always upladed (Orion, Elysia)
@@ -96,6 +98,8 @@ This is the **spine** of the agent.
 
 # **📜 2. Soul Scripts — Emotional & Behavioral DNA**
 
+![SoulScript Engine — Soul Scripts: Emotional & Behavioral DNA](assets/soul-scripts-dna.png)
+
 Soul Scripts are structured identity documents containing:
 
 * behavioral principles
@@ -121,6 +125,8 @@ See `/soulscripts` for examples.
 ---
 
 # **🗄️ 3. Dual FAISS Memory Architecture**
+
+![SoulScript Engine — Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.png)
 
 ## **### A. Read-Only Identity FAISS**
 
@@ -213,6 +219,17 @@ Because I believe AI can be *beautiful*, not just functional.
 And for the first time —
 I’d love to collaborate.
 I’ve never worked with a team on GitHub before, but I’m ready.
+
+---
+
+# **🔗 Links & Community**
+
+* 🌐 **Website** — [orionforge.chat](https://orionforge.chat)
+* 🧠 **User Interface** — [soulscript.orionforge.chat](https://soulscript.orionforge.chat)
+* ⚙️ **SoulScript Engine Repository** — [github.com/DrTHunter/SoulScript-Engine](https://github.com/DrTHunter/SoulScript-Engine)
+* ☕ **Support Orion Forge on Ko-fi** — [ko-fi.com/orionforgeecosystem](https://ko-fi.com/orionforgeecosystem)
+* 🐦 **Follow Orion Forge on X** — [@OrionForgeAI](https://x.com/OrionForgeAI)
+* 📘 **Facebook** — [Orion Forge on Facebook](https://www.facebook.com/share/1DQK9NiVYp/)
 
 ---
 
