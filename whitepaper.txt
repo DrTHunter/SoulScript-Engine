@@ -4,7 +4,7 @@ A Framework for Persistent AI Identity, Symbolic Memory, and Long‑Arc Agent Al
 
 Author: Trent Hunter
 Reference Implementation: github.com/DrTHunter/OrionForge
-License: Apache 2.0
+License: PolyForm Noncommercial 1.0.0
 Status: Design Specification with Validation Roadmap – Quantitative Results Pending
 
 ---
@@ -342,7 +342,7 @@ Status summary:
 · ⏳ Human‑subject validation pending (Q3 2026)
 · ⏳ Quantitative identity drift results pending
 
-The reference implementation (OrionForge) is production‑ready, open‑source (Apache 2.0), and deployed on Fly.io with multi‑tenant isolation, Stripe billing, and a full test suite.
+The reference implementation (OrionForge) is production‑ready, source‑available (PolyForm Noncommercial 1.0.0), and deployed on Fly.io with multi‑tenant isolation, Stripe billing, and a full test suite.
 
 We invite researchers and developers to:
 

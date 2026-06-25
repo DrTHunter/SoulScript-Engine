@@ -270,9 +270,13 @@ And if you want to build with me, my door is open.
 ---
 
 ## License
-Apache 2.0 — see [LICENSE](LICENSE) for details.
+**PolyForm Noncommercial License 1.0.0** — see [LICENSE](LICENSE) for the full text. This is a *source-available* license, not an OSI "open source" license.
 
-Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt. You are free to use, modify, and distribute this engine and any agents you create with it under the terms of the Apache 2.0 license
+**Noncommercial use is free.** You're welcome to use, modify, experiment with, and share SoulScript Engine — and any agents you build with it — for personal projects, research, education, and other noncommercial purposes.
+
+**Commercial use requires a paid license.** If you want to use SoulScript Engine in or for a commercial product, service, or other revenue-generating activity, contact me via GitHub [@DrTHunter](https://github.com/DrTHunter) to arrange a commercial license.
+
+Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt.
 
 ---
 

@@ -9,7 +9,7 @@ The web dashboard lets you chat with agents, manage their memories, attach knowl
 ## Quick Links
 
 - [README.md](README.md) — Project overview, architecture, and agent roster
-- [LICENSE](LICENSE) — Apache 2.0 license
+- [LICENSE](LICENSE) — PolyForm Noncommercial 1.0.0 (source-available; commercial use requires a paid license)
 - [soul_script-engine-ui-testi-example.md](soul_script-engine-ui-test-example/docs/soul_script-engine-ui-testi-example.md) — Full AI engine + UI test walkthrough (installation, configuration, running, troubleshooting)
 
 ---
@@ -45,7 +45,7 @@ For the full step-by-step walkthrough (virtual environments, API key setup, agen
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE) for details.
+**PolyForm Noncommercial License 1.0.0** — see [LICENSE](LICENSE) for the full text. Noncommercial use (personal, research, education) is free; **commercial use requires a paid license** — contact me via GitHub [@DrTHunter](https://github.com/DrTHunter).
 
 Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt.
 
