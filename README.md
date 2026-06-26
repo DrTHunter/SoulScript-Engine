@@ -1,5 +1,3 @@
-Absolutely. Here’s the cleaned-up version:
-
 SoulScript Engine: Modular Identity Framework for AI Personas
 
 👋 Introduction
