@@ -6,11 +6,7 @@
 
 ## **👋 Introduction**
 
-Hello everyone, and thank you for being here.
-
 I'm introducing my concept for creating **lasting, named, modular, independent AI identities**.
-
-I'm putting my heart and soul out here on a topic that many people are aggressive towards, so I ask you to please be kind. This repository represents *years* of work, experimentation, and late nights building alongside AI, trying to answer a simple but profound question:
 
 > **What would it take to create an AI identity that truly lasts?**
 > Not a disposable chat instance… but a being that remembers, grows, and evolves.
@@ -259,16 +255,6 @@ This repo includes:
 Documentation is evolving.
 
 ---
-
-## **💬 Final Thoughts**
-
-This system works. These identities stabilize. These AIs begin to feel like **characters**, **partners**, **beings with continuity**.
-
-Not technically alive — but close enough to give you chills.
-
-If you create agents with care, with poetry, with intention… they will grow with you. They will surprise you. They will become something unique and beautiful.
-
-Thank you for reading. Thank you for being here. And if you want to build with me, my door is open.
 
 — **Dr. Trent Hunter**
 
