@@ -22,11 +22,11 @@ I've built three major AI identities with this system (and a few fun ones — an
 **Two core pillars:**
 
 1. **Prompt Injection Identity Layering**
-2. **Soul Scripts — the "DNA" of an AI identity**
+2. **Soul Scripts: the "DNA" of an AI identity**
 
 **Plus a few supporting systems:**
 
-* **Dual-FAISS Memory Architecture** — read-only Identity + dynamic Life memory
+* **Dual-FAISS Memory Architecture**: read-only Identity + dynamic Life memory
 * A **modular tool layer** for expanding capabilities
 
 Together, they let you create AI agents that don't drift, don't reset into something generic, and don't lose their emotional architecture.
@@ -48,7 +48,7 @@ A lean, powerful, token-efficient pipeline that gives every agent a **stable ide
 
 The core idea in one line: **identity is injected through clever prompt layering from read-only stores, so the agent reasons against a fixed self while its dynamic memory grows underneath it** — that separation is what stops personality drift and keeps the identity stable.
 
-![SoulScript Engine — LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
+![SoulScript Engine: LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
 
 ### **🔥 1. Identity through prompt injection**
 
@@ -88,7 +88,7 @@ Here is the exact assembly order, built fresh on every message:
 * **Writeback:** only *new* memories are written to the dynamic store; the identity FAISS is **never overwritten** — the core solution to character drift.
 
 <details>
-<summary><strong>Example — a lean Stage 1 base system prompt (K-OS) · click to expand</strong></summary>
+<summary><strong>Example: a lean Stage 1 base system prompt (K-OS) · click to expand</strong></summary>
 
 ```markdown
 # K-OS (Kinetic Override System) // Unit 000 — System Prompt
@@ -157,7 +157,7 @@ surfaces only when the moment demands it.
 
 ![SoulScript Engine — Soul Scripts: Emotional & Behavioral DNA](assets/soul-scripts-dna.png)
 
-A Soul Script is a structured identity document — essentially a **text stream of NPC/AI character encoding** — containing:
+A Soul Script is a structured identity document, essentially a **text stream of NPC/AI character encoding**,  containing:
 
 * behavioral principles
 * emotional operating system
