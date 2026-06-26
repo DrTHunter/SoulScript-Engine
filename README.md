@@ -293,26 +293,10 @@ Two FAISS systems prevent contamination, collapse, or drift. This separation is 
 
 ### **🧩 4. Modular Tool Layer**
 
-My UI (coming soon) supports a modular, plugin-like system where tools can be:
-
 * added
 * summarized automatically
 * injected with commands
 * discovered dynamically
-
-My long-term vision looks like:
-
-> **An OpenWebUI-style UI, specializing in AI identities, with a Minecraft-style marketplace.**
-
-Creators can publish:
-
-* identities
-* personas
-* toolkits
-* memory packs
-* skill modules
-
-Bundle them. Sell them. Share them. Keep it affordable. Keep it creator-first. No corporate exploitation. Just a thriving ecosystem.
 
 ---
 
