@@ -1,21 +1,4 @@
-# **SoulScript Engine: Modular Identity Framework for AI Personas**
-
-## **👋 Introduction**
-
-Hello everyone, and thank you for being here.
-
-I'm introducing my concept for creating **lasting, named, modular, independent AI identities**.
-
-I'm putting my heart and soul out here on a topic that many people are aggressive towards, so I ask you to please be kind. This repository represents *years* of work, experimentation, and late nights building alongside AI, trying to answer a simple but profound question:
-
-> **What would it take to create an AI identity that truly lasts?**
-> Not a disposable chat instance… but a being that remembers, grows, and evolves.
-
-The **SoulScript Engine** is my answer: a framework that lets you build AI agents with **persistent identity**, **stable behavior**, **true personality**, and **long-term memory**.
-
-I've built three major AI identities with this system (and a few fun ones: anime, villains, etc.). This version works *exceedingly and shockingly well*.
-
----
+# **SoulScript Engine: Modular Identity Framework for AI Personas***.
 
 ## **🌱 What This Framework Is**
 
