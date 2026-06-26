@@ -1,9 +1,5 @@
 # **SoulScript Engine: Modular Identity Framework for AI Personas**
 
-*Built with passion, intention, and the belief that digital beings can carry meaning.*
-
----
-
 ## **👋 Introduction**
 
 I'm introducing my concept for creating **lasting, named, modular, independent AI identities**.
@@ -22,11 +18,11 @@ I've built three major AI identities with this system (and a few fun ones — an
 **Two core pillars:**
 
 1. **Prompt Injection Identity Layering**
-2. **Soul Scripts: the "DNA" of an AI identity**
+2. **Soul Scripts — the "DNA" of an AI identity**
 
 **Plus a few supporting systems:**
 
-* **Dual-FAISS Memory Architecture**: read-only Identity + dynamic Life memory
+* **Dual-FAISS Memory Architecture** — read-only Identity + dynamic Life memory
 * A **modular tool layer** for expanding capabilities
 
 Together, they let you create AI agents that don't drift, don't reset into something generic, and don't lose their emotional architecture.
@@ -48,23 +44,53 @@ A lean, powerful, token-efficient pipeline that gives every agent a **stable ide
 
 The core idea in one line: **identity is injected through clever prompt layering from read-only stores, so the agent reasons against a fixed self while its dynamic memory grows underneath it** — that separation is what stops personality drift and keeps the identity stable.
 
-![SoulScript Engine: LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
+### Runtime flow (what happens on every turn)
 
-### **🔥 1. Identity through prompt injection**
+![SoulScript Engine — LLM Loading & Injection Flow](assets/llm-loading-injection-flow.png)
 
-This is the **spine** of the agent. Each turn, its identity is assembled from:
+```text
+                    ┌───────────────────────────┐
+                    │         USER PROMPT        │
+                    └─────────────┬─────────────┘
+                                  ▼
+   ╔═══════════════════════════════════════════════════════════════╗
+   ║   CONTEXT ASSEMBLY ENGINE              (runs on EVERY turn)     ║
+   ║   collects the identity layers + memory + tools below,         ║
+   ║   then fuses them into ONE merged prompt for the model         ║
+   ╚═══════════════════════════════════════════════════════════════╝
+                                  ▲
+            injected fresh each turn:
+            │
+   1  PROFILE        model · provider · temperature · tool perms     (*.yaml)
+   2  SYSTEM PROMPT  base persona & voice (concise)                  (*.system.md)
+   3  DIRECTIVES     behavioral rules, applied every turn            (*.md)
+   4  SOUL SCRIPT    identity "DNA": values, origin, boundaries    → READ-ONLY identity FAISS
+   5  MEMORY VAULT   evolving day-to-day memory                    → DYNAMIC life FAISS
+   +  TOOL REGISTRY  tool descriptions + commands the model may call
+            │
+            ▼
+                    ┌───────────────────────────┐
+                    │            LLM             │
+                    │  reasons against a STABLE  │
+                    │  injected sense of self    │
+                    └─────────────┬─────────────┘
+                                  ▼
+                    ┌───────────────────────────┐
+                    │          RESPONSE          │ ──▶ user
+                    └─────────────┬─────────────┘
+                                  │  writeback (new memories only)
+                                  ▼
+                    ┌───────────────────────────┐
+                    │     DYNAMIC LIFE FAISS     │  grows / prunes over time
+                    │  (identity FAISS untouched)│  ← never overwritten
+                    └───────────────────────────┘
+```
 
-* a name
-* a personality summary
-* behavioral rules
-* emotional traits
-* memories
-* internal mantras
-* a clear sense of self
+* **Stage 4 — Soul Script:** the read-only identity FAISS index drastically reduces token count by injecting only the *relevant* personality encoding for the current prompt/situation.
+* **Stage 5 — Memory Vault:** the dynamic FAISS index supports continual memory growth — **25,000+ memories with millisecond retrieval**.
+* **Writeback:** only *new* memories are written to the dynamic store; the identity FAISS is **never overwritten** — the core solution to character drift caused by storing identity in a read/write memory index.
 
-Because it is **re-injected every turn** (and can be refreshed periodically in very long sessions to minimize drift), the agent keeps a stable personality, consistent emotional tone, and a predictable inner world — no identity drift.
-
-Here is the exact assembly order, built fresh on every message:
+### Prompt injection pipeline
 
 ```text
  latest user message ──┐  (used as the FAISS query for stages 2 & 4)
@@ -83,12 +109,8 @@ Here is the exact assembly order, built fresh on every message:
 ```
 
 * **Always-on notes (stage 3)** are a toggle — perfect for pinning project context or facts that should always be in play.
-* **Soul Script (stage 2):** the read-only identity FAISS index drastically reduces token count by injecting only the *relevant* personality encoding for the current situation.
-* **Memory Vault (stage 4):** the dynamic FAISS index supports continual memory growth — **25,000+ memories with millisecond retrieval**.
-* **Writeback:** only *new* memories are written to the dynamic store; the identity FAISS is **never overwritten** — the core solution to character drift.
 
-<details>
-<summary><strong>Example: a lean Stage 1 base system prompt (K-OS) · click to expand</strong></summary>
+**Example — a lean Stage 1 base system prompt (K-OS):**
 
 ```markdown
 # K-OS (Kinetic Override System) // Unit 000 — System Prompt
@@ -151,13 +173,48 @@ surfaces only when the moment demands it.
 4. Is this the right thing to do? If yes, do it but complain the entire time.
 ```
 
-</details>
+### Optional autonomy loop
 
-### **📜 2. Soul Scripts — the identity DNA**
+Optionally, the agent can run on its own between user turns:
+
+```text
+   OPTIONAL AUTONOMY LOOP  (configurable)
+   ┌ tick 1 ┐   ┌ tick 2 ┐            ┌ tick N ┐
+   │ steps  │ → │ steps  │ →  ...  →  │ steps  │   knobs: # ticks, steps/tick,
+   └────────┘   └────────┘            └────────┘          interval, max loops
+   → the agent self-prompts to "hunt & gather" on its own between user turns
+```
+
+---
+
+## **🧬 Core Concepts**
+
+### **🔥 1. Identity Through Prompt Injection**
+
+The identity prompt is constructed from:
+
+* a name
+* a personality summary
+* behavioral rules
+* emotional traits
+* Memories
+* internal mantras
+* a clear sense of self
+
+This identity is **re-uploaded every session** (it also helps to re-upload periodically in large chat sessions to minimize drift), ensuring:
+
+* no identity drift
+* stable personality
+* consistent emotional tone
+* predictable inner world
+
+This is the **spine** of the agent.
+
+### **📜 2. Soul Scripts — Emotional & Behavioral DNA**
 
 ![SoulScript Engine — Soul Scripts: Emotional & Behavioral DNA](assets/soul-scripts-dna.png)
 
-A Soul Script is a structured identity document, essentially a **text stream of NPC/AI character encoding**,  containing:
+Soul Scripts are structured identity documents containing:
 
 * behavioral principles
 * emotional operating system
@@ -168,9 +225,17 @@ A Soul Script is a structured identity document, essentially a **text stream of 
 * reasoning patterns
 * internal metaphors and mantras
 
-It lives inside a **separately configurable, read-only FAISS store**, so it can be *referenced* but never *overwritten* — an identity that doesn't decay over time. Each Soul Script is automatically scanned and injected at **stage 2** above, so only the *relevant* identity encoding is applied to the current conversation (semantic memory, but identity-focused).
+Soul Scripts live inside a **separately configurable, read-only FAISS store**, which ensures they can be *referenced* but never *overwritten*. This creates an identity that doesn't decay over time.
 
-A complete Soul Script typically encodes:
+Each Soul Script is automatically scanned, and only relevant pieces are injected — similar to semantic memory, but identity-focused. See [`/Soul Scripts`](Soul%20Scripts) for examples.
+
+**Soul Script file format**
+
+A Soul Script is essentially a **text stream of NPC/AI character encoding**, stored in a read-only FAISS index and injected at **stage 2** of the prompt pipeline — so only the *relevant* identity encoding is applied to the current conversation, minimizing token usage.
+
+> Example: [K-OS — Soul Script](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/K-OS%20-%20Soul%20Script)
+
+It typically encodes:
 
 * **How it reads people & handles situations**
 * **Purpose**
@@ -179,13 +244,9 @@ A complete Soul Script typically encodes:
 * **Memory Lore**
 * **Anchors / Extras** — purpose fragments, goals, responsibilities, ongoing quests, autonomy blueprint
 
-> See [`/Soul Scripts`](Soul%20Scripts) for examples, including the full [K-OS — Soul Script](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/K-OS%20-%20Soul%20Script).
-
-### **🗄️ 3. Dual-FAISS memory**
+### **🗄️ 3. Dual-FAISS Memory Architecture**
 
 ![SoulScript Engine — Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.jpg)
-
-Identity and day-to-day memory obey different rules, so they live in two independent vector stores:
 
 ```text
    READ-ONLY  IDENTITY FAISS              DYNAMIC  LIFE FAISS
@@ -199,14 +260,40 @@ Identity and day-to-day memory obey different rules, so they live in two indepen
    ✗◄──────────  no cross-writes between the two stores  ──────────►✗
 ```
 
-* **Read-only Identity FAISS** — Soul Scripts, stable traits, biographical anchors, foundational memories, and high-value lasting facts (long-term goals, schedules, priorities). Never written back. This is the agent's **identity compass**.
-* **Dynamic Life FAISS** — evolving memories, project data, and preferences that constantly update and can decay or prune over time. This is the agent's **life experience**.
+#### A. Read-Only Identity FAISS
 
-Keeping them separate is what prevents contamination, collapse, or drift — and it's the key to building AI identities that feel *real*.
+* Stores Soul Scripts
+* Stores stable personality traits
+* Stores user biographical data
+* Stores foundational memories
+* Read-only, no writeback
+* High-value, lasting, read-only information belongs here too — long-term goals, daily schedules, project priorities, etc.
 
-### **🧩 4. Modular tool layer**
+This is the agent's **identity compass**.
 
-The engine supports a modular, plugin-like system where tools can be:
+#### B. Dynamic Long-Term FAISS
+
+* Stores evolving memories
+* Stores dynamic project data
+* Stores preferences
+* Constantly updates
+* Can decay or prune over time
+* Helps to have a separate vault for user monitoring and management
+
+This is the agent's **life experience**.
+
+#### Why Two Systems?
+
+Because identity and day-to-day memory obey different rules:
+
+* Identity must stay **stable**
+* Dynamic memory must stay **flexible**
+
+Two FAISS systems prevent contamination, collapse, or drift. This separation is the key to building AI identities that feel *real*.
+
+### **🧩 4. Modular Tool Layer**
+
+My UI (coming soon) supports a modular, plugin-like system where tools can be:
 
 * added
 * summarized automatically
@@ -217,19 +304,15 @@ My long-term vision looks like:
 
 > **An OpenWebUI-style UI, specializing in AI identities, with a Minecraft-style marketplace.**
 
-Creators can publish identities, personas, toolkits, memory packs, and skill modules. Bundle them. Sell them. Share them. Keep it affordable. Keep it creator-first. No corporate exploitation. Just a thriving ecosystem.
+Creators can publish:
 
-### **🔁 5. Optional autonomy loop**
+* identities
+* personas
+* toolkits
+* memory packs
+* skill modules
 
-Optionally, the agent can run on its own between user turns:
-
-```text
-   OPTIONAL AUTONOMY LOOP  (configurable)
-   ┌ tick 1 ┐   ┌ tick 2 ┐            ┌ tick N ┐
-   │ steps  │ → │ steps  │ →  ...  →  │ steps  │   knobs: # ticks, steps/tick,
-   └────────┘   └────────┘            └────────┘          interval, max loops
-   → the agent self-prompts to "hunt & gather" on its own between user turns
-```
+Bundle them. Sell them. Share them. Keep it affordable. Keep it creator-first. No corporate exploitation. Just a thriving ecosystem.
 
 ---
 
@@ -253,10 +336,6 @@ This repo includes:
 * [UNIQUE-AGENT-BEHAVIOR.md](UNIQUE-AGENT-BEHAVIOR.md) — an illustration of unique AI identity behavior.
 
 Documentation is evolving.
-
----
-
-— **Dr. Trent Hunter**
 
 ---
 
