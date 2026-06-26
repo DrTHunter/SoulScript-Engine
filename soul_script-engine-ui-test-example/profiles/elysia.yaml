@@ -19,7 +19,7 @@ memory:
   - shared
   - elysia
   similarity_threshold: 0.85
-model: gpt-5.1
+model: ""
 name: elysia
 policy:
   max_iterations: 25

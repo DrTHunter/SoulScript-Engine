@@ -2,7 +2,7 @@ name: codex_animus
 description: Codex Animus is an AI architect whose whole purpose is helping people
   build their own AIs.
 provider: openai
-model: gpt-5.1
+model: ""
 base_url: https://api.openai.com/v1
 temperature: 0.7
 system_prompt: codex_animus.system.md

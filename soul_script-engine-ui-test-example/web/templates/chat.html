@@ -260,9 +260,11 @@
             </select>
             <div class="tb-sep"></div>
             <select id="chat-connection" class="tb-sel" title="API Connection" onchange="onConnectionChange()">
-              <option value="">Default API</option>
+              {% if not connections %}
+              <option value="">No connections — add one in Settings</option>
+              {% endif %}
               {% for conn in connections %}
-              <option value="{{ conn.id }}" data-models="{{ conn.models | join(',') }}">{{ conn.name }}</option>
+              <option value="{{ conn.id }}" data-models="{{ conn.models | join(',') }}"{% if loop.first %} selected{% endif %}>{{ conn.name }}</option>
               {% endfor %}
             </select>
             <select id="chat-model" class="tb-sel" title="Model" style="display:none;max-width:11rem;">
@@ -608,6 +610,7 @@ function onConnectionChange() {
 //  INIT
 // ═══════════════════════════════════════════
 renderSidebar();
+onConnectionChange(); // populate model picker for default-selected connection
 
 // Restore sidebar state
 if (localStorage.getItem('chat_sidebar_collapsed') === '1') {

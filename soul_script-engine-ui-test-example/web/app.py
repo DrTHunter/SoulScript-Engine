@@ -59,6 +59,35 @@ async def _lifespan(application: FastAPI):
         invalidate_notes_faiss()          # force singleton to reload fresh index
     except Exception as exc:
         log.warning("[startup] NotesFAISS build skipped: %s", exc)
+
+    # Auto-seed a default Ollama connection on first run (empty connections list)
+    try:
+        store = _load_connections()
+        if not store.get("connections"):
+            ollama_url = "http://localhost:11434"
+            models: list[str] = []
+            try:
+                async with httpx.AsyncClient(timeout=5) as _client:
+                    _r = await _client.get(f"{ollama_url}/api/tags")
+                    _r.raise_for_status()
+                    models = sorted(m["name"] for m in _r.json().get("models", []))
+            except Exception:
+                pass  # Ollama not running yet — connection is added anyway
+            store["connections"].append({
+                "id": "ollama-local",
+                "name": "Ollama (Local)",
+                "type": "external",
+                "provider": "ollama",
+                "url": f"{ollama_url}/v1",
+                "api_key": "",
+                "models": models,
+                "enabled": True,
+            })
+            _save_connections(store)
+            log.info("[startup] Auto-seeded Ollama connection — %d model(s) found", len(models))
+    except Exception as exc:
+        log.warning("[startup] Ollama auto-seed skipped: %s", exc)
+
     yield
 
 app = FastAPI(title="SoulScript Engine", version="0.2.0", lifespan=_lifespan)
@@ -122,7 +151,7 @@ def _resolve_connection(connection_id: str | None, agent: str) -> dict | None:
         found = next((c for c in conns if c["id"] == mapped_id and c.get("enabled")), None)
         if found:
             return found
-    return next((c for c in conns if c.get("enabled") and c.get("type") == "external"), None)
+    return next((c for c in conns if c.get("enabled")), None)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -548,7 +577,10 @@ async def api_chat_send(req: ChatRequest):
     # Build prompt with all identity layers
     llm_messages, layers = _build_chat_messages(req.agent, chat_data["messages"])
 
-    # Resolve model
+    # Resolve model — prefer explicit override, then agent/profile setting.
+    # If the resolved name is not in the connection's known model list (e.g. a
+    # cloud model name used against a local Ollama connection), fall back to
+    # the first available model from the connection.
     profile = _load_profile(req.agent)
     agent_cfg = _get_agent_config(req.agent)
     model = (
@@ -557,9 +589,13 @@ async def api_chat_send(req: ChatRequest):
         or profile.get("model", "")
         or (conn["models"][0] if conn.get("models") else "gpt-4o-mini")
     )
+    if conn.get("models") and model not in conn["models"]:
+        model = conn["models"][0]
 
     # Call LLM API
     url = conn["url"].rstrip("/")
+    if conn.get("provider") == "ollama" and not url.endswith(("/v1", "/chat/completions")):
+        url += "/v1"
     if not url.endswith("/chat/completions"):
         url += "/chat/completions"
     headers = {"Content-Type": "application/json"}
@@ -567,7 +603,7 @@ async def api_chat_send(req: ChatRequest):
         headers["Authorization"] = f"Bearer {conn['api_key']}"
 
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=300) as client:
             resp = await client.post(url, json={
                 "model": model,
                 "messages": llm_messages,
@@ -665,9 +701,13 @@ async def api_chat_auto_title(chat_id: str):
 
     snippet = "\n".join(f"{m['role']}: {m['text'][:200]}" for m in data["messages"][:4])
     profile = _load_profile(agent)
-    model = _get_agent_config(agent).get("model") or profile.get("model", "") or "gpt-4o-mini"
+    model = _get_agent_config(agent).get("model") or profile.get("model", "") or (conn["models"][0] if conn.get("models") else "gpt-4o-mini")
+    if conn.get("models") and model not in conn["models"]:
+        model = conn["models"][0]
 
     url = conn["url"].rstrip("/")
+    if conn.get("provider") == "ollama" and not url.endswith(("/v1", "/chat/completions")):
+        url += "/v1"
     if not url.endswith("/chat/completions"):
         url += "/chat/completions"
     headers = {"Content-Type": "application/json"}
