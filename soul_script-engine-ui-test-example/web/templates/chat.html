@@ -415,7 +415,7 @@ function pushMsgEl(role, text, data, layers) {
           ${renderLayerRow(1, 'Base Prompt', layers.base_prompt?.chars + ' chars', layers.base_prompt?.preview)}
           ${renderLayerRow(2, 'Soul Script (Directive FAISS)', layers.soul_script?.chunks + ' chunks · ' + layers.soul_script?.chars + ' chars', layers.soul_script?.preview)}
           ${renderLayerRow(3, 'Always-On Knowledge', layers.always_on?.chunks + ' notes · ' + layers.always_on?.chars + ' chars', layers.always_on?.preview)}
-          ${renderLayerRow(4, 'Memory Vault', layers.vault?.memories + ' memories · ' + layers.vault?.chars + ' chars', (layers.vault?.snippets||[]).join('\\n---\\n'))}
+          ${renderLayerRow(4, 'Memory Vault', layers.vault?.memories + ' memories · ' + (layers.vault?.snapshot_chars||0) + ' snapshot chars · ' + layers.vault?.chars + ' total chars', (layers.vault?.snippets||[]).join('\\n---\\n'))}
           ${renderLayerRow(5, 'Conversation', layers.conversation?.turns + ' turns · ' + layers.conversation?.chars + ' chars', '')}
         </div>`;
     }

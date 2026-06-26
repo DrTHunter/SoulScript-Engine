@@ -155,12 +155,45 @@ class FAISSMemory:
             memory_id, text=text, category=category, tags=tags,
         )
         if text is not None:
-            # Text changed -> need to re-embed
-            # Mark old index entry as deleted, add new embedding
-            self._deleted_ids.add(memory_id)
+            # Text changed -> embed and append a new row for this id.
+            # `_id_to_idx[memory_id]` now points at the new row, so the
+            # old row is implicitly stale (see `search()`); the id
+            # itself must NOT go in `_deleted_ids` - it is still active.
             self._embed_and_add(new_ver)
             self._save_index()
         return new_ver
+
+    def update_by_topic(
+        self,
+        topic_id: str,
+        scope: str,
+        text: str,
+        category: str = "other",
+        tags: Optional[List[str]] = None,
+        source: str = "manual",
+    ) -> Memory:
+        """Upsert a register-tier memory keyed by topic_id (vault + FAISS in sync).
+
+        See `VaultStore.update_by_topic` - this just adds the re-embed
+        step so the FAISS index stays consistent with whichever branch
+        (create vs. in-place update) the vault took.
+        """
+        mem = self.vault.update_by_topic(
+            topic_id=topic_id, scope=scope, text=text,
+            category=category, tags=tags, source=source,
+        )
+        self._embed_and_add(mem)
+        self._save_index()
+        return mem
+
+    def snapshot(self, scope: Union[str, List[str]]) -> str:
+        """Always-injected Markdown block: canon facts + active registers.
+
+        Non-semantic (no embedding/search involved) - delegates straight
+        to the vault so identity facts can't be missed by a query that
+        doesn't match them well.  See `VaultStore.build_snapshot`.
+        """
+        return self.vault.build_snapshot(scope)
 
     def delete(self, memory_id: str) -> bool:
         """Soft-delete a memory in vault and exclude from FAISS results."""
@@ -215,7 +248,11 @@ class FAISSMemory:
             if idx >= len(self._idx_to_id):
                 continue
             vault_id = self._idx_to_id[idx]
-            if vault_id in self._deleted_ids:
+            if not vault_id or vault_id in self._deleted_ids:
+                continue
+            if self._id_to_idx.get(vault_id) != idx:
+                # Stale row: this id has since been re-embedded at a
+                # different row (see `update()`/`update_by_topic()`).
                 continue
 
             # Look up from vault for current data
@@ -294,11 +331,18 @@ class FAISSMemory:
         vault_stats = self.vault.stats()
         active = vault_stats["active_count"]
         raw = vault_stats["raw_lines"]
+        # Rows superseded by a re-embed (see `update()`) - still occupy
+        # a FAISS row but are no longer the current row for their id.
+        stale_rows = sum(
+            1 for i, vid in enumerate(self._idx_to_id)
+            if vid and self._id_to_idx.get(vid) != i
+        )
         vault_stats["active_memories"] = active  # alias for clarity
         vault_stats["faiss_vectors"] = self.index.ntotal if self.index else 0
         vault_stats["faiss_deleted"] = len(self._deleted_ids)
+        vault_stats["faiss_stale_rows"] = stale_rows
         vault_stats["faiss_effective"] = (
-            (self.index.ntotal if self.index else 0) - len(self._deleted_ids)
+            (self.index.ntotal if self.index else 0) - len(self._deleted_ids) - stale_rows
         )
         vault_stats["vault_total_lines"] = raw
         vault_stats["embedding_model"] = self.model_name
