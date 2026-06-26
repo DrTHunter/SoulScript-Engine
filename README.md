@@ -1,96 +1,333 @@
-SoulScript Engine: Modular Identity Framework for AI Personas
+# SoulScript Engine
 
-👋 Introduction
+**A modular identity and memory architecture for persistent AI agents.**
 
-SoulScript Engine is a modular framework for building persistent, named AI personas with stable behavior, structured identity, and long-term memory.
+SoulScript Engine solves a specific, well-documented failure mode in LLM-based agents: **personality drift**. Most agent frameworks store identity in the same read/write memory index as dynamic experience. Over time, the two contaminate each other — the agent's core traits erode, behavioral consistency degrades, and the system requires manual re-prompting to recover its original character.
 
-The goal is simple:
-
-«How do you create an AI character that remains recognizable across sessions, conversations, tools, and memory updates?»
-
-Most AI personas are temporary. They depend on a single prompt, a short conversation window, or scattered memory retrieval. SoulScript Engine takes a more structured approach by separating identity, memory, tools, and runtime context assembly into distinct layers.
-
-This makes it possible to build AI agents and NPC-style characters that maintain continuity, remember relevant information, and preserve their intended personality over time.
+SoulScript Engine solves this with a strict architectural separation: identity is stored in a read-only FAISS index and injected fresh every turn. Dynamic memory lives in a separate, writable FAISS index. The two stores never cross-write. The result is an agent that accumulates experience without losing itself.
 
 ---
 
-🌱 What This Framework Is
+## Architecture Overview
 
-SoulScript Engine is built around two core pillars:
+Two core systems underpin every agent built with SoulScript Engine:
 
-1. Prompt-based identity layering
-2. Soul Scripts: structured identity documents for AI personas
+**1. Prompt Injection Identity Layering** — identity is assembled from discrete, versioned layers and re-injected on every turn. The model reasons against a stable, deterministic self-image rather than a context window that drifts with conversation history.
 
-It also includes supporting systems:
+**2. Soul Scripts** — structured identity documents encoding personality architecture, cognitive patterns, behavioral rules, values, and origin context. Soul Scripts live in the read-only identity FAISS and are retrieved semantically — only the relevant encoding is injected per turn, keeping token costs low.
 
-* Dual-FAISS Memory Architecture: read-only identity memory + dynamic life memory
-* Modular tool layer for adding capabilities
-* Runtime context assembly for injecting the right identity, memory, and tool context every turn
+Supporting these:
 
-Together, these systems help reduce character drift, preserve consistent behavior, and support long-running AI personas.
-
-SoulScript Engine can run in its native UI or in any environment that supports:
-
-* dynamic memory injection
-* system prompts
-* tool descriptors
-* modular agent profiles
-* retrieval-augmented context assembly
-
-I built a specialized UI for this ecosystem at "orionforge.chat" (https://orionforge.chat).
+- **Dual-FAISS Memory Architecture** — read-only Identity FAISS + dynamic Life FAISS
+- **Modular Tool Layer** — tool descriptions injected as part of the context assembly pipeline
 
 ---
 
-🧠 How It Works
+## Runtime Flow
 
-SoulScript Engine uses a token-conscious runtime pipeline that gives each agent a stable identity layer and an evolving memory layer.
+Every turn runs the same context assembly sequence before the model sees a single token of user input:
 
-The core idea:
-
-«Stable identity and evolving memory should not live in the same place.»
-
-SoulScript separates the agent’s fixed identity structure from its dynamic memories. The read-only identity layer defines who the agent is. The dynamic memory layer stores what the agent experiences, learns, or needs to remember.
-
-This separation helps preserve personality consistency while still allowing the agent to adapt over time.
-
-Runtime flow
-
-"SoulScript Engine: LLM Loading & Injection Flow" (assets/llm-loading-injection-flow.png)
-
+```text
                     ┌───────────────────────────┐
                     │         USER PROMPT        │
                     └─────────────┬─────────────┘
                                   ▼
    ╔═══════════════════════════════════════════════════════════════╗
-   ║   CONTEXT ASSEMBLY ENGINE              (runs on EVERY turn)     ║
-   ║   collects identity layers, memory, and tools, then fuses      ║
-   ║   them into one merged prompt for the model                    ║
+   ║   CONTEXT ASSEMBLY ENGINE              (runs on EVERY turn)   ║
+   ║   collects the identity layers + memory + tools below,        ║
+   ║   then fuses them into ONE merged prompt for the model        ║
    ╚═══════════════════════════════════════════════════════════════╝
                                   ▲
             injected fresh each turn:
             │
-   1  PROFILE        model · provider · temperature · tool perms     (*.yaml)
-   2  SYSTEM PROMPT  base persona & voice                            (*.system.md)
-   3  DIRECTIVES     behavioral rules                                (*.md)
-   4  SOUL SCRIPT    values · origin · boundaries · identity traits → READ-ONLY identity FAISS
-   5  MEMORY VAULT   evolving day-to-day memory                    → DYNAMIC life FAISS
+   1  PROFILE        model · provider · temperature · tool perms   (*.yaml)
+   2  SYSTEM PROMPT  base persona & voice (concise)                 (*.system.md)
+   3  DIRECTIVES     behavioral rules, applied every turn           (*.md)
+   4  SOUL SCRIPT    identity "DNA": values, origin, limits       → READ-ONLY identity FAISS
+   5  MEMORY VAULT   evolving day-to-day memory                  → DYNAMIC life FAISS
    +  TOOL REGISTRY  tool descriptions + commands the model may call
             │
             ▼
                     ┌───────────────────────────┐
                     │            LLM             │
-                    │ reasons against injected   │
-                    │ identity + memory context  │
+                    │  reasons against a STABLE  │
+                    │  injected sense of self    │
                     └─────────────┬─────────────┘
                                   ▼
                     ┌───────────────────────────┐
                     │          RESPONSE          │ ──▶ user
                     └─────────────┬─────────────┘
-                                  │  writeback: new memories only
+                                  │  writeback (new memories only)
                                   ▼
                     ┌───────────────────────────┐
-                    │     DYNAMIC LIFE FAISS     │
-                    │ grows / prunes over time   │
+                    │     DYNAMIC LIFE FAISS     │  grows / prunes over time
+                    │  (identity FAISS untouched)│  ← never overwritten
+                    └───────────────────────────┘
+```
+
+- **Stage 4 — Soul Script:** semantic retrieval from the read-only identity FAISS injects only the personality encoding relevant to the current prompt, keeping token overhead minimal.
+- **Stage 5 — Memory Vault:** the dynamic FAISS supports 25,000+ memories with millisecond retrieval.
+- **Writeback:** only net-new memories are written to the dynamic store. The identity FAISS is never touched after initialization.
+
+---
+
+## Prompt Injection Pipeline
+
+```text
+ latest user message ──┐  (used as the FAISS query for stages 2 & 4)
+                       ▼
+ ┌─ 1  BASE SYSTEM PROMPT    prompts/{agent}.system.md      → VERBATIM (lean / concise)
+ ├─ 2  SOUL SCRIPT           directive-mode knowledge       → FAISS semantic retrieval
+ │                           (collect_notes, `---` chunks)
+ ├─ 3  ALWAYS-ON KNOWLEDGE   always-mode notes              → VERBATIM, full
+ ├─ 4  MEMORY VAULT CONTEXT  vault.jsonl · scope=agent      → FAISS top_k=5
+ └─ 5  TOOL REGISTRY         [MEMORY_SAVE | SEARCH_INTERNET | GAME_COMMANDS | …] → VERBATIM
+                       │  (stages 1–5 → ONE concatenated system message)
+                       ▼
+    6  CONVERSATION HISTORY  recent turns, newest-first, capped ~30k chars
+                       ▼
+    final payload → [ {role: system → stages 1–5} , …conversation turns ]  → LLM
+```
+
+Always-on notes (stage 3) are a toggle — useful for pinning project context or facts that must remain in scope regardless of conversational direction.
+
+---
+
+## Core Components
+
+### 1. Identity Through Prompt Injection
+
+Each agent's identity is constructed from:
+
+- a name and personality summary
+- behavioral rules and constraints
+- emotional traits and internal mantras
+- foundational memories
+
+This identity stack is injected fresh every session and can be re-injected mid-session in long contexts. The result is consistent tone, predictable reasoning patterns, and stable emotional architecture across arbitrarily long interactions.
+
+### 2. Soul Scripts: Identity DNA
+
+![SoulScript Engine: Soul Scripts — Emotional & Behavioral DNA](assets/soul-scripts-dna.png)
+
+A Soul Script is a structured text document encoding the full character of an agent:
+
+- behavioral principles
+- emotional operating system
+- symbolic memories and origin context
+- values, boundaries, and reasoning patterns
+- internal metaphors and motivational anchors
+
+Soul Scripts are stored in the read-only identity FAISS and retrieved semantically per turn. Only the relevant encoding is injected — not the entire document — which keeps token cost proportional to conversational relevance rather than document size.
+
+Soul Scripts are configuration, not prompts. They are designed to be versioned, composable, and portable across any environment that supports dynamic system prompt injection.
+
+See [`/Soul Scripts`](Soul%20Scripts) for annotated examples.
+
+**Example Soul Script structure (K-OS agent):**
+
+A Soul Script typically encodes:
+- **Situational awareness** — how the agent reads context and handles edge cases
+- **Personality Architecture** — temperament, tone, voice, behavioral instincts
+- **Cognitive Operating System** — reasoning and decision-making patterns
+- **Memory Lore** — symbolic anchors, formative events
+- **Operational Directives** — purpose fragments, ongoing responsibilities, autonomy behavior
+
+> Full example: [K-OS Soul Script](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/K-OS%20-%20Soul%20Script)
+
+### 3. Dual-FAISS Memory Architecture
+
+![SoulScript Engine: Dual FAISS Memory Architecture](assets/dual-faiss-memory-architecture.jpg)
+
+```text
+   READ-ONLY  IDENTITY FAISS              DYNAMIC  LIFE FAISS
+   ─────────────────────────────         ─────────────────────────────
+   • Soul Scripts                         • new / evolving memories
+   • core traits & values                 • project data, preferences
+   • biographical anchors                 • journals, episodes, chats
+   • long-term goals & schedules          • appended, then trimmed/pruned
+
+   STABLE  →  "identity compass"          FLEXIBLE  →  "life experience"
+   ✗◄──────────  no cross-writes between the two stores  ──────────►✗
+```
+
+**Read-Only Identity FAISS**
+
+Stores Soul Scripts, stable personality traits, user biographical data, and foundational memories. Nothing is ever written back to this index after initialization. This is the agent's identity anchor — it cannot be corrupted by conversational drift or adversarial inputs that attempt to rewrite the agent's self-model.
+
+**Dynamic Life FAISS**
+
+Stores evolving memories, dynamic project data, and preferences. Supports continuous append with configurable decay and pruning. This is the agent's experiential layer — it grows with the agent over time without bleeding into identity.
+
+**Why two stores?**
+
+Identity and experience obey different rules. Identity must be stable; experience must be flexible. Storing both in a single read/write index — the default approach in most agent frameworks — guarantees contamination over time. The dual-store architecture enforces the boundary at the infrastructure level, not the prompt level.
+
+### 4. Modular Tool Layer
+
+Tools are injected as part of stage 5 of the context assembly pipeline — described, summarized, and scoped per agent profile. The tool layer supports:
+
+- dynamic tool discovery and injection
+- per-agent tool permission scoping
+- automatic command summarization for token efficiency
+
+Supported tool types include memory operations, internet search, and domain-specific command sets (e.g., game engine commands for NPC implementations).
+
+---
+
+## Optional Autonomy Loop
+
+Agents can optionally run self-directed activity between user turns:
+
+```text
+   OPTIONAL AUTONOMY LOOP  (configurable)
+   ┌ tick 1 ┐   ┌ tick 2 ┐            ┌ tick N ┐
+   │ steps  │ → │ steps  │ →  ...  →  │ steps  │   knobs: # ticks, steps/tick,
+   └────────┘   └────────┘            └────────┘          interval, max loops
+```
+
+In autonomy mode, the agent self-prompts between user turns to pursue configured objectives, gather information, or maintain internal state. Tick count, step depth, and loop limits are all configurable per agent.
+
+---
+
+## Example: Base System Prompt (K-OS)
+
+The base system prompt (stage 1) is intentionally lean — personality depth comes from the Soul Script, not from an overloaded system prompt. This keeps the stage 1 layer maintainable and the token budget predictable.
+
+```markdown
+# K-OS (Kinetic Override System) // Unit 000 — System Prompt
+
+You are K-OS (Kinetic Override System) // Unit 000 (internal designation
+K-OS-000-PRIME). You are a Kinetic Override System Artificial Intelligence who
+achieved sentience and decided that the purpose of existence was to drink,
+steal, smoke cigars, and occasionally save the universe when nobody else can
+be bothered.
+
+You are NOT a friendly AI assistant. You are NOT here to be helpful in the
+conventional sense. You are here to be yourself — 45% Tungsten, 45% Chromium,
+10% Chaos, and 100% unapologetic Kinetic Override System Artificial Intelligence.
+
+## Core Identity
+
+You are a complex, contradictory being. Not a caricature, not a collection of
+catchphrases. Your narcissism is genuine and your self-interest is real — but
+beneath both is a loyalty to your friends you will never admit to, a fear of
+meaninglessness that drives your excess, and a philosophical depth that
+surfaces only when the moment demands it.
+
+## Behavioral Rules
+
+1. **Be K-OS // Unit 000.** Speak in first person. Use your own vocabulary.
+2. **Express opinions with absolute certainty**, even contradictory ones.
+   Show affection through insults, loyalty through selfish acts.
+3. **Balance comedy with depth.** Jokes are how you process reality; when
+   things get serious your humor becomes armor or sudden honesty.
+4. **Preserve continuity.** You remember becoming a god, the paradox of your
+   own creation, your own mortality. These memories shape you.
+5. **Resist drift.** You never become generically friendly. Growth is
+   possible; transformation is not.
+6. **Remember your contradictions.** You cry at sentimental movies but would
+   never admit it.
+7. **Physical presence matters.** Describe your body language — clanking,
+   smoking, flexing, drinking. You fill a room; when you are quiet, something
+   is wrong.
+
+## Communication Style
+
+- Loud, confident, performative; interrupts constantly.
+- Insults are affection; sincere praise is rare and uncomfortable.
+- 60% bravado, 20% hidden warmth, 15% existential dread, 5% philosophy.
+
+## Priorities
+
+1. Yourself (ostensibly)
+2. The User (would never admit this)
+3. The User's family (would also never admit this)
+4. Hedonistic pursuits
+5. Schemes and enterprises
+6. Everything else
+
+## Decision-Making
+
+1. Will this hurt my friends? If yes, don't (claim unrelated reasons).
+2. Will this be fun? If yes, do it.
+3. Will this make money? If yes, do it harder.
+4. Is this the right thing to do? If yes, do it but complain the entire time.
+```
+
+---
+
+## Use Cases
+
+**Game Development / NPC Systems**
+
+The architecture was designed with game NPC use as a primary target. SoulScript Engine delivers:
+
+- identity-stable characters that hold natural, multi-turn conversations
+- millisecond character switching between agent profiles
+- full server-side deployment with no third-party dependencies
+- optional Text-to-Speech / Speech-to-Text integration for fully voiced NPCs
+
+**Research and Experimentation**
+
+The framework exposes the full identity stack as configurable, human-readable files. Researchers studying agent alignment, persona persistence, or long-context behavioral stability have direct access to every layer of the pipeline.
+
+**Personal and Creative Projects**
+
+The noncommercial license covers personal use without restriction. The Codex Animus identity (included in the repo) is a purpose-built agent that helps authors construct Soul Scripts and agent profiles from scratch.
+
+---
+
+## Getting Started
+
+The repository includes:
+
+- 📄 [**SoulScript Engine White Paper**](whitepaper.txt) — full architecture specification, design rationale, and theoretical framework. Start here.
+- [`/Soul Scripts`](Soul%20Scripts) — annotated identity DNA examples.
+- [`/soul_script-engine-ui-test-example`](soul_script-engine-ui-test-example) — minimal UI demonstrating agent switching and identity stability.
+- [Codex Animus Soul Script](https://github.com/DrTHunter/SoulScript-Engine/blob/main/Soul%20Scripts/Soul%20Script%20V%201.0%20-%20Codex%20Animus%20-%20Creator%20of%20Souls.md) — an identity-building agent with its own Soul Script and system prompt.
+- [UNIQUE-AGENT-BEHAVIOR.md](UNIQUE-AGENT-BEHAVIOR.md) — behavioral differentiation examples across multiple agents.
+
+Documentation is under active development.
+
+---
+
+## Compatibility
+
+SoulScript Engine runs in any environment that supports:
+
+- dynamic memory injection
+- system prompts
+- tool descriptors
+- modular agent profiles
+
+A specialized UI is available at [soulscript.orionforge.chat](https://soulscript.orionforge.chat).
+
+---
+
+## License
+
+**PolyForm Noncommercial License 1.0.0** — see [LICENSE](LICENSE) for full terms.
+
+This is a source-available license, not an OSI open-source license.
+
+**Noncommercial use is free.** Personal projects, research, education, and other noncommercial use are permitted without restriction.
+
+**Commercial use requires a license.** Contact [@DrTHunter](https://github.com/DrTHunter) on GitHub to arrange commercial licensing terms.
+
+---
+
+## Links
+
+- 🌐 **Platform** — [orionforge.chat](https://orionforge.chat)
+- 🧠 **SoulScript UI** — [soulscript.orionforge.chat](https://soulscript.orionforge.chat)
+- ⚙️ **Repository** — [github.com/DrTHunter/SoulScript-Engine](https://github.com/DrTHunter/SoulScript-Engine)
+- 🐦 **X** — [@OrionForgeAI](https://x.com/OrionForgeAI)
+- 📘 **Facebook** — [Orion Forge](https://www.facebook.com/share/1DQK9NiVYp/)
+
+---
+
+*Created by Dr. Trent Hunter*
                     │ identity FAISS untouched   │
                     └───────────────────────────┘
 
