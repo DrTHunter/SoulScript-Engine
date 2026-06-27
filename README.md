@@ -336,10 +336,11 @@ Documentation is evolving.
 
 ## **License**
 
-**PolyForm Noncommercial License 1.0.0** — see [LICENSE](LICENSE) for the full text. This is a *source-available* license, not an OSI "open source" license.
+SoulScript Engine is **dual-licensed** — choose whichever fits; you only need one:
 
-**Noncommercial use is free.** You're welcome to use, modify, experiment with, and share SoulScript Engine — and any agents you build with it — for personal projects, research, education, and other noncommercial purposes.
+- **Open source — GNU AGPL v3.0** — see [LICENSE](LICENSE). Free to use, modify, and self-host, provided you comply with the AGPL's copyleft terms (including making your source available if you deploy a modified version over a network).
+- **Commercial — OrionForge / SoulScript Engine License** — see [LICENSE.md](LICENSE.md). A builder-friendly alternative for closed-source or commercial products: **free until your product reaches $100k in lifetime gross revenue, then 5% of net revenue** attributable to the engine — public terms, self-serve, no pre-approval. Enterprise / white-label / custom: contact **dr_hunter@yahoo.com**.
 
-**Commercial use requires a paid license.** If you want to use SoulScript Engine in or for a commercial product, service, or other revenue-generating activity, contact me via GitHub [@DrTHunter](https://github.com/DrTHunter) to arrange a commercial license.
+Pick AGPL if you're happy to open-source your work; pick the commercial license if you need to keep it closed or ship a paid product. Either way you can run it locally for free — and any agents you build with it are yours. Support development on [Ko-fi](https://ko-fi.com/orionforgeecosystem) if it helps you. ☕
 
 Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt.
