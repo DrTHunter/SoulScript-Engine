@@ -1,6 +1,6 @@
 # OrionForge / SoulScript Engine License
 
-**Version 1.0 — "Use Until ROI, Then Revenue-Share"**
+**Version 1.1 — "Free Until $100k, Then 5%"**
 Copyright © 2026 Trent Hunter (DrTHunter). All rights reserved.
 
 ---
@@ -11,22 +11,23 @@ Copyright © 2026 Trent Hunter (DrTHunter). All rights reserved.
 > - **AGPL v3** — free, but copyleft: if you build on it or deploy a modified version
 >   over a network, you must make your source available under AGPL too.
 > - **This commercial license** — for closed-source or commercial products: free
->   until your project recovers its investment, then a revenue share by written
->   agreement. Pick this if AGPL's copyleft doesn't work for you.
+>   until your product reaches **$100,000 in lifetime gross revenue**, then **5% of
+>   net revenue** attributable to the Software. Pick this if AGPL's copyleft doesn't
+>   work for you.
 
 ---
 
 ## Plain-English summary
 
-> **You can use this for free until it makes you money.** Run it on your own
-> machine, learn from it, and build with it — including building a product or
-> putting it in a game — and you owe nothing while you're getting started and
-> earning back what you invested. Once your project has recovered its investment
-> and is genuinely profiting from this Software, a share of that revenue comes
-> back to me, at a percentage we agree **in writing**. If you're going to make
-> money with it, just reach out first: **dr_hunter@yahoo.com**.
+> **Free to start. You only pay once you're winning.** Run it locally, learn from it,
+> and build with it — including shipping a commercial product or putting it in a game —
+> and you owe nothing until your product passes **$100,000 in total gross revenue**.
+> After that, **5% of the net revenue the engine helps you earn** comes back to me.
+> No pre-approval, no haggling, no sales call: the standard terms below apply
+> automatically. Bigger or unusual plans — white-label, exclusivity, enterprise, or a
+> flat fee instead of a share — email **dr_hunter@yahoo.com** and we'll tailor a deal.
 >
-> Coffee is always appreciated but never required: https://ko-fi.com/orionforgeecosystem
+> Coffee is appreciated but never required: https://ko-fi.com/orionforgeecosystem
 
 This summary is for convenience. The terms below govern.
 
@@ -44,15 +45,16 @@ This summary is for convenience. The terms below govern.
 - **"Commercial Use"** — embedding, deploying, or distributing the Software (or a
   derivative) as part of a product, service, game, or offering from which You
   intend to, or do, derive revenue.
-- **"Investment"** — the documented, good-faith costs You incur to build and
-  ship Your product incorporating the Software (development, art, infrastructure,
-  and directly attributable costs). It does not include unrelated business costs.
-- **"Cost Recovery" (ROI)** — the point at which cumulative Net Revenue
-  attributable to the product incorporating the Software equals Your Investment.
-- **"Net Revenue"** — gross revenue attributable to the product incorporating the
-  Software, less payment-processing fees, refunds, and applicable taxes.
-- **"Revenue Share"** — the agreed percentage of Net Revenue payable to the
-  Licensor after Cost Recovery (see Section 4).
+- **"Gross Revenue"** — the total, cumulative, lifetime gross receipts You earn
+  from the product or service incorporating the Software.
+- **"Revenue Threshold"** — **US $100,000** in cumulative lifetime Gross Revenue
+  of the product or service incorporating the Software.
+- **"Net Revenue"** — revenue attributable to the Software, less payment-processing
+  fees, refunds, and applicable taxes. Where the Software is one component of a
+  larger product, the attributable share is settled in good faith when You reach
+  the Revenue Threshold (see Section 5).
+- **"Revenue Share"** — **5%** of Net Revenue, payable to the Licensor on revenue
+  earned after the Revenue Threshold is reached.
 
 ## 2. Grant — Personal & Noncommercial Use
 
@@ -60,34 +62,33 @@ The Licensor grants You a free, worldwide, perpetual, non-exclusive license to
 use, copy, modify, and self-host the Software for Personal / Noncommercial Use,
 including downloading and running it locally on Your own systems at no cost.
 
-## 3. Grant — Commercial Use (Free Until ROI)
+## 3. Grant — Commercial Use (Free Until $100k)
 
-The Licensor grants You a license to make Commercial Use of the Software,
-**at no fee, until Cost Recovery is reached.** You may put the Software into a
-product, application, game, or service, ship it, and earn from it during this
-period without owing any royalty. This pre-ROI grant is conditioned on Your
-compliance with Sections 4–6.
+The Licensor grants You a worldwide, non-exclusive license to make Commercial Use
+of the Software **at no fee until Your product reaches the Revenue Threshold
+($100,000 in lifetime Gross Revenue).** Build it, ship it, and earn up to that
+point owing no royalty. **No pre-approval, sales call, or signed agreement is
+required** to use the Software under these standard terms — just build.
 
-## 4. Revenue-Share (After ROI)
+## 4. Revenue Share — 5% After the Threshold
 
-Once Your product reaches Cost Recovery, You agree to pay the Licensor the
-**Revenue Share** on Net Revenue attributable to the Software thereafter.
+Once Your product passes the Revenue Threshold, You agree to pay the Licensor a
+**Revenue Share of 5% of Net Revenue** attributable to the Software, on revenue
+earned *after* the threshold. The first $100,000 is always royalty-free.
 
-> **Revenue Share percentage: `____%` of Net Revenue** *(to be agreed in writing
-> per Section 5 before commercial launch; left blank intentionally until agreed).*
+These standard terms apply automatically; You do not need the Licensor's prior
+approval to build on or ship the Software under them.
 
-The parties may agree to caps, tiers, reporting cadence, and audit rights in the
-written agreement. Absent a signed agreement, the pre-ROI commercial grant in
-Section 3 does not extend past Cost Recovery, and continued Commercial Use after
-ROI without an agreement is not licensed.
+## 5. Payment, Reporting & Custom Deals
 
-## 5. Written Agreement (Required for Commercial Use)
-
-If You intend to make Commercial Use of the Software, You must contact the
-Licensor at **dr_hunter@yahoo.com** and enter a simple written licensing
-agreement recording the Revenue Share percentage and terms **before** Your
-commercial launch (or promptly upon first commercial revenue). The Licensor
-intends to keep this lightweight and builder-friendly.
+- **Crossing the threshold.** When Your product passes the Revenue Threshold,
+  contact the Licensor at **dr_hunter@yahoo.com** to set up lightweight reporting
+  and payment of the Revenue Share, and to settle in good faith the share of
+  revenue attributable to the Software. The Licensor intends to keep this simple
+  and builder-friendly.
+- **Enterprise / custom.** For white-label use, exclusivity, redistribution, a
+  flat-fee license instead of a revenue share, or any arrangement that doesn't fit
+  the standard terms above, contact the Licensor to negotiate a custom agreement.
 
 ## 6. Attribution
 
@@ -114,10 +115,10 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 ## 10. Termination
 
-This license terminates automatically if You make Commercial Use past Cost
-Recovery without the written agreement required by Sections 4–5, or otherwise
-materially breach these terms and fail to cure within 30 days of notice.
-Personal / Noncommercial rights under Section 2 survive good-faith use.
+This license terminates automatically if You make Commercial Use past the Revenue
+Threshold without paying the Revenue Share (or arranging terms under Section 5),
+or otherwise materially breach these terms and fail to cure within 30 days of
+notice. Personal / Noncommercial rights under Section 2 survive good-faith use.
 
 ## 11. Contact
 
@@ -137,5 +138,5 @@ Web: https://orionforge.chat · GitHub: https://github.com/DrTHunter
   is retired in favor of this dual-license model.
 - **This is a plain-language custom license, not legal advice.** For any
   significant commercial arrangement, both parties should have it reviewed by a
-  lawyer. The intent is a fair, builder-first deal: free to start, share when you
-  win.
+  lawyer. The intent is a fair, builder-first deal: free to start, a modest share
+  only once you're genuinely winning.

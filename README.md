@@ -339,7 +339,7 @@ Documentation is evolving.
 SoulScript Engine is **dual-licensed** — choose whichever fits; you only need one:
 
 - **Open source — GNU AGPL v3.0** — see [LICENSE](LICENSE). Free to use, modify, and self-host, provided you comply with the AGPL's copyleft terms (including making your source available if you deploy a modified version over a network).
-- **Commercial — OrionForge / SoulScript Engine License** — see [LICENSE.md](LICENSE.md). A builder-friendly alternative for closed-source or commercial products: **free to run locally, and free to ship until your project recovers its investment** — then a revenue share by written agreement. Contact **dr_hunter@yahoo.com**.
+- **Commercial — OrionForge / SoulScript Engine License** — see [LICENSE.md](LICENSE.md). A builder-friendly alternative for closed-source or commercial products: **free until your product reaches $100k in lifetime gross revenue, then 5% of net revenue** attributable to the engine — public terms, self-serve, no pre-approval. Enterprise / white-label / custom: contact **dr_hunter@yahoo.com**.
 
 Pick AGPL if you're happy to open-source your work; pick the commercial license if you need to keep it closed or ship a paid product. Either way you can run it locally for free — and any agents you build with it are yours. Support development on [Ko-fi](https://ko-fi.com/orionforgeecosystem) if it helps you. ☕
 
