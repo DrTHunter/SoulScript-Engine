@@ -6,23 +6,24 @@ The Memory System — FAISS semantic search backed by vault.jsonl storage, plus 
 
 | File | Purpose |
 |------|---------|
-| `types.py` | `Memory` dataclass, taxonomy tiers, valid scopes/categories/sources, write-gate constants |
-| `vault.py` | `VaultStore` class — all CRUD + search + write-gating + consolidation + promotion + snapshot |
+| `types.py` | `Memory` dataclass, taxonomy tiers, valid tiers/categories/sources, length cap |
+| `vault.py` | `VaultStore` class — append-only JSONL CRUD, versioning, topic upsert, snapshot |
 | `faiss_memory.py` | `FAISSMemory` class — semantic search over vault memories using FAISS + sentence-transformers |
 | `notes_faiss.py` | `NotesFAISS` class — read-only FAISS index over chunked soul scripts & knowledge notes |
 | `load_and_index.py` | Builds the NotesFAISS index from user notes JSON files. Runnable as `python -m src.memory.load_and_index` |
 | `chunker.py` | `SemanticChunker` — splits documents by `### H3` headers with configurable size limits |
 | `pii_guard.py` | Regex-based PII detection (SSN, credit cards, passwords, API keys) |
-| `injector.py` | `build_memory_block()` (relevance-filtered) and `build_snapshot_block()` (always-injected) for prompt injection |
 | `faiss_schema.json` | JSON Schema for FAISS configuration |
 | `FAISS_README.md` | Detailed documentation for the FAISS vector memory system |
+
+Prompt injection (the always-injected snapshot + relevance-filtered search) is wired directly in `web/app.py` via `FAISSMemory.snapshot()` and `FAISSMemory.search()` — there is no separate injector module.
 
 ## Two FAISS Systems
 
 ### 1. FAISSMemory (Mutable — Vault Memories)
 - Backed by `data/memory/vault.jsonl` as source of truth
 - FAISS index is an ephemeral cache rebuilt as needed
-- Supports add, update, delete, search
+- Supports add, update, update_by_topic, delete, search, snapshot
 - Stores: canon memories, register memories, user-created facts
 
 ### 2. NotesFAISS (Immutable — Knowledge Notes)
@@ -76,60 +77,40 @@ Each record has an `id` and `version` (starts at 1). On read, the vault scans al
 - **Update:** Appends a new line with same `id`, `version + 1`, updated fields
 - **Delete:** Appends a tombstone line with same `id`, `version + 1`, `deleted_at` set
 - **Bulk Delete:** Resolves latest state once, appends tombstones for all valid IDs in a single pass
-- **Bulk Add:** Adds multiple memories in one pass with per-item validation
 - **Read:** Resolves latest versions, filters out tombstones
 
 ## Write-Gate Pipeline
 
-Every `add_memory()` / `bulk_add()` call passes through the write-gate before storage:
+Every `create_memory()` / `update_memory()` call passes through these checks before storage:
 
-1. **Reject LOG-tier noise** — scans text for journal-only signals (`tick marker`, `runtime snapshot`, `check-in`, `heartbeat`, `no changes`, `nothing to report`, `status unchanged`, `routine scan`, `ephemeral`)
-2. **Reject `tier="log"`** — explicit log tier is always blocked
-3. **Length gate** — text over 1200 chars is rejected (compress or split first)
-4. **Scope / tier / source validation**
-5. **PII guard** — blocks SSNs, credit card numbers, passwords, API keys
-6. **Register upsert** — if `tier=register` and `topic_id` matches an existing active record in the same scope → version-bump update instead of new record
-7. **Duplicate gate** — blocks near-duplicates (token overlap ≥ 60% or SequenceMatcher ≥ 70%)
-8. **Capacity gate** — rejects when vault is full (default 100 active)
+1. **Empty-text rejection** — text must be non-blank after `strip()`
+2. **Length gate** — text over `MAX_MEMORY_TEXT_LENGTH` (1200) chars is rejected (compress or split first)
+3. **Tier validation** — `tier` must be one of `VALID_TIERS` (`canon`, `register`); `"log"` and any other value is rejected
+4. **PII guard** — blocks SSNs, credit card numbers, passwords, API keys
+
+Note what's *not* here yet, despite being defined in `types.py`/imagined in earlier drafts: there is no scope/category/source validation against `VALID_SCOPES`/`VALID_CATEGORIES`/`VALID_SOURCES`, no `JOURNAL_ONLY_SIGNALS` noise filter, no duplicate-detection gate, and no capacity gate. Callers should not rely on the vault to catch those.
 
 ## Topic-Based Upsert (Registers)
 
-Register-tier memories use `topic_id` as a stable key to avoid paraphrase spam:
+Register-tier memories use `topic_id` as a stable key to avoid paraphrase spam. `vault.update_by_topic(topic_id, scope, text, ...)` (or `FAISSMemory.update_by_topic(...)` to keep the FAISS index in sync) creates the record on first call and version-bumps it **in place** on every subsequent call with the same `topic_id` + `scope`:
 
 ```python
 # First call creates a new register
-vault.add_memory("Projects: dashboard, memory upgrade",
-                 "shared", "project", tier="register", topic_id="current_projects")
+vault.update_by_topic("current_projects", "shared",
+                       "Projects: dashboard, memory upgrade")
 
-# Second call with same topic_id + scope → updates in place (version bump)
-vault.add_memory("Projects: dashboard, memory upgrade, email integration",
-                 "shared", "project", tier="register", topic_id="current_projects")
+# Second call with same topic_id + scope -> updates in place (version bump)
+vault.update_by_topic("current_projects", "shared",
+                       "Projects: dashboard, memory upgrade, email integration")
 ```
-
-Explicit upsert API: `vault.update_by_topic(topic_id, scope, text, ...)` — creates if missing, updates if exists.
-
-## Consolidation & Promotion
-
-| Method | Purpose |
-|--------|---------|
-| `find_consolidation_candidates(scope, floor)` | Find pairs of similar active memories (for merging review) |
-| `propose_deletions(scope)` | Identify deletion candidates with reasons — **never auto-deletes** |
-| `promote_to_canon(memory_id, canonical_text)` | Upgrade register → canon tier (`source="promotion"`) |
 
 ## Snapshot (Always-Injected Summary)
 
-`vault.build_snapshot(scope)` produces a compact Markdown block containing:
+`vault.build_snapshot(scope)` (or `FAISSMemory.snapshot(scope)`, which just delegates to it) produces a compact Markdown block containing:
 - All **canon** memories (invariants)
 - **Register** memories that have a `topic_id` (actively maintained state)
 
-This is meant to be always-injected alongside notes — small and high-signal.
-
-## Injection Modes
-
-| Function | Mode | Use case |
-|----------|------|----------|
-| `build_snapshot_block(vault, scopes)` | Always-injected | Canon + active registers as compact summary |
-| `build_memory_block(vault, scopes, query=...)` | Relevance-filtered | Search/recall with tier-aware grouping (canon first) |
+This is *not* a similarity search — it's a flat scan of the vault, so identity/bio facts can't be missed just because a query doesn't match them well. `web/app.py` injects this block into the system prompt on every turn (always-on), separately from the relevance-filtered `FAISSMemory.search()` results used for episodic recall (canon facts are excluded from search results to avoid double-injecting them).
 
 ## Scoping
 
@@ -138,18 +119,19 @@ Scopes are dynamic per agent: `shared` + the agent's own name. Each agent sees `
 ## Safety
 
 - **PII guard:** Blocks memories containing SSNs, credit card numbers, passwords, API keys
-- **Write-gate:** Rejects ephemeral/journal-only noise before it reaches the vault
-- **Duplicate detection:** Blocks near-duplicates (token overlap or sequence similarity) within the same scope
+- **Length/tier gates:** Rejects over-length text and any tier outside `canon`/`register` (see Write-Gate Pipeline above)
 - **Concurrent safety:** Append-only means no file locks needed — two agents can write simultaneously
-- **Deletion safety:** `propose_deletions()` only suggests — never auto-deletes
+- **Deletion safety:** Deletes are soft (tombstone, `deleted_at` set) — nothing is physically removed except by explicit `compact()`
+
+There is no duplicate-detection gate and no automated consolidation/promotion tooling — paraphrase spam is only avoided where callers use `update_by_topic()` for register-tier state instead of creating a fresh record on every write.
 
 ## Search Scoring
 
-Token overlap + substring bonus (+0.3) + SequenceMatcher ratio × 0.4. Requires at least one matching token.
+`FAISSMemory.search()` is pure cosine similarity: query and memory text are both embedded with `all-mpnet-base-v2`, L2-normalized, and compared via `IndexFlatIP` (inner product on normalized vectors == cosine similarity). The returned `score` is that similarity, highest first.
 
 ## Vault Health
 
-`vault_stats()` returns: active count, max, utilization %, deleted count, raw lines, bloat ratio, breakdown by scope/tier/category, register topic count.
+`VaultStore.stats()` returns: active count, deleted count, raw line count, and breakdowns by scope/category/tier. `FAISSMemory.stats()` adds FAISS-side numbers on top: `faiss_vectors` (total rows), `faiss_deleted`, `faiss_stale_rows` (rows superseded by a re-embed on update), and `faiss_effective` (vectors actually live and searchable).
 
 ## Key Config (in profile YAML)
 
@@ -160,3 +142,5 @@ memory:
   max_items: 20
   similarity_threshold: 0.85
 ```
+
+Note: this block is currently documentation-only — `web/app.py` does not read it. Scope is hardcoded as `["shared", agent]` (`web/app.py`), and there's no enforced `max_items`/`similarity_threshold` cutoff in `vault.py` or `faiss_memory.py`.

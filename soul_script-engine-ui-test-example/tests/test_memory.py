@@ -533,6 +533,116 @@ def test_jsonl_format():
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def test_length_and_tier_validation():
+    """create_memory/update_memory enforce length cap and valid tiers."""
+    print("\n=== Length & Tier Validation ===")
+    vault, tmp = make_vault()
+    try:
+        from src.memory.types import MAX_MEMORY_TEXT_LENGTH
+
+        too_long = "x" * (MAX_MEMORY_TEXT_LENGTH + 1)
+        blocked = False
+        try:
+            vault.create_memory(too_long, "shared", "bio")
+        except ValueError:
+            blocked = True
+        check("over-length text blocked on create", blocked)
+
+        ok = vault.create_memory("x" * MAX_MEMORY_TEXT_LENGTH, "shared", "bio")
+        check("exactly-max-length text allowed", ok is not None)
+
+        invalid_tier = False
+        try:
+            vault.create_memory("Sneaky log entry", "shared", "meta", tier="log")
+        except ValueError:
+            invalid_tier = True
+        check("tier='log' rejected on create", invalid_tier)
+
+        mem = vault.create_memory("Updatable", "shared", "bio")
+        update_blocked = False
+        try:
+            vault.update_memory(mem.id, text=too_long)
+        except ValueError:
+            update_blocked = True
+        check("over-length text blocked on update", update_blocked)
+
+        update_tier_blocked = False
+        try:
+            vault.update_memory(mem.id, tier="log")
+        except ValueError:
+            update_tier_blocked = True
+        check("tier='log' rejected on update", update_tier_blocked)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_update_by_topic():
+    """update_by_topic upserts in place instead of duplicating."""
+    print("\n=== Update By Topic ===")
+    vault, tmp = make_vault()
+    try:
+        m1 = vault.update_by_topic(
+            "current_projects", "shared", "Projects: dashboard",
+            category="project",
+        )
+        check("first call creates register", m1.tier == "register")
+        check("topic_id stored", m1.topic_id == "current_projects")
+        check("version is 1", m1.version == 1)
+
+        m2 = vault.update_by_topic(
+            "current_projects", "shared", "Projects: dashboard, memory upgrade",
+            category="project",
+        )
+        check("second call updates in place (same id)", m2.id == m1.id)
+        check("version bumped", m2.version == 2)
+        check("text updated", m2.text == "Projects: dashboard, memory upgrade")
+
+        active = vault.read_active()
+        check("only 1 active memory for this topic", len(active) == 1)
+
+        # Different scope -> separate record
+        m3 = vault.update_by_topic(
+            "current_projects", "orion", "Orion's own projects",
+            category="project",
+        )
+        check("different scope creates new record", m3.id != m1.id)
+        check("2 active memories total", len(vault.read_active()) == 2)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def test_build_snapshot():
+    """build_snapshot returns canon facts + active registers, not episodic memory."""
+    print("\n=== Build Snapshot ===")
+    vault, tmp = make_vault()
+    try:
+        check("empty vault snapshot is empty", vault.build_snapshot("shared") == "")
+
+        vault.create_memory("Mission: stabilize runtime", "shared", "mission", tier="canon")
+        vault.create_memory("Bio: created in 2025", "shared", "bio", tier="canon")
+        vault.update_by_topic("current_projects", "shared", "Projects: dashboard", category="project")
+        # Register without topic_id should NOT appear in the snapshot
+        vault.create_memory("One-off register note", "shared", "other", tier="register")
+        # Different scope should not leak in
+        vault.create_memory("Orion-only canon fact", "orion", "bio", tier="canon")
+
+        snap = vault.build_snapshot("shared")
+        check("snapshot non-empty", bool(snap))
+        check("contains canon mission", "Mission: stabilize runtime" in snap)
+        check("contains canon bio", "Bio: created in 2025" in snap)
+        check("contains topic register", "Projects: dashboard" in snap)
+        check("excludes topic-less register", "One-off register note" not in snap)
+        check("excludes other scope", "Orion-only canon fact" not in snap)
+        check("canon labeled", "[CANON]" in snap)
+        check("register labeled with topic", "[REGISTER:current_projects]" in snap)
+
+        # List form of scope
+        snap_list = vault.build_snapshot(["shared", "orion"])
+        check("list-scope includes both scopes", "Orion-only canon fact" in snap_list and "Mission" in snap_list)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def test_backward_compat_alias():
     """MemoryVault is an alias for VaultStore."""
     print("\n=== Backward Compat ===")
@@ -568,6 +678,9 @@ if __name__ == "__main__":
     test_tags_and_source()
     test_create_validation()
     test_jsonl_format()
+    test_length_and_tier_validation()
+    test_update_by_topic()
+    test_build_snapshot()
     test_backward_compat_alias()
 
     print(f"\n{'=' * 40}")
