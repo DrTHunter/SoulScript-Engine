@@ -48,7 +48,7 @@ flowchart TD
     L1["1. Base system prompt<br/><i>verbatim</i>"]
     L2["2. Soul script sections<br/><i>semantic top-k</i>"]
     L3["3. Always-on notes<br/><i>verbatim</i>"]
-    L4["4. Memory vault<br/><i>semantic top-5</i>"]
+    L4["4. Memory vault<br/><i>5 most relevant per turn</i>"]
     L5["5. Protocol + tool instructions<br/><i>verbatim</i>"]
     L6["6. Conversation history<br/><i>recent turns, ~30k chars</i>"]
     LLM["LLM<br/>(any supported backend)"]
@@ -68,7 +68,7 @@ flowchart TD
 | 1. Base system prompt | `prompts/{agent}.system.md` | Verbatim. Kept short: name, voice, core rules. |
 | 2. Soul script | Notes attached to the agent in *directive* mode | Chunked by section headers, embedded, and retrieved by semantic similarity (default top-k: 12). |
 | 3. Always-on notes | Notes attached in *always* mode | Verbatim, every turn. Useful for pinned project context. |
-| 4. Memory vault | `data/memory/vault.jsonl` | Semantic search scoped to the agent, top 5. |
+| 4. Memory vault | `data/memory/vault.jsonl` | The vault has no size limit. Each turn, the 5 memories most relevant to the message are retrieved and injected. |
 | 5. Protocol instructions | Built in | Memory-save protocol and tool descriptions. |
 | 6. Conversation history | Current chat | Most recent turns, trimmed to a ~30k character budget. |
 
@@ -94,7 +94,7 @@ flowchart LR
 ```
 
 - **Identity index.** Built from the character's soul script. The model can retrieve from it but cannot write to it, so no conversation can rewrite who the character is.
-- **Memory index.** Grows over time. The model saves memories by emitting inline tags such as `[MEMORY_SAVE: category=preference | Prefers short answers in the morning]`. The server extracts these, writes them to the vault, and strips them from the visible response.
+- **Memory index.** Grows over time with no fixed limit; only the most relevant memories are pulled into each prompt. The model saves memories by emitting inline tags such as `[MEMORY_SAVE: category=preference | Prefers short answers in the morning]`. The server extracts these, writes them to the vault, and strips them from the visible response.
 
 The result: a bad or manipulative conversation can add noise to memory, but it can't overwrite the character's core definition.
 
@@ -265,7 +265,7 @@ SoulScript-Engine/
 ## Limitations
 
 - **Retrieval is keyed on the latest message only.** In multi-turn threads, a short follow-up ("why?") can retrieve less relevant sections. A rolling query over recent turns would help.
-- **Memory retrieval has no relevance threshold.** The top 5 memories are always injected once an agent has at least 5, even when none are closely related.
+- **Memory retrieval has no relevance threshold.** Each turn injects the 5 closest memories from the vault, even when none of them are closely related to the message.
 - **Section granularity matters.** Sections that are too long dilute; sections that are too short lose voice. Writing a good soul script takes iteration.
 - **Smaller models follow injected identity less reliably** than large ones. This hasn't been benchmarked systematically.
 - **Drift testing is qualitative.** Consistency has been evaluated through long-term use and adversarial prompting, not a formal benchmark. Contributions toward a drift evaluation are welcome.
