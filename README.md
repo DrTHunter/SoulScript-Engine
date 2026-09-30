@@ -44,25 +44,23 @@ On every user message, the engine assembles a fresh system prompt from layered s
 
 ```mermaid
 flowchart TD
-    U["User message"] --> Q["Retrieval query<br/>(latest user message)"]
+    U["User message<br/>(also the retrieval query)"]
+    L1["1. Base system prompt<br/><i>verbatim</i>"]
+    L2["2. Soul script sections<br/><i>semantic top-k</i>"]
+    L3["3. Always-on notes<br/><i>verbatim</i>"]
+    L4["4. Memory vault<br/><i>semantic top-5</i>"]
+    L5["5. Protocol + tool instructions<br/><i>verbatim</i>"]
+    L6["6. Conversation history<br/><i>recent turns, ~30k chars</i>"]
+    LLM["LLM<br/>(any supported backend)"]
+    R["Response<br/>(memory tags stripped)"]
 
-    subgraph ASSEMBLY["Prompt assembly (every turn)"]
-        L1["1. Base system prompt<br/>prompts/{agent}.system.md<br/><i>verbatim</i>"]
-        L2["2. Soul script sections<br/>identity index (read-only)<br/><i>semantic top-k</i>"]
-        L3["3. Always-on notes<br/><i>verbatim</i>"]
-        L4["4. Memory vault<br/>memory index (read/write)<br/><i>semantic top-5</i>"]
-        L5["5. Protocol + tool instructions<br/><i>verbatim</i>"]
-        L6["6. Conversation history<br/><i>recent turns, ~30k chars</i>"]
-    end
+    ID[("Identity index<br/>read-only")]
+    MI[("Memory index<br/>read/write")]
 
-    Q --> L2
-    Q --> L4
-    L1 & L2 & L3 & L4 & L5 --> SYS["System message"]
-    SYS --> LLM["LLM<br/>(any supported backend)"]
-    L6 --> LLM
-    LLM --> R["Response"]
-    R -->|"[MEMORY_SAVE] tags"| MEM[("Memory index")]
-    R --> OUT["User sees response<br/>(tags stripped)"]
+    U --> L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> LLM --> R
+    ID -. "retrieve" .-> L2
+    MI -. "retrieve" .-> L4
+    R -. "[MEMORY_SAVE] tags" .-> MI
 ```
 
 | Layer | Source | How it's included |
