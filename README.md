@@ -192,6 +192,8 @@ The full K-OS soul script is in [`Soul Scripts/K-OS - Soul Script`](Soul%20Scrip
 
 ## Quickstart
 
+> **Don't want to self-host?** The hosted version at [soulscript.orionforge.chat](https://soulscript.orionforge.chat) runs the same engine with no setup, keeps your characters and memories synced across devices, and connects them to MCP-capable clients like Claude. Try the [demo](https://soulscript.orionforge.chat/demo) first.
+
 The reference implementation is a FastAPI web app in [`soul_script-engine-ui-test-example/`](soul_script-engine-ui-test-example). It includes a chat UI, memory management, knowledge notes, and connection settings.
 
 **Requirements:** Python 3.10+ (3.11 recommended), or Docker. The first launch downloads the embedding model (~420 MB), which is cached afterwards.
