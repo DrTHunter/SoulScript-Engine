@@ -140,12 +140,14 @@ lsof -ti:8989 | xargs kill
 
 ## 2. Build & Run
 
-From the repo root, use the provided `Dockerfile` and `docker-compose.yml`:
+From the repo root, point Compose at the provided `docker-compose.yml`:
 
 ```bash
 cd SoulScript-Engine
-docker compose up --build -d
+docker compose -f soul_script-engine-ui-test-example/docker-compose.yml up --build -d
 ```
+
+(Or `cd soul_script-engine-ui-test-example` first and run `docker compose up --build -d`.)
 
 This builds the image and starts the server on **http://localhost:8989**.
 

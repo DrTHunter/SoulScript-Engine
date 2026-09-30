@@ -6,7 +6,7 @@ Author:        Dr. Trent Hunter
 Repository:    github.com/DrTHunter/SoulScript-Engine
 Reference UI:  /soul_script-engine-ui-test-example (open, runnable demo in this repo)
 Production:    orionforge.chat (OrionForge — a hosted platform built on this engine)
-License:       PolyForm Noncommercial 1.0.0 (source-available; noncommercial use is free, commercial use requires a paid license)
+License:       Dual-licensed: GNU AGPL v3.0, or a commercial license (free until $100k lifetime gross revenue, then 5%) — see LICENSE and LICENSE.md
 Status:        Design specification with a working open reference implementation. Quantitative validation pending.
 
 ================================================================================
