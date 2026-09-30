@@ -9,8 +9,8 @@ The web dashboard lets you chat with agents, manage their memories, attach knowl
 ## Quick Links
 
 - [README.md](README.md) — Project overview, architecture, and agent roster
-- [LICENSE](LICENSE) — PolyForm Noncommercial 1.0.0 (source-available; commercial use requires a paid license)
-- [soul_script-engine-ui-testi-example.md](soul_script-engine-ui-test-example/docs/soul_script-engine-ui-testi-example.md) — Full AI engine + UI test walkthrough (installation, configuration, running, troubleshooting)
+- [LICENSE](LICENSE) / [LICENSE.md](LICENSE.md) — dual-licensed: GNU AGPL v3.0 or a commercial license
+- [example app README](soul_script-engine-ui-test-example/README.md) — Full AI engine + UI test walkthrough (installation, configuration, running, troubleshooting)
 
 ---
 
@@ -28,12 +28,13 @@ SoulScript Engine gives every agent a five-layer identity stack:
 
 ```bash
 pip install -r requirements.txt
-python -m uvicorn web.app:app --host 0.0.0.0 --port 8585
-# Open http://localhost:8585
+cd soul_script-engine-ui-test-example
+python -m uvicorn web.app:app --host 127.0.0.1 --port 8989
+# Open http://localhost:8989
 ```
 
 For the full step-by-step walkthrough (virtual environments, API key setup, agent profiles, troubleshooting), see:
-**[soul_script-engine-ui-testi-example.md](soul_script-engine-ui-test-example/docs/soul_script-engine-ui-testi-example.md)**
+**[example app README](soul_script-engine-ui-test-example/README.md)**
 
 ## Included Agents
 
@@ -45,8 +46,8 @@ For the full step-by-step walkthrough (virtual environments, API key setup, agen
 
 ## License
 
-**PolyForm Noncommercial License 1.0.0** — see [LICENSE](LICENSE) for the full text. Noncommercial use (personal, research, education) is free; **commercial use requires a paid license** — contact me via GitHub [@DrTHunter](https://github.com/DrTHunter).
+Dual-licensed: **GNU AGPL v3.0** ([LICENSE](LICENSE)), free to use, modify, and self-host under copyleft terms; or the **commercial license** ([LICENSE.md](LICENSE.md)) for closed-source products, free until $100k in lifetime gross revenue, then 5% of net revenue. Custom terms: **dr_hunter@yahoo.com**.
 
 Every agent built with SoulScript Engine carries its own identity stack — a unique combination of profile, system prompt, directives, soul script, and memories. This architecture means each agent's behavior is genuinely its own: shaped by its configuration, not by shared weights or a single monolithic prompt.
 
-See [UNIQUE-AGENT-BEHAVIOR.md](soul_script-engine-ui-test-example/docs/UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of distinct agent identities in action.
+See [UNIQUE-AGENT-BEHAVIOR.md](UNIQUE-AGENT-BEHAVIOR.md) for a demonstration of distinct agent identities in action.
