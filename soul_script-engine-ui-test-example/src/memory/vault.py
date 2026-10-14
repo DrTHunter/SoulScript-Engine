@@ -17,7 +17,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Set, Union
 from zoneinfo import ZoneInfo
 
-from src.memory.types import Memory
+from src.memory.types import Memory, MAX_MEMORY_TEXT_LENGTH, VALID_TIERS
 from src.memory.pii_guard import check_pii
 
 # US Central Time - used for all vault timestamps.
@@ -58,11 +58,20 @@ class VaultStore:
     ) -> Memory:
         """Create and persist a new memory.  Returns the Memory object.
 
-        Validates PII.  Raises ValueError on PII detection.
+        Validates length, tier, and PII.  Raises ValueError on failure.
         """
         text = text.strip()
         if not text:
             raise ValueError("Memory text must not be empty")
+        if len(text) > MAX_MEMORY_TEXT_LENGTH:
+            raise ValueError(
+                f"Memory text exceeds {MAX_MEMORY_TEXT_LENGTH} chars "
+                f"(got {len(text)}) - compress or split first"
+            )
+
+        tier = tier.lower()
+        if tier not in VALID_TIERS:
+            raise ValueError(f"Invalid tier '{tier}' - must be one of {sorted(VALID_TIERS)}")
 
         pii = check_pii(text)
         if pii:
@@ -73,7 +82,7 @@ class VaultStore:
             text=text,
             scope=scope.lower(),
             category=category.lower(),
-            tier=tier.lower(),
+            tier=tier,
             topic_id=topic_id,
             tags=tags or [],
             created_at=_now_ct(),
@@ -104,9 +113,17 @@ class VaultStore:
             text = text.strip()
             if not text:
                 raise ValueError("Memory text must not be empty")
+            if len(text) > MAX_MEMORY_TEXT_LENGTH:
+                raise ValueError(
+                    f"Memory text exceeds {MAX_MEMORY_TEXT_LENGTH} chars "
+                    f"(got {len(text)}) - compress or split first"
+                )
             pii = check_pii(text)
             if pii:
                 raise ValueError(f"PII detected: {'; '.join(pii)}")
+
+        if tier is not None and tier.lower() not in VALID_TIERS:
+            raise ValueError(f"Invalid tier '{tier}' - must be one of {sorted(VALID_TIERS)}")
 
         new_version = Memory(
             id=current.id,
@@ -170,6 +187,62 @@ class VaultStore:
             self._append(tombstone)
             deleted.append(mid)
         return {"deleted": deleted, "not_found": not_found}
+
+    def update_by_topic(
+        self,
+        topic_id: str,
+        scope: str,
+        text: str,
+        category: str = "other",
+        tags: Optional[List[str]] = None,
+        source: str = "manual",
+    ) -> Memory:
+        """Upsert a register-tier memory keyed by (topic_id, scope).
+
+        If an active record with this topic_id already exists in this
+        scope, it is updated in place (version bump). Otherwise a new
+        register-tier record is created. This is what keeps mutable
+        state like "current_projects" as one evolving record instead
+        of a new memory every time it changes.
+        """
+        scope = scope.lower()
+        existing = next(
+            (m for m in self.read_active()
+             if m.topic_id == topic_id and m.scope == scope),
+            None,
+        )
+        if existing is not None:
+            return self.update_memory(
+                existing.id, text=text, category=category, tags=tags,
+            )
+        return self.create_memory(
+            text=text, scope=scope, category=category, tags=tags,
+            source=source, tier="register", topic_id=topic_id,
+        )
+
+    def build_snapshot(self, scope: Union[str, List[str]]) -> str:
+        """Compact Markdown block: canon memories + active registers.
+
+        Unlike search-based recall, this is NOT relevance-filtered -
+        it always includes every canon fact and every register with a
+        topic_id for the given scope(s), so identity/bio facts can't
+        be missed just because a query doesn't match them well.
+        """
+        scopes = {scope.lower()} if isinstance(scope, str) else {s.lower() for s in scope}
+        relevant = [
+            m for m in self.read_active()
+            if m.scope in scopes and (m.tier == "canon" or (m.tier == "register" and m.topic_id))
+        ]
+        if not relevant:
+            return ""
+
+        relevant.sort(key=lambda m: (m.tier != "canon", m.category, m.created_at))
+
+        lines = ["## Identity Snapshot", ""]
+        for m in relevant:
+            label = "CANON" if m.tier == "canon" else f"REGISTER:{m.topic_id}"
+            lines.append(f"- [{label}] {m.text}")
+        return "\n".join(lines)
 
     # ------------------------------------------------------------------
     # Read operations

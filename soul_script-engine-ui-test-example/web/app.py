@@ -273,7 +273,7 @@ def _build_chat_messages(agent: str, messages: list[dict]) -> tuple[list[dict], 
         "base_prompt": {"chars": 0, "preview": ""},
         "soul_script": {"chunks": 0, "chars": 0, "preview": ""},
         "always_on":   {"chunks": 0, "chars": 0, "preview": ""},
-        "vault":       {"memories": 0, "chars": 0, "snippets": []},
+        "vault":       {"memories": 0, "chars": 0, "snippets": [], "snapshot_chars": 0},
         "conversation": {"turns": 0, "chars": 0},
     }
 
@@ -309,26 +309,50 @@ def _build_chat_messages(agent: str, messages: list[dict]) -> tuple[list[dict], 
         log.warning("[prompt] Note collection failed: %s", exc)
 
     # ── 4. Memory Vault context ──
-    if latest_user_msg:
+    # Each agent sees "shared" memories plus its own scope.
+    vault_scopes = ["shared", agent]
+    fm = None
+    try:
+        fm = _get_faiss_memory()
+    except Exception as exc:
+        log.warning("[prompt] Vault load failed: %s", exc)
+
+    if fm:
+        # 4a. Always-injected snapshot — canon facts + active registers.
+        # Not a similarity search, so identity/bio facts can't be missed
+        # just because the user's wording doesn't match them well.
         try:
-            fm = _get_faiss_memory()
-            if fm:
-                results = fm.search(latest_user_msg, scope=agent, top_k=5)
-                if results:
-                    snippets = [r["text"] for r in results if r.get("text")]
-                    if snippets:
-                        vault_block = "\n\n---\n\n".join(snippets)
-                        system_prompt += (
-                            "\n\n## Memory Vault Context\n\n"
-                            "The following memories were retrieved from your persistent "
-                            "memory vault based on relevance to the current conversation:\n\n"
-                            + vault_block
-                        )
-                        layers["vault"]["memories"] = len(snippets)
-                        layers["vault"]["chars"] = len(vault_block)
-                        layers["vault"]["snippets"] = [s[:150] for s in snippets]
+            snapshot = fm.snapshot(vault_scopes)
+            if snapshot:
+                system_prompt += "\n\n" + snapshot
+                layers["vault"]["snapshot_chars"] = len(snapshot)
+                layers["vault"]["chars"] += len(snapshot)
         except Exception as exc:
-            log.warning("[prompt] Vault search failed: %s", exc)
+            log.warning("[prompt] Vault snapshot failed: %s", exc)
+
+        # 4b. Relevance-filtered recall for episodic / non-canon memories.
+        # Canon facts are already guaranteed via the snapshot above, so
+        # they're excluded here to avoid double-injecting them.
+        if latest_user_msg:
+            try:
+                results = fm.search(latest_user_msg, scope=vault_scopes, top_k=5)
+                snippets = [
+                    r["text"] for r in results
+                    if r.get("text") and r.get("tier") != "canon"
+                ]
+                if snippets:
+                    vault_block = "\n\n---\n\n".join(snippets)
+                    system_prompt += (
+                        "\n\n## Memory Vault Context\n\n"
+                        "The following memories were retrieved from your persistent "
+                        "memory vault based on relevance to the current conversation:\n\n"
+                        + vault_block
+                    )
+                    layers["vault"]["memories"] = len(snippets)
+                    layers["vault"]["chars"] += len(vault_block)
+                    layers["vault"]["snippets"] = [s[:150] for s in snippets]
+            except Exception as exc:
+                log.warning("[prompt] Vault search failed: %s", exc)
 
     # ── Memory save instruction ──
     system_prompt += (
