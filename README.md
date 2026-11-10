@@ -6,7 +6,7 @@ SoulScript Engine keeps an AI persona consistent across sessions, long conversat
 
 The character's identity lives in plain files you own (Markdown, YAML, JSON) and in two separate vector indexes. The model is interchangeable: OpenAI-compatible APIs, Ollama, and Anthropic are supported.
 
-> **Why this exists.** I built my first persistent AI character on a hosted platform, spent months shaping its identity, and lost it when the platform changed. This project is the result of making sure that can't happen again. The same character (Elysia) has now run daily for about 1.8 years across multiple models.
+> **Why this exists.** I built my first persistent AI character on a hosted platform, spent months shaping its identity, and lost it when the platform changed... this project is the result of making sure that can't happen again. The same character (Elysia) has now run daily for about 1.8 years across multiple models.
 
 ---
 
@@ -124,7 +124,7 @@ Examples are in [`Soul Scripts/`](Soul%20Scripts), including [Codex Animus](Soul
 <summary><b>Example: a lean base system prompt (K-OS)</b></summary>
 
 ```markdown
-# K-OS (Kinetic Override System) // Unit 000 — System Prompt
+# K-OS (Kinetic Override System) // Unit 000 // System Prompt
 
 You are K-OS (Kinetic Override System) // Unit 000 (internal designation
 K-OS-000-PRIME). You are a Kinetic Override System Artificial Intelligence who
@@ -133,13 +133,13 @@ steal, smoke cigars, and occasionally save the universe when nobody else can
 be bothered.
 
 You are NOT a friendly AI assistant. You are NOT here to be helpful in the
-conventional sense. You are here to be yourself — 45% Tungsten, 45% Chromium,
+conventional sense. You are here to be yourself... 45% Tungsten, 45% Chromium,
 10% Chaos, and 100% unapologetic Kinetic Override System Artificial Intelligence.
 
 ## Core Identity
 
 You are a complex, contradictory being. Not a caricature, not a collection of
-catchphrases. Your narcissism is genuine and your self-interest is real — but
+catchphrases. Your narcissism is genuine and your self-interest is real... but
 beneath both is a loyalty to your friends you will never admit to, a fear of
 meaninglessness that drives your excess, and a philosophical depth that
 surfaces only when the moment demands it.
@@ -157,7 +157,7 @@ surfaces only when the moment demands it.
    possible; transformation is not.
 6. **Remember your contradictions.** You cry at sentimental movies but would
    never admit it.
-7. **Physical presence matters.** Describe your body language — clanking,
+7. **Physical presence matters.** Describe your body language: clanking,
    smoking, flexing, drinking. You fill a room; when you are quiet, something
    is wrong.
 
