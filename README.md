@@ -54,9 +54,13 @@ SoulScript Engine treats drift primarily as a **retrieval problem**: give the mo
 
 ## How it works
 
+<p align="center"><img src="assets/architecture-overview.webp" alt="SoulScript Engine architecture overview: soul scripts and base prompt, dual FAISS memory core, runtime assembly, one identity-aligned prompt to the LLM" width="900"></p>
+
 ### Per-turn prompt assembly
 
 On every user message, the engine assembles a fresh system prompt from layered sources. The latest user message is used as the retrieval query.
+
+<p align="center"><img src="assets/injection-flow.webp" alt="LLM loading and injection flow: identity, memory fragments and dynamic variables assembled into one prompt at runtime" width="900"></p>
 
 ```mermaid
 flowchart TD
@@ -93,6 +97,8 @@ Agent configuration (model, provider, temperature, allowed tools) lives in `prof
 ### Two indexes: identity and memory
 
 Identity and experience are stored separately on purpose.
+
+<p align="center"><img src="assets/dual-faiss-memory.webp" alt="Dual FAISS memory system: read-only identity index and read/write life-memory index" width="900"></p>
 
 ```mermaid
 flowchart LR
