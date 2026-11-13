@@ -68,17 +68,17 @@ flowchart TD
     L3["3. Always-on notes<br/><i>verbatim</i>"]
     L4["4. Memory vault<br/><i>5 most relevant per turn</i>"]
     L5["5. Protocol + tool instructions<br/><i>verbatim</i>"]
-    L6["6. Conversation history<br/><i>recent turns, ~30k chars</i>"]
-    L7["7. Modular tools<br/><i>schemas per agent</i>"]
+    L6["6. Modular tools<br/><i>schemas per agent</i>"]
+    L7["7. Conversation history<br/><i>recent turns, ~30k chars</i>"]
     LLM["LLM<br/>(any supported backend)"]
     R["Response<br/>(memory tags stripped)"]
 
     ID[("Identity index<br/>read-only")]
     MI[("Memory index<br/>read/write")]
 
-    U --> L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> LLM --> R
-    L7 -- "function calling" --> LLM
-    LLM -. "tool calls / results" .-> L7
+    U --> L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7 --> LLM --> R
+    L6 -. "function-calling schemas" .-> LLM
+    LLM -. "tool calls / results" .-> L6
     ID -. "retrieve" .-> L2
     MI -. "retrieve" .-> L4
     R -. "[MEMORY_SAVE] tags" .-> MI
@@ -91,8 +91,8 @@ flowchart TD
 | 3. Always-on notes | Notes attached in *always* mode | Verbatim, every turn. Useful for pinned project context. |
 | 4. Memory vault | `data/memory/vault.jsonl` | The vault has no size limit. Each turn, the 5 memories most relevant to the message are retrieved and injected. |
 | 5. Protocol instructions | Built in | Memory-save protocol and tool descriptions. |
-| 6. Conversation history | Current chat | Most recent turns, trimmed to a ~30k character budget. |
-| 7. Modular tools | `src/tools/*.py`, enabled per agent in `allowed_tools` of `profiles/{agent}.yaml` | Sent alongside the prompt as native function-calling schemas (OpenAI-compatible, Ollama, Anthropic), not as prompt text. Built in: `memory`, `directives`, `continuation_update`, `echo`. Each tool is a class with `definition()` and `execute()`; add a file and list it in `allowed_tools` to plug in a new one. |
+| 6. Modular tools | `src/tools/*.py`, enabled per agent in `allowed_tools` of `profiles/{agent}.yaml` | Sent alongside the prompt as native function-calling schemas (OpenAI-compatible, Ollama, Anthropic), not as prompt text. Built in: `memory`, `directives`, `continuation_update`, `echo`. Each tool is a class with `definition()` and `execute()`; add a file and list it in `allowed_tools` to plug in a new one. |
+| 7. Conversation history | Current chat | Most recent turns, trimmed to a ~30k character budget. |
 
 Agent configuration (model, provider, temperature, allowed tools) lives in `profiles/{agent}.yaml`. Additional rule files in `directives/*.md` are available to agents on demand through the read-only `directives` tool.
 
