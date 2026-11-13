@@ -1,6 +1,22 @@
-# SoulScript Engine
+<div align="center">
 
-**Persistent identity for LLM characters and agents.**
+# 📜 **SoulScript Engine**
+
+### *Persistent identity for LLM characters and agents.*
+
+**Your character's identity lives in files you own. Swap the model, and it's still them.**
+
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL%20v3-8a2be2?style=for-the-badge)](LICENSE)
+[![Commercial: free to $100k](https://img.shields.io/badge/commercial-free%20to%20%24100k-ff2e88?style=for-the-badge)](LICENSE.md)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-1f1f1f?style=for-the-badge&logo=python&logoColor=white)](#quickstart)
+[![Try the demo](https://img.shields.io/badge/try-the%20demo-ff8c00?style=for-the-badge)](https://soulscript.orionforge.chat/demo)
+[![Pairs with SoulScript Loop](https://img.shields.io/badge/pairs%20with-SoulScript%20Loop-3b5bdb?style=for-the-badge)](https://github.com/DrTHunter/SoulScript-Loop)
+
+`base identity` → `relevant soul script` → `pinned notes` → `memories` → `history` → **rebuilt every turn. drift doesn't stick.**
+
+</div>
+
+---
 
 SoulScript Engine keeps an AI persona consistent across sessions, long conversations, and model backends. Instead of relying on one large system prompt that gets diluted as context grows, it rebuilds the prompt on every turn: a short base identity, plus only the sections of the character's *soul script* that are relevant to the current message, plus relevant long-term memories.
 
